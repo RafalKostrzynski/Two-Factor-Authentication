@@ -1,46 +1,92 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#0099cc"
-    tools:context=".FullscreenActivity">
+             xmlns:tools="http://schemas.android.com/tools"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
+             android:background="#0099cc"
+             tools:context=".FullscreenActivity">
 
     <!-- The primary full-screen view. This can be replaced with whatever view
          is needed to present your content, e.g. VideoView, SurfaceView,
          TextureView, etc. -->
-    <TextView android:id="@+id/fullscreen_content"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:keepScreenOn="true"
-        android:textColor="#33b5e5"
-        android:textStyle="bold"
-        android:textSize="50sp"
-        android:gravity="center"
-        android:text="@string/dummy_content" />
 
     <!-- This FrameLayout insets its children based on system windows using
          android:fitsSystemWindows. -->
+
     <FrameLayout android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fitsSystemWindows="true">
+                 android:layout_height="match_parent"
+                 android:fitsSystemWindows="true"
+                 tools:ignore="UselessParent">
+
+        <LinearLayout android:layout_width="match_parent"
+                      android:layout_height="match_parent"
+                      android:orientation="vertical">
+
+            <LinearLayout android:id="@+id/titleTextLayout"
+                          android:layout_width="match_parent"
+                          android:layout_height="wrap_content"
+                          android:layout_gravity="top|center_horizontal"
+                          android:background="@color/black_overlay"
+                          android:orientation="horizontal"
+                          tools:ignore="UselessParent">
+
+                <TextView android:id="@+id/select_algorithm_text"
+                          style="?metaButtonBarButtonStyle"
+                          android:layout_width="0dp"
+                          android:layout_height="wrap_content"
+                          android:layout_weight="1"
+                          android:textSize="20sp"
+                          android:text="@string/titleString"
+                          android:fontFamily="@font/archivo_black"/>
+            </LinearLayout>
+
+            <LinearLayout android:id="@+id/PK_list_layout"
+                          android:layout_width="match_parent"
+                          android:layout_height="500dp"
+                          android:layout_marginTop="20dp"
+                          android:layout_marginLeft="14dp"
+                          android:layout_marginRight="14dp"
+                          android:orientation="vertical"
+                          android:layout_gravity="center">
+
+                <ListView android:layout_width="wrap_content"
+                          android:layout_height="wrap_content">
+                </ListView>
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout android:id="@+id/loadKeyControls"
+                      style="?metaButtonBarStyle"
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_gravity="bottom"
+                      android:orientation="horizontal">
+
+            <Button android:text="@string/load_private_key"
+                    style="?metaButtonBarButtonStyle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_margin="80dp"
+                    android:background="@color/black_overlay"
+                    android:id="@+id/read_PK_button"/>
+        </LinearLayout>
 
         <LinearLayout android:id="@+id/fullscreen_content_controls"
-            style="?metaButtonBarStyle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|center_horizontal"
-            android:background="@color/black_overlay"
-            android:orientation="horizontal"
-            tools:ignore="UselessParent">
-
-            <Button android:id="@+id/dummy_button"
-                style="?metaButtonBarButtonStyle"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/dummy_button" />
-
+                      style="?metaButtonBarStyle"
+                      android:layout_width="match_parent"
+                      android:layout_height="match_parent"
+                      android:orientation="horizontal"
+                      android:gravity="center|bottom"
+                      tools:ignore="UselessParent">
+            <Button android:id="@+id/scan_code_button"
+                    style="?metaButtonBarButtonStyle"
+                    android:textStyle="bold"
+                    android:background="@color/black_overlay"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/scan_QR"/>
         </LinearLayout>
     </FrameLayout>
 

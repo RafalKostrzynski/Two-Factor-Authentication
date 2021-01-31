@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">Two Factor Authentication</string>
-    <string name="dummy_button">Dummy Button</string>
-    <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="scan_QR">Scan QR Code</string>
+    <string name="load_private_key">Load Private Key</string>
+    <string name="titleString">Choose Private Key</string>
 </resources>
