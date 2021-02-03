@@ -2,5 +2,8 @@
     <string name="app_name">Two Factor Authentication</string>
     <string name="scan_QR">Scan QR Code</string>
     <string name="load_private_key">Load Private Key</string>
-    <string name="titleString">Choose Private Key</string>
+    <string name="titleString">Two Factor Authorization</string>
+    <string name="key">Key</string>
+    <string name="private_key_name"/>
+    <string name="choose_private_key">Choose Private Key</string>
 </resources>
