@@ -1,12 +1,25 @@
 package pl.kostrzynski.twofactorauthentication;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.os.Build;
+import android.widget.Button;
+import android.widget.TextView;
+import android.widget.Toast;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
-import android.view.MotionEvent;
 import android.view.View;
+
+import java.io.File;
+import java.io.FileInputStream;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -18,17 +31,81 @@ public class FullscreenActivity extends AppCompatActivity {
      * and a change of the status and navigation bar.
      */
     private static final int UI_ANIMATION_DELAY = 300;
+    private static final int READ_REQUEST_CODE = 42;
+    private static final int PERMISSION_REQUEST_STORAGE = 1000;
 
     private View mContentView;
+    private TextView privateKeyName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_fullscreen);
-
         mContentView = findViewById(R.id.fullscreen_content);
 
+        privateKeyName = findViewById(R.id.privateKeyName);
+        final Button loadPK = findViewById(R.id.read_PK_button);
+        final Button scanQR = findViewById(R.id.scan_code_button);
+
+        scanQR.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                scanQR();
+            }
+        });
+        loadPK.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                loadPK();
+            }
+        });
+    }
+
+    private void scanQR() {
+
+    }
+
+    private void loadPK() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+                checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
+            requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSION_REQUEST_STORAGE);
+
+
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("*/*");
+        startActivityForResult(intent, READ_REQUEST_CODE);
+    }
+
+    private void setPK(String path) {
+        File file = new File(path);
+        Toast.makeText(this, "Remember we do not store your Private Key but the path", Toast.LENGTH_SHORT).show();
+        privateKeyName.setText(file.getName());
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (requestCode == READ_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+            if (data != null) {
+                Uri uri = data.getData();
+                String path = uri.getPath();
+                path = path.substring(path.indexOf(":") + 1);
+                Toast.makeText(this, "" + path, Toast.LENGTH_SHORT).show();
+
+                setPK(path);
+            }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == PERMISSION_REQUEST_STORAGE) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "Permission granted!", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Permission not granted!", Toast.LENGTH_SHORT).show();
+                finish();
+            }
+        }
     }
 
     @Override
