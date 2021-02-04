@@ -5,5 +5,5 @@
     <string name="titleString">Two Factor Authorization</string>
     <string name="key">Key</string>
     <string name="private_key_name"/>
-    <string name="choose_private_key">Choose Private Key</string>
+    <string name="generate_key_pair">Generate ECC key-pair</string>
 </resources>
