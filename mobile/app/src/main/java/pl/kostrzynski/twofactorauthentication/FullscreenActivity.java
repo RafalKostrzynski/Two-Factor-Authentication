@@ -28,6 +28,8 @@ import java.security.*;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECGenParameterSpec;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -131,12 +133,15 @@ public class FullscreenActivity extends AppCompatActivity{
                     // NOT LIKE THIS
                     // TODO change the file format
                     File privateKeyFile = new File(path, "private.key");
-                    File publicKeyFile = new File(path, "public.pub");
+                    File publicKeyFile = new File(path, "public.key");
 
                     try (FileOutputStream privateKeyOutput = new FileOutputStream(privateKeyFile);
                          FileOutputStream publicKeyOutput = new FileOutputStream(publicKeyFile)) {
-                        privateKeyOutput.write(privateKey.getEncoded());
-                        publicKeyOutput.write(publicKey.getEncoded());
+
+                        PKCS8EncodedKeySpec pkcs8EncodedKeySpec = new PKCS8EncodedKeySpec(privateKey.getEncoded());
+                        X509EncodedKeySpec x509EncodedKeySpec = new X509EncodedKeySpec(publicKey.getEncoded());
+                        privateKeyOutput.write(pkcs8EncodedKeySpec.getEncoded());
+                        publicKeyOutput.write(x509EncodedKeySpec.getEncoded());
                     }
                     setAndSavePathTextView(path.getPath());
                 } catch (Exception e) {
