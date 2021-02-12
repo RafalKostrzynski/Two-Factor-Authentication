@@ -3,6 +3,7 @@ package pl.kostrzynski.twofactorauthentication;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.*;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -18,6 +19,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -30,7 +33,7 @@ import java.security.spec.ECGenParameterSpec;
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
  */
-public class FullscreenActivity extends AppCompatActivity {
+public class FullscreenActivity extends AppCompatActivity{
     /**
      * Some older devices needs a small delay between UI widget updates
      * and a change of the status and navigation bar.
@@ -79,7 +82,12 @@ public class FullscreenActivity extends AppCompatActivity {
     }
 
     private void scanQR() {
-
+        IntentIntegrator integrator = new IntentIntegrator(this);
+        integrator.setCaptureActivity(CaptureActivity.class);
+        integrator.setOrientationLocked(false);
+        integrator.setDesiredBarcodeFormats(IntentIntegrator.QR_CODE);
+        integrator.setPrompt("Scanning code");
+        integrator.initiateScan();
     }
 
     private void loadPK() {
@@ -184,6 +192,21 @@ public class FullscreenActivity extends AppCompatActivity {
                 path = path.substring(path.indexOf(":") + 1);
                 setAndSavePathTextView(path);
                 Toast.makeText(this, "Key-path has been stored", Toast.LENGTH_SHORT).show();
+            }
+        }else if(IntentIntegrator.parseActivityResult(requestCode,resultCode,data)!=null){
+            IntentResult result = IntentIntegrator.parseActivityResult(requestCode,resultCode,data);
+            if(result.getContents() != null){
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setMessage(result.getContents());
+                builder.setTitle("Scanning the QR code");
+                builder.setPositiveButton("Try again!", (dialog, which) -> scanQR())
+                        .setNegativeButton("Finish", (dialog, which) ->
+                                //TODO change this to decode method
+                                finish());
+                AlertDialog dialog = builder.create();
+                dialog.show();
+            } else{
+                Toast.makeText(this, "Something went wrong please try again",Toast.LENGTH_SHORT).show();
             }
         }
     }
