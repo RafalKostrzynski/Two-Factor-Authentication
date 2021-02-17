@@ -36,4 +36,13 @@ public class SecondAuth {
         result = 31 * result + Arrays.hashCode(publicKeyBytes);
         return result;
     }
+
+    @Override
+    public String toString() {
+        return "SecondAuth{" +
+                "id=" + id +
+                ", publicKeyBytes=" + Arrays.toString(publicKeyBytes) +
+                ", active=" + active +
+                '}';
+    }
 }
