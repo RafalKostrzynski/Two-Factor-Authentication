@@ -20,6 +20,11 @@ public class VerificationToken {
     @OneToOne
     private User user;
 
+    public VerificationToken(User user, String value) {
+        this.user=user;
+        this.value=value;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
