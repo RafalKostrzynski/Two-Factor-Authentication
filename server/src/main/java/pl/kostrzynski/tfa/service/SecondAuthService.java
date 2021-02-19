@@ -18,8 +18,12 @@ public class SecondAuthService {
         this.secondAuthRepository = secondAuthRepository;
     }
 
-    private SecondAuth getSecondAuthByUser(User user){
+    public SecondAuth getSecondAuthByUser(User user){
         return secondAuthRepository.findSecondAuthByUser(user).orElseThrow(()->
                 new NoSuchElementException("No SecondAuth for user "+user.getUsername()+" found"));
+    }
+
+    public void addSecondAuth(SecondAuth secondAuth){
+        secondAuthRepository.save(secondAuth);
     }
 }
