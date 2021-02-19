@@ -1,4 +1,4 @@
-package pl.kostrzynski.tfa.config.webSecurity;
+package pl.kostrzynski.tfa.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
