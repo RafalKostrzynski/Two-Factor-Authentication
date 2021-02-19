@@ -14,6 +14,17 @@
     <name>tfa</name>
     <description>BEng Thesis Project about the usage of Public-Key Cryptography in the two factor authentication
     </description>
+
+    <developers>
+        <developer>
+            <name>Rafal Kostrzynski</name>
+            <email>kostrzynskirafal@protonmail.com</email>
+            <organization>Polish Naval Academy Gdynia</organization>
+            <roles>
+                <role>student</role>
+            </roles>
+        </developer>
+    </developers>
     <properties>
         <java.version>11</java.version>
     </properties>
@@ -34,6 +45,11 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-mail</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>

@@ -8,6 +8,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotNull;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Objects;
@@ -21,8 +23,13 @@ public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+    @Email(message = "Please provide a correct Email address",regexp = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")
+    @Column(nullable = false, unique = true)
+    private String email;
+    @NotNull(message = "Please provide a username")
     @Column(nullable = false, unique = true)
     private String username;
+    @NotNull(message = "Please provide a password")
     @Column(nullable = false)
     private String password;
     @Column(nullable = false)
