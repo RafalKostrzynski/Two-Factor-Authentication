@@ -23,13 +23,18 @@ import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.*;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECGenParameterSpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Arrays;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -127,11 +132,11 @@ public class FullscreenActivity extends AppCompatActivity{
                     ECPrivateKey privateKey = (ECPrivateKey) keyPair.getPrivate();
 
                     Context context = FullscreenActivity.this;
+
+                    // TODO save somehow else
                     File path = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
 
 
-                    // NOT LIKE THIS
-                    // TODO change the file format
                     File privateKeyFile = new File(path, "private.key");
                     File publicKeyFile = new File(path, "public.key");
 
@@ -142,8 +147,10 @@ public class FullscreenActivity extends AppCompatActivity{
                         X509EncodedKeySpec x509EncodedKeySpec = new X509EncodedKeySpec(publicKey.getEncoded());
                         privateKeyOutput.write(pkcs8EncodedKeySpec.getEncoded());
                         publicKeyOutput.write(x509EncodedKeySpec.getEncoded());
+                        System.out.println("This is the PrivateK:\n"+Arrays.toString(pkcs8EncodedKeySpec.getEncoded()));
+                        System.out.println("This is the PublicK:\n"+Arrays.toString(x509EncodedKeySpec.getEncoded()));
                     }
-                    setAndSavePathTextView(path.getPath());
+                    setAndSavePathTextView(privateKeyFile.getPath());
                 } catch (Exception e) {
                     System.err.println("EC Exception\n" + e.toString());
                     e.printStackTrace();
@@ -155,7 +162,21 @@ public class FullscreenActivity extends AppCompatActivity{
 
     private void readFileForPK(String path) {
         try {
+
+            // TODO provide storage access framework, look into content values
             File file = new File(path);
+
+            File newFile = new File(getExternalFilesDir(file.getParentFile().toString()),file.getName());
+
+            FileInputStream fileInputStream = new FileInputStream(newFile);
+            fileInputStream.read();
+//            byte[] bytes = Files.readAllBytes(pkPath);
+
+//            PKCS8EncodedKeySpec ks = new PKCS8EncodedKeySpec(encodedPrivateKey);
+//            KeyFactory kf = KeyFactory.getInstance("EC");
+//            PrivateKey pvt = kf.generatePrivate(ks);
+//
+//            System.out.println("This is the PK:\n"+Arrays.toString(pvt.getEncoded()));
 
             // TODO set key
         } catch (Exception e) {
@@ -179,8 +200,12 @@ public class FullscreenActivity extends AppCompatActivity{
     }
 
     private String findFileNameFromString(String path) {
-        return path.contains("/") ?
-                path.substring(path.lastIndexOf("/") + 1, path.lastIndexOf(".")) : "";
+        try {
+            return path.contains("/") ?
+                    path.substring(path.lastIndexOf("/") + 1, path.lastIndexOf(".")) : "";
+        }catch (Exception e){
+            return "";
+        }
     }
 
     private void setAndSavePathTextView(String path) {
@@ -195,6 +220,7 @@ public class FullscreenActivity extends AppCompatActivity{
                 Uri uri = data.getData();
                 String path = uri.getPath();
                 path = path.substring(path.indexOf(":") + 1);
+                readFileForPK(path);
                 setAndSavePathTextView(path);
                 Toast.makeText(this, "Key-path has been stored", Toast.LENGTH_SHORT).show();
             }
