@@ -33,6 +33,8 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String password;
     @Column(nullable = false)
+    private boolean emailVerified;
+    @Column(nullable = false)
     private boolean isEnabled;
 
     @Override
@@ -40,22 +42,12 @@ public class User implements UserDetails {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        return id == user.id && isEnabled == user.isEnabled && username.equals(user.username) && password.equals(user.password);
+        return id == user.id && emailVerified == user.emailVerified && isEnabled == user.isEnabled && email.equals(user.email) && username.equals(user.username) && password.equals(user.password);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, username, password, isEnabled);
-    }
-
-    @Override
-    public String toString() {
-        return "User{" +
-                "id=" + id +
-                ", username='" + username + '\'' +
-                ", password='" + password + '\'' +
-                ", isEnabled=" + isEnabled +
-                '}';
+        return Objects.hash(id, email, username, password, emailVerified, isEnabled);
     }
 
     @Override
