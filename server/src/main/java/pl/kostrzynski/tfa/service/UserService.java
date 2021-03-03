@@ -11,31 +11,32 @@ import javax.servlet.http.HttpServletRequest;
 
 @Service
 public class UserService {
-    private final VerificationTokenService tokenRepositoryService;
+    private final VerificationTokenService verificationTokenService;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final MailSenderService mailSenderService;
 
     @Autowired
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder,
-                       VerificationTokenService tokenRepositoryService, MailSenderService mailSenderService) {
+                       VerificationTokenService verificationTokenService, MailSenderService mailSenderService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.tokenRepositoryService = tokenRepositoryService;
+        this.verificationTokenService = verificationTokenService;
         this.mailSenderService = mailSenderService;
     }
 
     public void addNewUser(User user, HttpServletRequest httpServletRequest) throws MessagingException {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
-        String url = tokenRepositoryService.createUUIDLink(user, httpServletRequest);
+        String url = verificationTokenService.createUUIDLink(user, "verify-email", httpServletRequest);
         mailSenderService.sendMail(user.getUsername(), "Verification Token", url, false);
     }
 
-    public void verifyToken(String token) {
-        User user = tokenRepositoryService.findUserByVerificationToken(token);
-        if(user.isEmailVerified()) user.setEnabled(true);
-        else user.setEmailVerified(true);
-        userRepository.save(user);
+    public User verifyToken(String token, String purpose) {
+        User user = verificationTokenService.findUserByVerificationToken(token);
+        if (user.isEmailVerified() && purpose.equals("add-public")) user.setEnabled(true);
+        else if (purpose.equals("verify-email")) user.setEmailVerified(true);
+        else throw new IllegalArgumentException("Couldn't verify token");
+        return userRepository.save(user);
     }
 }

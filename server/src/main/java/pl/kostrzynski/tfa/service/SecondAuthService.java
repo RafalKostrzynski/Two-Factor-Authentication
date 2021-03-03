@@ -12,10 +12,12 @@ import java.util.NoSuchElementException;
 public class SecondAuthService {
 
     private final SecondAuthRepository secondAuthRepository;
+    private final UserService userService;
 
     @Autowired
-    public SecondAuthService(SecondAuthRepository secondAuthRepository) {
+    public SecondAuthService(SecondAuthRepository secondAuthRepository, UserService userService) {
         this.secondAuthRepository = secondAuthRepository;
+        this.userService = userService;
     }
 
     public SecondAuth getSecondAuthByUser(User user){
@@ -23,7 +25,10 @@ public class SecondAuthService {
                 new NoSuchElementException("No SecondAuth for user "+user.getUsername()+" found"));
     }
 
-    public void addSecondAuth(SecondAuth secondAuth){
+    public void addSecondAuth(String token, SecondAuth secondAuth){
+        //TODO verify if public Key is a real key
+        User user = userService.verifyToken(token, "add-public");
+        secondAuth.setUser(user);
         secondAuthRepository.save(secondAuth);
     }
 }

@@ -12,24 +12,26 @@ import java.util.UUID;
 @Service
 public class VerificationTokenService {
 
-    VerificationTokenRepository verificationTokenRepository;
+    private final VerificationTokenRepository verificationTokenRepository;
 
     @Autowired
     public VerificationTokenService(VerificationTokenRepository verificationTokenRepository) {
         this.verificationTokenRepository = verificationTokenRepository;
     }
 
-    public String createUUIDLink(User user, HttpServletRequest httpServletRequest){
+    public String createUUIDLink(User user, String purpose, HttpServletRequest httpServletRequest) {
         String token = UUID.randomUUID().toString();
         VerificationToken verificationToken = new VerificationToken(user, token);
         verificationTokenRepository.save(verificationToken);
         return "http://" + httpServletRequest.getServerName() + ":" + httpServletRequest.getServerPort() + httpServletRequest.getContextPath()
-                + "/verify-token?token=" + token;
+                + "/tfa/service/rest/v1/" + purpose + "/" + token;
     }
 
-    public User findUserByVerificationToken(String token){
+    public User findUserByVerificationToken(String token) {
         return verificationTokenRepository.findByValue(token)
-                .orElseThrow(()->new IllegalArgumentException("Couldn't find provided token"))
+                .orElseThrow(() -> new IllegalArgumentException("Couldn't find provided token"))
                 .getUser();
     }
+
+
 }
