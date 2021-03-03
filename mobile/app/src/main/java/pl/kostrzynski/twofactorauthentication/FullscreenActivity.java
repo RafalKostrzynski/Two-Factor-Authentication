@@ -4,11 +4,16 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.*;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -16,19 +21,14 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
-import android.os.Bundle;
-import android.os.Handler;
-import android.view.View;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.security.*;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECGenParameterSpec;
@@ -40,7 +40,7 @@ import java.util.Arrays;
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
  */
-public class FullscreenActivity extends AppCompatActivity{
+public class FullscreenActivity extends AppCompatActivity {
     /**
      * Some older devices needs a small delay between UI widget updates
      * and a change of the status and navigation bar.
@@ -68,21 +68,9 @@ public class FullscreenActivity extends AppCompatActivity{
         final Button scanQRButton = findViewById(R.id.scan_code_button);
         final Button generateECCButton = findViewById(R.id.generate_ECC_button);
 
-        scanQRButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                scanQR();
-            }
-        });
-        loadPKButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                loadPK();
-            }
-        });
-        generateECCButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                generateECC();
-            }
-        });
+        scanQRButton.setOnClickListener(v -> scanQR());
+        loadPKButton.setOnClickListener(v -> loadPK());
+        generateECCButton.setOnClickListener(v -> generateECC());
 
         String path = loadPathFromPreferences();
         privateKeyName.setText(findFileNameFromString(path));
@@ -147,8 +135,8 @@ public class FullscreenActivity extends AppCompatActivity{
                         X509EncodedKeySpec x509EncodedKeySpec = new X509EncodedKeySpec(publicKey.getEncoded());
                         privateKeyOutput.write(pkcs8EncodedKeySpec.getEncoded());
                         publicKeyOutput.write(x509EncodedKeySpec.getEncoded());
-                        System.out.println("This is the PrivateK:\n"+Arrays.toString(pkcs8EncodedKeySpec.getEncoded()));
-                        System.out.println("This is the PublicK:\n"+Arrays.toString(x509EncodedKeySpec.getEncoded()));
+                        System.out.println("This is the PrivateK:\n" + Arrays.toString(pkcs8EncodedKeySpec.getEncoded()));
+                        System.out.println("This is the PublicK:\n" + Arrays.toString(x509EncodedKeySpec.getEncoded()));
                     }
                     setAndSavePathTextView(privateKeyFile.getPath());
                 } catch (Exception e) {
@@ -166,7 +154,7 @@ public class FullscreenActivity extends AppCompatActivity{
             // TODO provide storage access framework, look into content values
             File file = new File(path);
 
-            File newFile = new File(getExternalFilesDir(file.getParentFile().toString()),file.getName());
+            File newFile = new File(getExternalFilesDir(file.getParentFile().toString()), file.getName());
 
             FileInputStream fileInputStream = new FileInputStream(newFile);
             fileInputStream.read();
@@ -203,7 +191,7 @@ public class FullscreenActivity extends AppCompatActivity{
         try {
             return path.contains("/") ?
                     path.substring(path.lastIndexOf("/") + 1, path.lastIndexOf(".")) : "";
-        }catch (Exception e){
+        } catch (Exception e) {
             return "";
         }
     }
@@ -224,20 +212,20 @@ public class FullscreenActivity extends AppCompatActivity{
                 setAndSavePathTextView(path);
                 Toast.makeText(this, "Key-path has been stored", Toast.LENGTH_SHORT).show();
             }
-        }else if(IntentIntegrator.parseActivityResult(requestCode,resultCode,data)!=null){
-            IntentResult result = IntentIntegrator.parseActivityResult(requestCode,resultCode,data);
-            if(result.getContents() != null){
+        } else if (IntentIntegrator.parseActivityResult(requestCode, resultCode, data) != null) {
+            IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+            if (result.getContents() != null) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
                 builder.setMessage(result.getContents());
                 builder.setTitle("Scanning the QR code");
                 builder.setPositiveButton("Try again!", (dialog, which) -> scanQR())
                         .setNegativeButton("Finish", (dialog, which) ->
-                                //TODO change this to decode method
+                                //TODO change this to decode method or generate a key
                                 finish());
                 AlertDialog dialog = builder.create();
                 dialog.show();
-            } else{
-                Toast.makeText(this, "Something went wrong please try again",Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Something went wrong please try again", Toast.LENGTH_SHORT).show();
             }
         }
     }
