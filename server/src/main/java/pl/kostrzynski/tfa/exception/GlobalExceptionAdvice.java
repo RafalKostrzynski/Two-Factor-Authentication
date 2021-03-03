@@ -10,7 +10,7 @@ import javax.mail.MessagingException;
 @ControllerAdvice
 public class GlobalExceptionAdvice {
 
-    @ExceptionHandler({MessagingException.class, IllegalArgumentException.class})
+    @ExceptionHandler({MessagingException.class, IllegalArgumentException.class, SecurityException.class})
     public final ResponseEntity<Object> exceptionHandler(Exception exception) {
         HttpStatus httpStatus;
         String error;
@@ -18,6 +18,9 @@ public class GlobalExceptionAdvice {
             httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
             error = "Couldn't send requested Email";
         } else if (exception instanceof IllegalArgumentException) {
+            httpStatus = HttpStatus.BAD_REQUEST;
+            error = "Wrong input, try again later";
+        }else if(exception instanceof SecurityException){
             httpStatus = HttpStatus.BAD_REQUEST;
             error = "Wrong input, try again later";
         } else {

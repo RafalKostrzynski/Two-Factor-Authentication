@@ -31,4 +31,13 @@ public class ECCHandler {
         return Base64.getEncoder().encodeToString(cipherContent);
     }
 
+    public boolean isValidPublicKey(byte[] publicKey) {
+        try {
+            getPublicKeyFromBytes(publicKey);
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+            throw new SecurityException("Provided key is not valid!");
+        }
+        return true;
+    }
+
 }

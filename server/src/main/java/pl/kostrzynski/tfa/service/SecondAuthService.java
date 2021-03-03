@@ -13,11 +13,13 @@ public class SecondAuthService {
 
     private final SecondAuthRepository secondAuthRepository;
     private final UserService userService;
+    private final ECCHandler eccHandler;
 
     @Autowired
-    public SecondAuthService(SecondAuthRepository secondAuthRepository, UserService userService) {
+    public SecondAuthService(SecondAuthRepository secondAuthRepository, UserService userService, ECCHandler eccHandler) {
         this.secondAuthRepository = secondAuthRepository;
         this.userService = userService;
+        this.eccHandler = eccHandler;
     }
 
     public SecondAuth getSecondAuthByUser(User user) {
@@ -26,9 +28,10 @@ public class SecondAuthService {
     }
 
     public void addSecondAuth(String token, SecondAuth secondAuth) {
-        //TODO verify if public Key is a real key
-        User user = userService.verifyToken(token, "add-public");
-        secondAuth.setUser(user);
-        secondAuthRepository.save(secondAuth);
+        if (eccHandler.isValidPublicKey(secondAuth.getPublicKeyBytes())) {
+            User user = userService.verifyToken(token, "add-public");
+            secondAuth.setUser(user);
+            secondAuthRepository.save(secondAuth);
+        }
     }
 }
