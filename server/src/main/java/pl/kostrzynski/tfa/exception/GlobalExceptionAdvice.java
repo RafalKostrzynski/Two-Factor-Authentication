@@ -11,27 +11,27 @@ import javax.mail.MessagingException;
 public class GlobalExceptionAdvice {
 
     @ExceptionHandler({MessagingException.class, IllegalArgumentException.class})
-    public final ResponseEntity<Object> exceptionHandler(Exception exception){
+    public final ResponseEntity<Object> exceptionHandler(Exception exception) {
         HttpStatus httpStatus;
         String error;
-        if(exception instanceof MessagingException) {
+        if (exception instanceof MessagingException) {
             httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
             error = "Couldn't send requested Email";
-        }else if(exception instanceof IllegalArgumentException){
+        } else if (exception instanceof IllegalArgumentException) {
             httpStatus = HttpStatus.BAD_REQUEST;
             error = "Wrong input, try again later";
-        }else {
-            httpStatus=HttpStatus.INTERNAL_SERVER_ERROR;
+        } else {
+            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
             error = "Unknown error occurred please try again later";
         }
         String message = secureMessageOutput(exception.getLocalizedMessage());
 
-        return new ResponseEntity<>(new ApiError(httpStatus,message,error), httpStatus);
+        return new ResponseEntity<>(new ApiError(httpStatus, message, error), httpStatus);
     }
 
-    private String secureMessageOutput(String message){
-        return message.contains("pl.kostrzynski.tfa.model.")?
-                message.replace("pl.kostrzynski.tfa.model.",""):message;
+    private String secureMessageOutput(String message) {
+        return message.contains("pl.kostrzynski.tfa.model.") ?
+                message.replace("pl.kostrzynski.tfa.model.", "") : message;
     }
 
 }

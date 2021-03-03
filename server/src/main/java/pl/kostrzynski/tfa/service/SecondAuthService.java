@@ -20,12 +20,12 @@ public class SecondAuthService {
         this.userService = userService;
     }
 
-    public SecondAuth getSecondAuthByUser(User user){
-        return secondAuthRepository.findSecondAuthByUser(user).orElseThrow(()->
-                new NoSuchElementException("No SecondAuth for user "+user.getUsername()+" found"));
+    public SecondAuth getSecondAuthByUser(User user) {
+        return secondAuthRepository.findSecondAuthByUser(user).orElseThrow(() ->
+                new NoSuchElementException("No SecondAuth for user " + user.getUsername() + " found"));
     }
 
-    public void addSecondAuth(String token, SecondAuth secondAuth){
+    public void addSecondAuth(String token, SecondAuth secondAuth) {
         //TODO verify if public Key is a real key
         User user = userService.verifyToken(token, "add-public");
         secondAuth.setUser(user);

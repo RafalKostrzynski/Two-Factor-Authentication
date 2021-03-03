@@ -36,7 +36,7 @@ public class Api {
     }
 
     @PostMapping("/second-auth/{token}")
-    public ResponseEntity<HttpStatus> addPublicKey(@PathVariable String token, @RequestBody SecondAuth secondAuth){
+    public ResponseEntity<HttpStatus> addPublicKey(@PathVariable String token, @RequestBody SecondAuth secondAuth) {
         // TODO Implement EMAI storing?
         secondAuthService.addSecondAuth(token, secondAuth);
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
@@ -47,6 +47,6 @@ public class Api {
         User user = userService.verifyToken(token, "verify-email");
         //TODO test if doesn't throw errors when wrong data
         return user.isEmailVerified() ?
-                new ResponseEntity<>(verificationTokenService.createUUIDLink(user, "add-public", httpServletRequest),HttpStatus.ACCEPTED) : new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
+                new ResponseEntity<>(verificationTokenService.createUUIDLink(user, "add-public", httpServletRequest), HttpStatus.ACCEPTED) : new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
     }
 }
