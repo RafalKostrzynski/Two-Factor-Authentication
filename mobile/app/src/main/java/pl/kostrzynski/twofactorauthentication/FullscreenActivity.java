@@ -23,18 +23,15 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
+import org.json.JSONException;
+import org.json.JSONObject;
 import pl.kostrzynski.twofactorauthentication.service.ECCHandler;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.KeyPair;
-import java.security.PrivateKey;
-import java.security.PublicKey;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 
@@ -147,7 +144,7 @@ public class FullscreenActivity extends AppCompatActivity {
         };
     }
 
-    private PrivateKey readFileForPK(String path) {
+    private ECPrivateKey readFileForPK(String path) {
         try {
 
             // TODO provide storage access framework, look into content values
@@ -216,13 +213,13 @@ public class FullscreenActivity extends AppCompatActivity {
                 String qrMessage = result.getContents();
 
                 // TODO if its generate key request give a toast with (key successfully stored) else set textField to encoded OTP
-                if(qrMessage.startsWith(POST_PUBLIC_KEY_SERVICE_URL)){
-                    if(generateAndPostPublicKey()){
+                if (qrMessage.startsWith(POST_PUBLIC_KEY_SERVICE_URL)) {
+                    if (generateAndPostPublicKey()) {
 
                     }
                     dialog = createBuilder(this, qrMessage, "Generate public key?", "Generate key");
-                }else{
-                    dialog = createBuilder(this, qrMessage, "Scanned qr-code","");
+                } else {
+                    dialog = createBuilder(this, qrMessage, "Scanned qr-code", "");
                 }
                 dialog.show();
             } else {
@@ -240,40 +237,50 @@ public class FullscreenActivity extends AppCompatActivity {
             generateECCThread.join();
             postPublicKeyThread.start();
 
-
-        }catch (Exception e){
+            // TODO complete post
+            return true;
+        } catch (Exception e) {
             return false;
         }
     }
 
     private Thread postPublicKeyThread() {
-        return new Thread(){
-            public void run(){
+        return new Thread() {
+            public void run() {
                 ECCHandler eccHandler = new ECCHandler();
-                PublicKey publicKey = eccHandler.getPublicKeyFromPrivateKey(readFileForPK(loadPathFromPreferences()));
-
-                sendPostRequest();
+                ECPublicKey publicKey = eccHandler.getPublicKeyFromPrivateKey(readFileForPK(loadPathFromPreferences()));
+                byte[] publicKeyBytes = eccHandler.getEncodedPublicKey(publicKey);
+                sendPostRequest(publicKeyBytes);
             }
         };
     }
 
-    private void sendPostRequest(){
+    private void sendPostRequest(byte[] publicKeyBytes) {
         try {
             URL url = new URL("https://reqres.in/api/users");
-            HttpURLConnection con = (HttpURLConnection)url.openConnection();
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
             con.setRequestMethod("POST");
             con.setRequestProperty("Content-Type", "application/json; utf-8");
             con.setRequestProperty("Accept", "application/json");
             con.setDoOutput(true);
 
+            JSONObject json = new JSONObject();
+            json.put("publicKeyBytes", publicKeyBytes);
+
+            try (OutputStream os = con.getOutputStream()) {
+                os.write(publicKeyBytes, 0, publicKeyBytes.length);
+            }
+
         } catch (MalformedURLException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
     }
 
-    private AlertDialog createBuilder(Context context,  String qrMessage , String title, String positiveButtonString){
+    private AlertDialog createBuilder(Context context, String qrMessage, String title, String positiveButtonString) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setMessage(qrMessage);
         builder.setTitle(title);

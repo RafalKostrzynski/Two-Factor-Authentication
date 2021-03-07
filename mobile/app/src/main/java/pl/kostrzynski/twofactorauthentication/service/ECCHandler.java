@@ -33,7 +33,7 @@ public class ECCHandler {
     }
 
     // TODO implement receiving public key from private key
-    public PublicKey getPublicKeyFromPrivateKey(PrivateKey privateKey){
+    public ECPublicKey getPublicKeyFromPrivateKey(ECPrivateKey privateKey){
         return null;
     }
 
