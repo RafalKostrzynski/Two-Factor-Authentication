@@ -23,18 +23,20 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
+import pl.kostrzynski.twofactorauthentication.service.ECCHandler;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.security.KeyPair;
-import java.security.KeyPairGenerator;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
-import java.security.spec.ECGenParameterSpec;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
-import java.util.Arrays;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -52,9 +54,12 @@ public class FullscreenActivity extends AppCompatActivity {
 
     private static final String SHARED_PREFS = "sharedPreferences";
     private static final String TEXT = "text";
+    private byte[] publicKeyByteArray;
 
     private View mContentView;
     private TextView privateKeyName;
+
+    private final String POST_PUBLIC_KEY_SERVICE_URL = "http://localhost:8080/tfa/service/rest/v1/add-public/";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,46 +102,41 @@ public class FullscreenActivity extends AppCompatActivity {
     }
 
     private void generateECC() {
+        readWriteFilePermissionCheck();
+        generateAndWriteKeysToStorage();
+        Toast.makeText(this, "Saved in Documents!", Toast.LENGTH_SHORT).show();
+    }
+
+    private void readWriteFilePermissionCheck() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
                 checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             if (shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE))
                 Toast.makeText(this, "Write permission is needed to save your keys", Toast.LENGTH_SHORT).show();
             requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSION_REQUEST_STORAGE_WRITE);
         }
-        generateAndWriteKeysToStorage();
-        Toast.makeText(this, "Saved in Documents!", Toast.LENGTH_SHORT).show();
     }
 
     private void generateAndWriteKeysToStorage() {
-        Thread thread = new Thread() {
+        Thread thread = getThreadToSaveKeys();
+        thread.start();
+    }
+
+    private Thread getThreadToSaveKeys() {
+        return new Thread() {
             public void run() {
                 try {
                     setPriority(Thread.MAX_PRIORITY);
 
-                    KeyPairGenerator generator = KeyPairGenerator.getInstance("EC");
-                    generator.initialize(new ECGenParameterSpec("secp521r1"));
-                    KeyPair keyPair = generator.generateKeyPair();
-                    ECPublicKey publicKey = (ECPublicKey) keyPair.getPublic();
+                    ECCHandler eccHandler = new ECCHandler();
+                    KeyPair keyPair = eccHandler.generateKeyPair();
                     ECPrivateKey privateKey = (ECPrivateKey) keyPair.getPrivate();
 
                     Context context = FullscreenActivity.this;
-
                     // TODO save somehow else
                     File path = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
-
-
                     File privateKeyFile = new File(path, "private.key");
-                    File publicKeyFile = new File(path, "public.key");
-
-                    try (FileOutputStream privateKeyOutput = new FileOutputStream(privateKeyFile);
-                         FileOutputStream publicKeyOutput = new FileOutputStream(publicKeyFile)) {
-
-                        PKCS8EncodedKeySpec pkcs8EncodedKeySpec = new PKCS8EncodedKeySpec(privateKey.getEncoded());
-                        X509EncodedKeySpec x509EncodedKeySpec = new X509EncodedKeySpec(publicKey.getEncoded());
-                        privateKeyOutput.write(pkcs8EncodedKeySpec.getEncoded());
-                        publicKeyOutput.write(x509EncodedKeySpec.getEncoded());
-                        System.out.println("This is the PrivateK:\n" + Arrays.toString(pkcs8EncodedKeySpec.getEncoded()));
-                        System.out.println("This is the PublicK:\n" + Arrays.toString(x509EncodedKeySpec.getEncoded()));
+                    try (FileOutputStream privateKeyOutput = new FileOutputStream(privateKeyFile)) {
+                        privateKeyOutput.write(eccHandler.getEncodedPrivateKey(privateKey));
                     }
                     setAndSavePathTextView(privateKeyFile.getPath());
                 } catch (Exception e) {
@@ -145,10 +145,9 @@ public class FullscreenActivity extends AppCompatActivity {
                 }
             }
         };
-        thread.start();
     }
 
-    private void readFileForPK(String path) {
+    private PrivateKey readFileForPK(String path) {
         try {
 
             // TODO provide storage access framework, look into content values
@@ -158,17 +157,15 @@ public class FullscreenActivity extends AppCompatActivity {
 
             FileInputStream fileInputStream = new FileInputStream(newFile);
             fileInputStream.read();
-//            byte[] bytes = Files.readAllBytes(pkPath);
 
-//            PKCS8EncodedKeySpec ks = new PKCS8EncodedKeySpec(encodedPrivateKey);
-//            KeyFactory kf = KeyFactory.getInstance("EC");
-//            PrivateKey pvt = kf.generatePrivate(ks);
-//
-//            System.out.println("This is the PK:\n"+Arrays.toString(pvt.getEncoded()));
+            byte[] privateKeyBytes = null; // TODO handle reading bytes
+            ECCHandler eccHandler = new ECCHandler();
+            return eccHandler.getPrivateKeyFromBytes(privateKeyBytes);
 
             // TODO set key
         } catch (Exception e) {
             Toast.makeText(this, "Something went wrong, Please try again!", Toast.LENGTH_LONG).show();
+            return null;
         }
     }
 
@@ -215,19 +212,75 @@ public class FullscreenActivity extends AppCompatActivity {
         } else if (IntentIntegrator.parseActivityResult(requestCode, resultCode, data) != null) {
             IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
             if (result.getContents() != null) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setMessage(result.getContents());
-                builder.setTitle("Scanning the QR code");
-                builder.setPositiveButton("Try again!", (dialog, which) -> scanQR())
-                        .setNegativeButton("Finish", (dialog, which) ->
-                                //TODO change this to decode method or generate a key
-                                finish());
-                AlertDialog dialog = builder.create();
+                AlertDialog dialog;
+                String qrMessage = result.getContents();
+
+                // TODO if its generate key request give a toast with (key successfully stored) else set textField to encoded OTP
+                if(qrMessage.startsWith(POST_PUBLIC_KEY_SERVICE_URL)){
+                    if(generateAndPostPublicKey()){
+
+                    }
+                    dialog = createBuilder(this, qrMessage, "Generate public key?", "Generate key");
+                }else{
+                    dialog = createBuilder(this, qrMessage, "Scanned qr-code","");
+                }
                 dialog.show();
             } else {
                 Toast.makeText(this, "Something went wrong please try again", Toast.LENGTH_SHORT).show();
             }
         }
+    }
+
+    private boolean generateAndPostPublicKey() {
+        try {
+            readWriteFilePermissionCheck();
+            Thread generateECCThread = getThreadToSaveKeys();
+            Thread postPublicKeyThread = postPublicKeyThread();
+            generateECCThread.start();
+            generateECCThread.join();
+            postPublicKeyThread.start();
+
+
+        }catch (Exception e){
+            return false;
+        }
+    }
+
+    private Thread postPublicKeyThread() {
+        return new Thread(){
+            public void run(){
+                ECCHandler eccHandler = new ECCHandler();
+                PublicKey publicKey = eccHandler.getPublicKeyFromPrivateKey(readFileForPK(loadPathFromPreferences()));
+
+                sendPostRequest();
+            }
+        };
+    }
+
+    private void sendPostRequest(){
+        try {
+            URL url = new URL("https://reqres.in/api/users");
+            HttpURLConnection con = (HttpURLConnection)url.openConnection();
+            con.setRequestMethod("POST");
+            con.setRequestProperty("Content-Type", "application/json; utf-8");
+            con.setRequestProperty("Accept", "application/json");
+            con.setDoOutput(true);
+
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private AlertDialog createBuilder(Context context,  String qrMessage , String title, String positiveButtonString){
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setMessage(qrMessage);
+        builder.setTitle(title);
+        builder.setPositiveButton(positiveButtonString, (dialog, which) -> scanQR())
+                .setNegativeButton("Cancel", (dialog, which) ->
+                        finish());
+        AlertDialog dialog = builder.create();
     }
 
     @Override
