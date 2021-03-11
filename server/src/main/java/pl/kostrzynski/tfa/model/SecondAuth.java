@@ -22,7 +22,7 @@ public class SecondAuth {
     private byte[] publicKeyBytes;
     @Column(nullable = false)
     private boolean active;
-    private String EMAI;
+    private String imei;
     @OneToOne
     private User user;
 
@@ -31,12 +31,12 @@ public class SecondAuth {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         SecondAuth that = (SecondAuth) o;
-        return id == that.id && active == that.active && Arrays.equals(publicKeyBytes, that.publicKeyBytes) && Objects.equals(EMAI, that.EMAI);
+        return id == that.id && active == that.active && Arrays.equals(publicKeyBytes, that.publicKeyBytes) && Objects.equals(imei, that.imei);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(id, active, EMAI);
+        int result = Objects.hash(id, active, imei);
         result = 31 * result + Arrays.hashCode(publicKeyBytes);
         return result;
     }
@@ -47,7 +47,7 @@ public class SecondAuth {
                 "id=" + id +
                 ", publicKeyBytes=" + Arrays.toString(publicKeyBytes) +
                 ", active=" + active +
-                ", EMAI='" + EMAI + '\'' +
+                ", EMAI='" + imei + '\'' +
                 '}';
     }
 }

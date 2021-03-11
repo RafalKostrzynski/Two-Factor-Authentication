@@ -13,6 +13,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.telephony.TelephonyManager;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -23,17 +24,15 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
-import org.json.JSONException;
-import org.json.JSONObject;
-import pl.kostrzynski.twofactorauthentication.service.ECCHandler;
+import pl.kostrzynski.twofactorauthentication.service.BCrypt;
+import pl.kostrzynski.twofactorauthentication.service.ECCService;
+import pl.kostrzynski.twofactorauthentication.thread.PostPublicKeyRunnable;
 
 import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.security.KeyPair;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
+
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -124,8 +123,8 @@ public class FullscreenActivity extends AppCompatActivity {
                 try {
                     setPriority(Thread.MAX_PRIORITY);
 
-                    ECCHandler eccHandler = new ECCHandler();
-                    KeyPair keyPair = eccHandler.generateKeyPair();
+                    ECCService eccService = new ECCService();
+                    KeyPair keyPair = eccService.generateKeyPair();
                     ECPrivateKey privateKey = (ECPrivateKey) keyPair.getPrivate();
 
                     Context context = FullscreenActivity.this;
@@ -133,7 +132,7 @@ public class FullscreenActivity extends AppCompatActivity {
                     File path = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
                     File privateKeyFile = new File(path, "private.key");
                     try (FileOutputStream privateKeyOutput = new FileOutputStream(privateKeyFile)) {
-                        privateKeyOutput.write(eccHandler.getEncodedPrivateKey(privateKey));
+                        privateKeyOutput.write(eccService.getEncodedPrivateKey(privateKey));
                     }
                     setAndSavePathTextView(privateKeyFile.getPath());
                 } catch (Exception e) {
@@ -156,8 +155,8 @@ public class FullscreenActivity extends AppCompatActivity {
             fileInputStream.read();
 
             byte[] privateKeyBytes = null; // TODO handle reading bytes
-            ECCHandler eccHandler = new ECCHandler();
-            return eccHandler.getPrivateKeyFromBytes(privateKeyBytes);
+            ECCService eccService = new ECCService();
+            return eccService.getPrivateKeyFromBytes(privateKeyBytes);
 
             // TODO set key
         } catch (Exception e) {
@@ -214,7 +213,7 @@ public class FullscreenActivity extends AppCompatActivity {
 
                 // TODO if its generate key request give a toast with (key successfully stored) else set textField to encoded OTP
                 if (qrMessage.startsWith(POST_PUBLIC_KEY_SERVICE_URL)) {
-                    if (generateAndPostPublicKey()) {
+                    if (generateAndPostPublicKey(qrMessage)) {
 
                     }
                     dialog = createBuilder(this, qrMessage, "Generate public key?", "Generate key");
@@ -228,11 +227,27 @@ public class FullscreenActivity extends AppCompatActivity {
         }
     }
 
-    private boolean generateAndPostPublicKey() {
+    private boolean generateAndPostPublicKey(String token) {
         try {
+
+            // TODO maybe make it a one bit thread
+            // TODO make this thread return the key so you can pass it to the PostPublicKeyThread
             readWriteFilePermissionCheck();
             Thread generateECCThread = getThreadToSaveKeys();
-            Thread postPublicKeyThread = postPublicKeyThread();
+
+            String secretImei = getHashedImei();
+
+            ECCService eccService = new ECCService();
+            ECPublicKey publicKey = eccService.getPublicKeyFromPrivateKey(readFileForPK(loadPathFromPreferences()));
+            byte[] publicKeyBytes = eccService.getEncodedPublicKey(publicKey);
+
+            // TODO ensure it will not be created before the key have been generated
+
+            Runnable postPublicKeyRunnable = secretImei == null ?
+                    new PostPublicKeyRunnable(token, publicKeyBytes) :
+                    new PostPublicKeyRunnable(token, secretImei, publicKeyBytes);
+            Thread postPublicKeyThread = new Thread(postPublicKeyRunnable);
+
             generateECCThread.start();
             generateECCThread.join();
             postPublicKeyThread.start();
@@ -244,40 +259,13 @@ public class FullscreenActivity extends AppCompatActivity {
         }
     }
 
-    private Thread postPublicKeyThread() {
-        return new Thread() {
-            public void run() {
-                ECCHandler eccHandler = new ECCHandler();
-                ECPublicKey publicKey = eccHandler.getPublicKeyFromPrivateKey(readFileForPK(loadPathFromPreferences()));
-                byte[] publicKeyBytes = eccHandler.getEncodedPublicKey(publicKey);
-                sendPostRequest(publicKeyBytes);
-            }
-        };
-    }
-
-    private void sendPostRequest(byte[] publicKeyBytes) {
-        try {
-            URL url = new URL("https://reqres.in/api/users");
-            HttpURLConnection con = (HttpURLConnection) url.openConnection();
-            con.setRequestMethod("POST");
-            con.setRequestProperty("Content-Type", "application/json; utf-8");
-            con.setRequestProperty("Accept", "application/json");
-            con.setDoOutput(true);
-
-            JSONObject json = new JSONObject();
-            json.put("publicKeyBytes", publicKeyBytes);
-
-            try (OutputStream os = con.getOutputStream()) {
-                os.write(publicKeyBytes, 0, publicKeyBytes.length);
-            }
-
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();
+    private String getHashedImei() {
+        TelephonyManager telephonyManager = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
+        if(telephonyManager != null) {
+            String emai = telephonyManager.getImei();
+            return BCrypt.hashpw(emai, BCrypt.gensalt(12));
         }
+        return null;
     }
 
     private AlertDialog createBuilder(Context context, String qrMessage, String title, String positiveButtonString) {

@@ -8,7 +8,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
-public class ECCHandler {
+public class ECCService {
 
     public KeyPair generateKeyPair() throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
         KeyPairGenerator generator = KeyPairGenerator.getInstance("EC");
