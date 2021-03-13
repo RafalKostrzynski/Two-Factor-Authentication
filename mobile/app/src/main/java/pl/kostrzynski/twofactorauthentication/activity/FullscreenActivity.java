@@ -1,4 +1,4 @@
-package pl.kostrzynski.twofactorauthentication;
+package pl.kostrzynski.twofactorauthentication.activity;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -6,14 +6,12 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.telephony.TelephonyManager;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -24,14 +22,14 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
-import pl.kostrzynski.twofactorauthentication.service.BCrypt;
+import pl.kostrzynski.twofactorauthentication.R;
+import pl.kostrzynski.twofactorauthentication.runnable.CreatePostSaveKeyRunnable;
 import pl.kostrzynski.twofactorauthentication.service.ECCService;
-import pl.kostrzynski.twofactorauthentication.thread.PostPublicKeyRunnable;
+import pl.kostrzynski.twofactorauthentication.service.PreferenceService;
 
 import java.io.*;
 import java.security.KeyPair;
 import java.security.interfaces.ECPrivateKey;
-import java.security.interfaces.ECPublicKey;
 
 
 /**
@@ -47,10 +45,6 @@ public class FullscreenActivity extends AppCompatActivity {
     private static final int READ_REQUEST_CODE = 42;
     private static final int PERMISSION_REQUEST_STORAGE_READ = 1000;
     private static final int PERMISSION_REQUEST_STORAGE_WRITE = 1001;
-
-    private static final String SHARED_PREFS = "sharedPreferences";
-    private static final String TEXT = "text";
-    private byte[] publicKeyByteArray;
 
     private View mContentView;
     private TextView privateKeyName;
@@ -71,9 +65,13 @@ public class FullscreenActivity extends AppCompatActivity {
 
         scanQRButton.setOnClickListener(v -> scanQR());
         loadPKButton.setOnClickListener(v -> loadPK());
-        generateECCButton.setOnClickListener(v -> generateECC());
+        generateECCButton.setOnClickListener(v ->
+                //generateECC()
+                generateAndPostPublicKey("String token")
+        );
 
-        String path = loadPathFromPreferences();
+        PreferenceService preferenceService = new PreferenceService();
+        String path = preferenceService.loadPathFromPreferences(this);
         privateKeyName.setText(findFileNameFromString(path));
     }
 
@@ -165,21 +163,6 @@ public class FullscreenActivity extends AppCompatActivity {
         }
     }
 
-    private String loadPathFromPreferences() {
-        SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
-        String path = sharedPreferences.getString(TEXT, "");
-        if (new File(path).exists())
-            return path;
-        return "";
-    }
-
-    private void savePathToSharedPreferences(String path) {
-        SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString(TEXT, path);
-        editor.apply();
-    }
-
     private String findFileNameFromString(String path) {
         try {
             return path.contains("/") ?
@@ -189,9 +172,10 @@ public class FullscreenActivity extends AppCompatActivity {
         }
     }
 
-    private void setAndSavePathTextView(String path) {
+    public void setAndSavePathTextView(String path) {
         privateKeyName.setText(findFileNameFromString(path));
-        savePathToSharedPreferences(path);
+        PreferenceService preferenceService= new PreferenceService();
+        preferenceService.savePathToSharedPreferences(this, path);
     }
 
     @Override
@@ -229,43 +213,16 @@ public class FullscreenActivity extends AppCompatActivity {
 
     private boolean generateAndPostPublicKey(String token) {
         try {
-
-            // TODO maybe make it a one bit thread
-            // TODO make this thread return the key so you can pass it to the PostPublicKeyThread
             readWriteFilePermissionCheck();
-            Thread generateECCThread = getThreadToSaveKeys();
 
-            String secretImei = getHashedImei();
+            Thread createSaveAndPostKeysThread = new Thread(
+                    new CreatePostSaveKeyRunnable(token, this));
+            createSaveAndPostKeysThread.start();
 
-            ECCService eccService = new ECCService();
-            ECPublicKey publicKey = eccService.getPublicKeyFromPrivateKey(readFileForPK(loadPathFromPreferences()));
-            byte[] publicKeyBytes = eccService.getEncodedPublicKey(publicKey);
-
-            // TODO ensure it will not be created before the key have been generated
-
-            Runnable postPublicKeyRunnable = secretImei == null ?
-                    new PostPublicKeyRunnable(token, publicKeyBytes) :
-                    new PostPublicKeyRunnable(token, secretImei, publicKeyBytes);
-            Thread postPublicKeyThread = new Thread(postPublicKeyRunnable);
-
-            generateECCThread.start();
-            generateECCThread.join();
-            postPublicKeyThread.start();
-
-            // TODO complete post
             return true;
         } catch (Exception e) {
             return false;
         }
-    }
-
-    private String getHashedImei() {
-        TelephonyManager telephonyManager = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
-        if(telephonyManager != null) {
-            String emai = telephonyManager.getImei();
-            return BCrypt.hashpw(emai, BCrypt.gensalt(12));
-        }
-        return null;
     }
 
     private AlertDialog createBuilder(Context context, String qrMessage, String title, String positiveButtonString) {
@@ -276,6 +233,7 @@ public class FullscreenActivity extends AppCompatActivity {
                 .setNegativeButton("Cancel", (dialog, which) ->
                         finish());
         AlertDialog dialog = builder.create();
+        return null;
     }
 
     @Override
