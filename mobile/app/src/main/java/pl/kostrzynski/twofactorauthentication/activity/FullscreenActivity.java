@@ -24,6 +24,7 @@ import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import pl.kostrzynski.twofactorauthentication.R;
 import pl.kostrzynski.twofactorauthentication.runnable.CreatePostSaveKeyRunnable;
+import pl.kostrzynski.twofactorauthentication.service.AlertDialogService;
 import pl.kostrzynski.twofactorauthentication.service.ECCService;
 import pl.kostrzynski.twofactorauthentication.service.PreferenceService;
 
@@ -98,6 +99,7 @@ public class FullscreenActivity extends AppCompatActivity {
         startActivityForResult(intent, READ_REQUEST_CODE);
     }
 
+    // TODO ensure it´s needed else remove
     private void generateECC() {
         readWriteFilePermissionCheck();
         generateAndWriteKeysToStorage();
@@ -118,6 +120,7 @@ public class FullscreenActivity extends AppCompatActivity {
         thread.start();
     }
 
+    // TODO ensure it's needed else remove
     private Thread getThreadToSaveKeys() {
         return new Thread() {
             public void run() {
@@ -197,15 +200,23 @@ public class FullscreenActivity extends AppCompatActivity {
             if (result.getContents() != null) {
                 AlertDialog dialog;
                 String qrMessage = result.getContents();
-
-                // TODO if its generate key request give a toast with (key successfully stored) else set textField to encoded OTP
+                ECCService eccService = new ECCService();
+                AlertDialogService alertDialogService = new AlertDialogService();
+                // Generate save and post keys
                 if (qrMessage.startsWith(POST_PUBLIC_KEY_SERVICE_URL)) {
-                    if (generateAndPostPublicKey(qrMessage)) {
-
-                    }
-                    dialog = createBuilder(this, qrMessage, "Generate public key?", "Generate key");
-                } else {
-                    dialog = createBuilder(this, qrMessage, "Scanned qr-code", "");
+                    dialog = alertDialogService.createBuilder(this, qrMessage,
+                            "Generate public key?", "Generate key",
+                            this::generateAndPostPublicKey);
+                }
+                // decode otp
+                else if (eccService.isValidCiphertext(qrMessage)) {
+                    dialog = alertDialogService.createBuilder(this, qrMessage, "Scanned qr-code",
+                            "Encode password", eccService::decodeMessage);
+                }
+                // create error dialog
+                else {
+                    dialog = alertDialogService.createBuilder(this, qrMessage,
+                            "Something went wrong please try again");
                 }
                 dialog.show();
             } else {
@@ -214,7 +225,7 @@ public class FullscreenActivity extends AppCompatActivity {
         }
     }
 
-    private boolean generateAndPostPublicKey(String token) {
+    private void generateAndPostPublicKey(String token) {
         try {
             readWriteFilePermissionCheck();
 
@@ -227,21 +238,9 @@ public class FullscreenActivity extends AppCompatActivity {
             String path = preferenceService.loadPathFromPreferences(this);
             privateKeyName.setText(findFileNameFromString(path));
 
-            return true;
         } catch (Exception e) {
-            return false;
+            Toast.makeText(this, "Something went wrong, please try again", Toast.LENGTH_SHORT).show();
         }
-    }
-
-    private AlertDialog createBuilder(Context context, String qrMessage, String title, String positiveButtonString) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setMessage(qrMessage);
-        builder.setTitle(title);
-        builder.setPositiveButton(positiveButtonString, (dialog, which) -> scanQR())
-                .setNegativeButton("Cancel", (dialog, which) ->
-                        finish());
-        AlertDialog dialog = builder.create();
-        return null;
     }
 
     @Override
