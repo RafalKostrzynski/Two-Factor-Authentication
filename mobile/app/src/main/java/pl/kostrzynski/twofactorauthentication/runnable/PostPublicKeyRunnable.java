@@ -1,7 +1,7 @@
-package pl.kostrzynski.twofactorauthentication.thread;
+package pl.kostrzynski.twofactorauthentication.runnable;
 
 import pl.kostrzynski.twofactorauthentication.model.SecondAuth;
-import pl.kostrzynski.twofactorauthentication.service.RequestApi;
+import pl.kostrzynski.twofactorauthentication.apInterface.RequestApi;
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
@@ -12,7 +12,7 @@ import java.io.IOException;
 public class PostPublicKeyRunnable implements Runnable{
 
     private final String token;
-    private String imei;
+    private String androidID;
     private final byte[] publicKeyBytes;
     // TODO check url
     private final String URL = "http://192.168.178.119:8080/tfa/service/rest/v1/";
@@ -22,17 +22,17 @@ public class PostPublicKeyRunnable implements Runnable{
         this.publicKeyBytes = publicKeyBytes;
     }
 
-    public PostPublicKeyRunnable(String token, String imei, byte[] publicKeyBytes) {
+    public PostPublicKeyRunnable(String token, String androidID, byte[] publicKeyBytes) {
         this.token = token;
-        this.imei = imei;
+        this.androidID = androidID;
         this.publicKeyBytes = publicKeyBytes;
     }
 
     @Override
     public void run() {
         try {
-            if (imei == null) sendPostRequest(publicKeyBytes, token);
-            else sendPostRequest(publicKeyBytes, imei, token);
+            if (androidID == null) sendPostRequest(publicKeyBytes, token);
+            else sendPostRequest(publicKeyBytes, androidID, token);
         }catch (IOException exception){
             // TODO something like return or other user communication
         }
@@ -43,8 +43,8 @@ public class PostPublicKeyRunnable implements Runnable{
         sendPost(secondAuth, token);
     }
 
-    private void sendPostRequest(byte[] publicKeyBytes,String imei, String token) throws IOException {
-        SecondAuth secondAuth = new SecondAuth(publicKeyBytes, imei);
+    private void sendPostRequest(byte[] publicKeyBytes,String androidId, String token) throws IOException {
+        SecondAuth secondAuth = new SecondAuth(publicKeyBytes, androidId);
         sendPost(secondAuth, token);
     }
 
