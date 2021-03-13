@@ -51,7 +51,7 @@ public class FullscreenActivity extends AppCompatActivity {
     private View mContentView;
     private TextView privateKeyName;
 
-    private final String POST_PUBLIC_KEY_SERVICE_URL = "http://localhost:8080/tfa/service/rest/v1/add-public/";
+    private final String POST_PUBLIC_KEY_SERVICE_URL = "https://localhost:8080/tfa/service/rest/v1/add-public/";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -221,6 +221,11 @@ public class FullscreenActivity extends AppCompatActivity {
             Thread createSaveAndPostKeysThread = new Thread(
                     new CreatePostSaveKeyRunnable(token, this));
             createSaveAndPostKeysThread.start();
+
+            createSaveAndPostKeysThread.join();
+            PreferenceService preferenceService = new PreferenceService();
+            String path = preferenceService.loadPathFromPreferences(this);
+            privateKeyName.setText(findFileNameFromString(path));
 
             return true;
         } catch (Exception e) {

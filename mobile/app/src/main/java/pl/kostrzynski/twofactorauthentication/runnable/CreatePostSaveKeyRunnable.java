@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Environment;
 import android.provider.Settings;
+import android.widget.Toast;
 import pl.kostrzynski.twofactorauthentication.service.ECCService;
 import pl.kostrzynski.twofactorauthentication.service.PreferenceService;
 
@@ -42,15 +43,14 @@ public class CreatePostSaveKeyRunnable implements Runnable {
 
             byte[] publicKeyBytes = keyPair.getPublic().getEncoded();
             Runnable postPublicKeyRunnable = secretAndroidId == null ?
-                    new PostPublicKeyRunnable(token, publicKeyBytes) :
-                    new PostPublicKeyRunnable(token, secretAndroidId, publicKeyBytes);
+                    new PostPublicKeyRunnable(token, publicKeyBytes, context) :
+                    new PostPublicKeyRunnable(token, secretAndroidId, publicKeyBytes, context);
 
             Thread postPublicKeyThread = new Thread(postPublicKeyRunnable);
             postPublicKeyThread.start();
 
         } catch (Exception e) {
-            System.err.println("EC Exception\n" + e.toString());
-            e.printStackTrace();
+            Toast.makeText(context, "Something went wrong please try again later", Toast.LENGTH_SHORT).show();
         }
     }
 
