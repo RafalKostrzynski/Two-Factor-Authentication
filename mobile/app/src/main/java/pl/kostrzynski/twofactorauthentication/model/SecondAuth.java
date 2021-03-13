@@ -6,11 +6,11 @@ import java.util.Objects;
 public class SecondAuth {
 
     private byte[] publicKeyBytes;
-    private String EMAI;
+    private String androidID;
 
-    public SecondAuth(byte[] publicKeyBytes, String EMAI) {
+    public SecondAuth(byte[] publicKeyBytes, String androidID) {
         this.publicKeyBytes = publicKeyBytes;
-        this.EMAI = EMAI;
+        this.androidID = androidID;
     }
 
     public SecondAuth(byte[] publicKeyBytes) {
@@ -25,12 +25,12 @@ public class SecondAuth {
         this.publicKeyBytes = publicKeyBytes;
     }
 
-    public String getEMAI() {
-        return EMAI;
+    public String getAndroidID() {
+        return androidID;
     }
 
-    public void setEMAI(String EMAI) {
-        this.EMAI = EMAI;
+    public void setAndroidID(String androidID) {
+        this.androidID = androidID;
     }
 
     @Override
@@ -38,12 +38,12 @@ public class SecondAuth {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         SecondAuth that = (SecondAuth) o;
-        return Arrays.equals(publicKeyBytes, that.publicKeyBytes) && Objects.equals(EMAI, that.EMAI);
+        return Arrays.equals(publicKeyBytes, that.publicKeyBytes) && Objects.equals(androidID, that.androidID);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(EMAI);
+        int result = Objects.hash(androidID);
         result = 31 * result + Arrays.hashCode(publicKeyBytes);
         return result;
     }
@@ -52,7 +52,7 @@ public class SecondAuth {
     public String toString() {
         return "SecondAuth{" +
                 "publicKeyBytes=" + Arrays.toString(publicKeyBytes) +
-                ", EMAI='" + EMAI + '\'' +
+                ", androidID='" + androidID + '\'' +
                 '}';
     }
 }

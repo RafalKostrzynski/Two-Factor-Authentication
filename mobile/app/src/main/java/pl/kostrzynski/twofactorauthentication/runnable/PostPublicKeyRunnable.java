@@ -1,5 +1,6 @@
 package pl.kostrzynski.twofactorauthentication.runnable;
 
+import pl.kostrzynski.twofactorauthentication.activity.FullscreenActivity;
 import pl.kostrzynski.twofactorauthentication.model.SecondAuth;
 import pl.kostrzynski.twofactorauthentication.apInterface.RequestApi;
 import retrofit2.Call;
@@ -34,7 +35,7 @@ public class PostPublicKeyRunnable implements Runnable{
             if (androidID == null) sendPostRequest(publicKeyBytes, token);
             else sendPostRequest(publicKeyBytes, androidID, token);
         }catch (IOException exception){
-            // TODO something like return or other user communication
+            throw new IllegalArgumentException("Error occurred while executing post method");
         }
     }
 
