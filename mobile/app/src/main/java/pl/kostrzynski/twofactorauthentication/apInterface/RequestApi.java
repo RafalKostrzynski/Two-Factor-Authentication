@@ -1,4 +1,4 @@
-package pl.kostrzynski.twofactorauthentication.service;
+package pl.kostrzynski.twofactorauthentication.apInterface;
 
 import pl.kostrzynski.twofactorauthentication.model.SecondAuth;
 import retrofit2.http.Body;
