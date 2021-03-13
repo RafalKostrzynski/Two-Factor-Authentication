@@ -2,7 +2,9 @@ package pl.kostrzynski.twofactorauthentication.service;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+
 import java.io.File;
+
 import static android.content.Context.MODE_PRIVATE;
 
 public class PreferenceService {

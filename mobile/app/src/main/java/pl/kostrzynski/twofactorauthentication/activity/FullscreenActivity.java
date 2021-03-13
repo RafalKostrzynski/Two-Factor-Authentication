@@ -27,7 +27,9 @@ import pl.kostrzynski.twofactorauthentication.runnable.CreatePostSaveKeyRunnable
 import pl.kostrzynski.twofactorauthentication.service.ECCService;
 import pl.kostrzynski.twofactorauthentication.service.PreferenceService;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.security.KeyPair;
 import java.security.interfaces.ECPrivateKey;
 
@@ -64,11 +66,12 @@ public class FullscreenActivity extends AppCompatActivity {
         final Button generateECCButton = findViewById(R.id.generate_ECC_button);
 
         scanQRButton.setOnClickListener(v -> scanQR());
+
+        // TODO not sure if it is needed depends on storing keys
         loadPKButton.setOnClickListener(v -> loadPK());
-        generateECCButton.setOnClickListener(v ->
-                //generateECC()
-                generateAndPostPublicKey("String token")
-        );
+
+        // TODO Not sure if it is needed, probably not (generating will be provided via qr-scan)
+        generateECCButton.setOnClickListener(v -> generateECC());
 
         PreferenceService preferenceService = new PreferenceService();
         String path = preferenceService.loadPathFromPreferences(this);
@@ -174,7 +177,7 @@ public class FullscreenActivity extends AppCompatActivity {
 
     public void setAndSavePathTextView(String path) {
         privateKeyName.setText(findFileNameFromString(path));
-        PreferenceService preferenceService= new PreferenceService();
+        PreferenceService preferenceService = new PreferenceService();
         preferenceService.savePathToSharedPreferences(this, path);
     }
 

@@ -1,8 +1,7 @@
 package pl.kostrzynski.twofactorauthentication.runnable;
 
-import pl.kostrzynski.twofactorauthentication.activity.FullscreenActivity;
-import pl.kostrzynski.twofactorauthentication.model.SecondAuth;
 import pl.kostrzynski.twofactorauthentication.apInterface.RequestApi;
+import pl.kostrzynski.twofactorauthentication.model.SecondAuth;
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
@@ -10,7 +9,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 import java.io.IOException;
 
-public class PostPublicKeyRunnable implements Runnable{
+public class PostPublicKeyRunnable implements Runnable {
 
     private final String token;
     private String androidID;
@@ -34,7 +33,7 @@ public class PostPublicKeyRunnable implements Runnable{
         try {
             if (androidID == null) sendPostRequest(publicKeyBytes, token);
             else sendPostRequest(publicKeyBytes, androidID, token);
-        }catch (IOException exception){
+        } catch (IOException exception) {
             throw new IllegalArgumentException("Error occurred while executing post method");
         }
     }
@@ -44,7 +43,7 @@ public class PostPublicKeyRunnable implements Runnable{
         sendPost(secondAuth, token);
     }
 
-    private void sendPostRequest(byte[] publicKeyBytes,String androidId, String token) throws IOException {
+    private void sendPostRequest(byte[] publicKeyBytes, String androidId, String token) throws IOException {
         SecondAuth secondAuth = new SecondAuth(publicKeyBytes, androidId);
         sendPost(secondAuth, token);
     }
@@ -58,7 +57,7 @@ public class PostPublicKeyRunnable implements Runnable{
         Call<Object> call = requestApi.createSecondAuth(token, secondAuth);
         Response<Object> response = call.execute();
 
-        if(!response.isSuccessful()) throw new IllegalArgumentException(response.message());
+        if (!response.isSuccessful()) throw new IllegalArgumentException(response.message());
     }
 
 }

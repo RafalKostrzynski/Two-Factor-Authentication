@@ -20,7 +20,7 @@ public class CreatePostSaveKeyRunnable implements Runnable {
 
     public CreatePostSaveKeyRunnable(String token, Context context) {
         this.token = token;
-        this.context=context;
+        this.context = context;
     }
 
     @Override
@@ -33,11 +33,9 @@ public class CreatePostSaveKeyRunnable implements Runnable {
             // TODO save somehow else
             File privateKeyFile = saveKeysToStorage(eccService, privateKey);
 
-            saveToPreferencesThread(privateKeyFile);
+            savePrivateKeyPathToPreferences(privateKeyFile);
 
-            /**
-             * This is used because third party apps have no access to Imei number since android 10.
-             */
+             // This is used because third party apps have no access to Imei number since android 10.
             @SuppressLint("HardwareIds")
             String secretAndroidId = Settings.Secure.
                     getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
@@ -65,10 +63,9 @@ public class CreatePostSaveKeyRunnable implements Runnable {
         return privateKeyFile;
     }
 
-    private void saveToPreferencesThread(File privateKeyFile) {
-
-                PreferenceService preferenceService = new PreferenceService();
-                preferenceService.savePathToSharedPreferences(context, privateKeyFile.getPath());
+    private void savePrivateKeyPathToPreferences(File privateKeyFile) {
+        PreferenceService preferenceService = new PreferenceService();
+        preferenceService.savePathToSharedPreferences(context, privateKeyFile.getPath());
     }
 
 }
