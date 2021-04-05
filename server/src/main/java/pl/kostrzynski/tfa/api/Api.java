@@ -16,6 +16,11 @@ import pl.kostrzynski.tfa.service.VerificationTokenService;
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 
+/**
+ * This is the API for the whole authorization
+ *
+ * See the swagger documentation on the API methods under https://localhost:8443/swagger-ui/index.html
+ */
 @RestController
 @RequestMapping(value = "tfa/service/rest/v1", produces = MediaType.APPLICATION_JSON_VALUE)
 public class Api {
