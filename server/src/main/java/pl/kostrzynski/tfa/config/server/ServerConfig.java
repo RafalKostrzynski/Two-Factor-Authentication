@@ -1,4 +1,4 @@
-package pl.kostrzynski.tfa.config.webSecurity;
+package pl.kostrzynski.tfa.config.server;
 
 import org.apache.catalina.Context;
 import org.apache.catalina.connector.Connector;
