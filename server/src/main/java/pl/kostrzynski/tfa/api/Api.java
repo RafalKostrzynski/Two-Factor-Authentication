@@ -41,7 +41,6 @@ public class Api {
 
     @PostMapping("/second-auth/{token}")
     public ResponseEntity<HttpStatus> addPublicKey(@PathVariable String token, @RequestBody SecondAuth secondAuth) {
-        // TODO Implement EMAI storing?
         secondAuthService.addSecondAuth(token, secondAuth);
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }

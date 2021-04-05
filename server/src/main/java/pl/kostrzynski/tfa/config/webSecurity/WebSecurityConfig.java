@@ -45,7 +45,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .rememberMe().tokenRepository(persistentTokenRepository())
                 .and()
-                .logout().logoutSuccessUrl("/for-all");
+                .logout().logoutSuccessUrl("/for-all")
+                .and().requiresChannel().anyRequest().requiresSecure();
 
         // TODO delete this (its only purpose is to allow easier manual testing)
         http.csrf().disable();
