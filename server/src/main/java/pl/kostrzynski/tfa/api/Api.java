@@ -15,6 +15,7 @@ import pl.kostrzynski.tfa.service.VerificationTokenService;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 
 /**
  * This is the API for the whole authorization
@@ -38,7 +39,7 @@ public class Api {
     }
 
     @PostMapping("/user")
-    public ResponseEntity<HttpStatus> addUser(@RequestBody User user, HttpServletRequest httpServletRequest)
+    public ResponseEntity<HttpStatus> addUser(@Valid @RequestBody User user, HttpServletRequest httpServletRequest)
             throws MessagingException {
         userService.addNewUser(user, httpServletRequest);
         return new ResponseEntity<>(HttpStatus.ACCEPTED);

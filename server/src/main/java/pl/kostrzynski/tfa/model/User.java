@@ -1,5 +1,6 @@
 package pl.kostrzynski.tfa.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -9,7 +10,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.Size;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Objects;
@@ -23,17 +25,19 @@ public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-    @Email(message = "Please provide a correct Email address",regexp = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")
+    @Email(message = "Please provide a valid Email address",regexp = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")
     @Column(nullable = false, unique = true)
     private String email;
-    @NotNull(message = "Please provide a username")
+    @Size(min = 5, max = 30, message = "Please provide a valid username")
     @Column(nullable = false, unique = true)
     private String username;
-    @NotNull(message = "Please provide a password")
+    @Size(min = 9, max = 30, message = "Please provide a valid password")
     @Column(nullable = false)
     private String password;
+    @JsonIgnore
     @Column(nullable = false)
     private boolean emailVerified;
+    @JsonIgnore
     @Column(nullable = false)
     private boolean isEnabled;
 
