@@ -55,4 +55,9 @@ public class Api {
 
         throw new ApiMethodException("Email could not be verified, try again", ApiErrorCodeEnum.NOT_ACCEPTABLE);
     }
+    @GetMapping()
+    public String hello()
+    {
+        return "Hello World";
+    }
 }
