@@ -28,8 +28,16 @@ public class UserService {
     public void addNewUser(User user, HttpServletRequest httpServletRequest) throws MessagingException {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
+        sendEmailVerificationMail(user, httpServletRequest);
+    }
+
+    public void sendEmailVerificationMail(User user, HttpServletRequest httpServletRequest) throws MessagingException {
         String url = verificationTokenService.createUUIDLink(user, "verify-email", httpServletRequest);
-        mailSenderService.sendMail(user.getUsername(), "Verification Token", url, false);
+        String textMessage = "Nice to meet you "+ user.getUsername()+"!\n\n" +
+                "This is your Verification Token.\n" +
+                "Please enter it to verify your email address.\n\n" + url;
+        mailSenderService.sendMail(user.getEmail(), "Verification Token",
+                textMessage, false);
     }
 
     public User verifyToken(String token, String purpose) {

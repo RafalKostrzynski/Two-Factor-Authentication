@@ -3,6 +3,7 @@ package pl.kostrzynski.tfa.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
@@ -16,7 +17,7 @@ public class MailSenderService {
     public MailSenderService(JavaMailSender javaMailSender) {
         this.javaMailSender = javaMailSender;
     }
-
+    @Async
     public void sendMail(String to,
                          String subject,
                          String text,
