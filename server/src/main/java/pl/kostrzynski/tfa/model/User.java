@@ -10,7 +10,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
-import javax.validation.constraints.Min;
 import javax.validation.constraints.Size;
 import java.util.Collection;
 import java.util.Collections;
@@ -25,7 +24,7 @@ public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-    @Email(message = "Please provide a valid Email address",regexp = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")
+    @Email(message = "Please provide a valid Email address", regexp = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")
     @Column(nullable = false, unique = true)
     private String email;
     @Size(min = 5, max = 30, message = "Please provide a valid username")
