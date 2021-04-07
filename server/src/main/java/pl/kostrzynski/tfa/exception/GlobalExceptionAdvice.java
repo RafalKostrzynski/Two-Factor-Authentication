@@ -16,17 +16,16 @@ public class GlobalExceptionAdvice {
     public final ResponseEntity<ApiError> exceptionHandler(Exception exception) {
         HttpStatus httpStatus;
         String error;
-        if(exception instanceof ApiMethodException){
+        if (exception instanceof ApiMethodException) {
             return createResponseEntityForApiMethodException((ApiMethodException) exception);
-        }
-        else if (exception instanceof MessagingException) {
+        } else if (exception instanceof MessagingException) {
             httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
             error = "Couldn't send requested Email";
         } else if (exception instanceof IllegalArgumentException
                 || exception instanceof DataIntegrityViolationException) {
             httpStatus = HttpStatus.BAD_REQUEST;
             error = "Wrong input, try again later";
-        }else if(exception instanceof SecurityException){
+        } else if (exception instanceof SecurityException) {
             httpStatus = HttpStatus.BAD_REQUEST;
             error = "Wrong input, try again later";
         } else {
@@ -42,7 +41,7 @@ public class GlobalExceptionAdvice {
         HttpStatus httpStatus;
         String message;
 
-        switch (exception.getApiErrorCodeEnum()){
+        switch (exception.getApiErrorCodeEnum()) {
             case NOT_ACCEPTABLE:
                 httpStatus = HttpStatus.NOT_ACCEPTABLE;
                 message = "Could not accept provided data, please check input";
@@ -51,7 +50,7 @@ public class GlobalExceptionAdvice {
                 httpStatus = HttpStatus.NOT_FOUND;
                 message = "Requested data not found";
                 break;
-            default:{
+            default: {
                 httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
                 message = "Unknown error occurred";
             }

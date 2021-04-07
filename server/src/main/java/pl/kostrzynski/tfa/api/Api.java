@@ -55,7 +55,7 @@ public class Api {
     public ResponseEntity<HttpStatus> sendVerificationMail(@Valid @RequestBody User user, HttpServletRequest httpServletRequest)
             throws MessagingException {
         if (userService.userExistsForLaterVerificationMail(user)) {
-            userService.sendEmailVerificationMail(user, httpServletRequest);
+            userService.sendVerificationEmail(user, httpServletRequest);
             return new ResponseEntity<>(HttpStatus.ACCEPTED);
         }
         throw new ApiMethodException("User does not exist please check input data",

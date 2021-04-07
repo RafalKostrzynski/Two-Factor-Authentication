@@ -30,27 +30,27 @@ public class UserService {
     public void addNewUser(User user, HttpServletRequest httpServletRequest) throws MessagingException {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
-        sendEmailVerificationMail(user, httpServletRequest);
+        sendVerificationEmail(user, httpServletRequest);
     }
 
-    public void sendEmailVerificationMail(User user, HttpServletRequest httpServletRequest) throws MessagingException {
+    public void sendVerificationEmail(User user, HttpServletRequest httpServletRequest) throws MessagingException {
         String url = verificationTokenService.createUUIDLink(user, "verify-email", httpServletRequest);
-        String textMessage = "Nice to meet you "+ user.getUsername()+"!\n\n" +
+        String textMessage = "Nice to meet you " + user.getUsername() + "!\n\n" +
                 "This is your Verification Token.\n" +
                 "Please enter it to verify your email address.\n\n" + url;
         mailSenderService.sendMail(user.getEmail(), "Verification Token",
                 textMessage, false);
     }
 
-    public boolean userExistsForLaterVerificationMail(User user){
+    public boolean userExistsForLaterVerificationMail(User user) {
         ExampleMatcher modelMatcher = ExampleMatcher.matching()
                 .withIgnorePaths("id");
         return userExists(user, modelMatcher);
     }
 
     public boolean userExists(User user, ExampleMatcher modelMatcher) {
-        Example<User> exampleUser = Example.of(user, modelMatcher);
-        return userRepository.exists(exampleUser);
+        Example<User> userExample = Example.of(user, modelMatcher);
+        return userRepository.exists(userExample);
     }
 
     public User verifyToken(String token, String purpose) {
