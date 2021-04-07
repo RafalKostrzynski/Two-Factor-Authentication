@@ -1,6 +1,8 @@
 package pl.kostrzynski.tfa.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import pl.kostrzynski.tfa.model.User;
@@ -38,6 +40,17 @@ public class UserService {
                 "Please enter it to verify your email address.\n\n" + url;
         mailSenderService.sendMail(user.getEmail(), "Verification Token",
                 textMessage, false);
+    }
+
+    public boolean userExistsForLaterVerificationMail(User user){
+        ExampleMatcher modelMatcher = ExampleMatcher.matching()
+                .withIgnorePaths("id");
+        return userExists(user, modelMatcher);
+    }
+
+    public boolean userExists(User user, ExampleMatcher modelMatcher) {
+        Example<User> exampleUser = Example.of(user, modelMatcher);
+        return userRepository.exists(exampleUser);
     }
 
     public User verifyToken(String token, String purpose) {

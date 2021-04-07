@@ -19,7 +19,7 @@ import javax.validation.Valid;
 
 /**
  * This is the API for the whole authorization
- *
+ * <p>
  * See the swagger documentation on the API methods under https://localhost:8443/swagger-ui/index.html
  */
 @RestController
@@ -51,6 +51,17 @@ public class Api {
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 
+    @PatchMapping("verification-mail")
+    public ResponseEntity<HttpStatus> sendVerificationMail(@Valid @RequestBody User user, HttpServletRequest httpServletRequest)
+            throws MessagingException {
+        if (userService.userExistsForLaterVerificationMail(user)) {
+            userService.sendEmailVerificationMail(user, httpServletRequest);
+            return new ResponseEntity<>(HttpStatus.ACCEPTED);
+        }
+        throw new ApiMethodException("User does not exist please check input data",
+                ApiErrorCodeEnum.NOT_FOUND);
+    }
+
     @GetMapping("/verify-email/{token}")
     public ResponseEntity<String> verifyEmailAndGenerateTokenForNewPublicKey(@PathVariable String token,
                                                                              HttpServletRequest httpServletRequest) {
@@ -61,9 +72,9 @@ public class Api {
 
         throw new ApiMethodException("Email could not be verified, try again", ApiErrorCodeEnum.NOT_ACCEPTABLE);
     }
+
     @GetMapping()
-    public String hello()
-    {
+    public String hello() {
         return "Hello World";
     }
 }
