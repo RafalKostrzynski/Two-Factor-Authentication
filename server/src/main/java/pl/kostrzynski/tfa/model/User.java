@@ -30,7 +30,7 @@ public class User implements UserDetails {
     @Size(min = 5, max = 30, message = "Please provide a valid username")
     @Column(nullable = false, unique = true)
     private String username;
-    @Size(min = 9, max = 30, message = "Please provide a valid password")
+    @Size(min = 9, max = 60, message = "Please provide a valid password")
     @Column(nullable = false)
     private String password;
     @JsonIgnore

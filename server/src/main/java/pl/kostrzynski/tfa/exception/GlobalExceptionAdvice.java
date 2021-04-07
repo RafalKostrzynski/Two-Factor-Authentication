@@ -1,10 +1,10 @@
 package pl.kostrzynski.tfa.exception;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import pl.kostrzynski.tfa.api.Api;
 
 import javax.mail.MessagingException;
 
@@ -12,7 +12,7 @@ import javax.mail.MessagingException;
 public class GlobalExceptionAdvice {
 
     @ExceptionHandler({MessagingException.class, IllegalArgumentException.class,
-            SecurityException.class, ApiMethodException.class})
+            SecurityException.class, ApiMethodException.class, DataIntegrityViolationException.class})
     public final ResponseEntity<ApiError> exceptionHandler(Exception exception) {
         HttpStatus httpStatus;
         String error;
@@ -22,7 +22,8 @@ public class GlobalExceptionAdvice {
         else if (exception instanceof MessagingException) {
             httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
             error = "Couldn't send requested Email";
-        } else if (exception instanceof IllegalArgumentException) {
+        } else if (exception instanceof IllegalArgumentException
+                || exception instanceof DataIntegrityViolationException) {
             httpStatus = HttpStatus.BAD_REQUEST;
             error = "Wrong input, try again later";
         }else if(exception instanceof SecurityException){
