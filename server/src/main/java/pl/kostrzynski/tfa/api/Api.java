@@ -67,7 +67,6 @@ public class Api {
     public ResponseEntity<String> verifyEmailAndGenerateTokenForNewPublicKey(@PathVariable String token,
                                                                              HttpServletRequest httpServletRequest) {
         User user = userService.verifyToken(token, "verify-email");
-        //TODO test if doesn't throw errors when wrong data
         if (user.isEmailVerified()) return new ResponseEntity<>(
                 verificationTokenService.createUUIDLink(user, "add-public", httpServletRequest),
                 HttpStatus.ACCEPTED);

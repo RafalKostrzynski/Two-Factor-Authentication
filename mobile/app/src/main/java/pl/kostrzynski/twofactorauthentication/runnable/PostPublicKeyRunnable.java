@@ -86,16 +86,17 @@ public class PostPublicKeyRunnable implements Runnable {
         Retrofit retrofit = getRetrofit();
         RequestApi requestApi = retrofit.create(RequestApi.class);
 
-        Call<Object> call = requestApi.createSecondAuth(token, secondAuth);
-        call.enqueue(new Callback<Object>() {
+        Call<Void> call = requestApi.createSecondAuth(token, secondAuth);
+        call.enqueue(new Callback<Void>() {
+
             @Override
-            public void onResponse(Call<Object> call, Response<Object> response) {
+            public void onResponse(Call<Void> call, Response<Void> response) {
                 if(response.isSuccessful()) Toast.makeText(context, "Public key stored successfully", Toast.LENGTH_SHORT).show();
                 else Toast.makeText(context, "Public key could not be stored", Toast.LENGTH_SHORT).show();
             }
 
             @Override
-            public void onFailure(Call<Object> call, Throwable t) {
+            public void onFailure(Call<Void> call, Throwable t) {
                 Toast.makeText(context, "Unexpected error occurred, try again later", Toast.LENGTH_SHORT).show();
             }
         });

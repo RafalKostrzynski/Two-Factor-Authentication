@@ -9,5 +9,5 @@ import retrofit2.http.Path;
 public interface RequestApi {
 
     @POST("second-auth/{token}")
-    Call<Object> createSecondAuth(@Path("token") String token, @Body SecondAuth secondAuth);
+    Call<Void> createSecondAuth(@Path("token") String token, @Body SecondAuth secondAuth);
 }
