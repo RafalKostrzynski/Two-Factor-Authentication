@@ -52,7 +52,7 @@ public class FullscreenActivity extends AppCompatActivity {
     private View mContentView;
     private TextView privateKeyName;
 
-    private final String POST_PUBLIC_KEY_SERVICE_URL = "https://localhost:8080/tfa/service/rest/v1/add-public/";
+    private final String POST_PUBLIC_KEY_SERVICE_URL = "https://localhost:8443/tfa/service/rest/v1/add-public/";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -204,6 +204,7 @@ public class FullscreenActivity extends AppCompatActivity {
                 AlertDialogService alertDialogService = new AlertDialogService();
                 // Generate save and post keys
                 if (qrMessage.startsWith(POST_PUBLIC_KEY_SERVICE_URL)) {
+                    qrMessage = qrMessage.substring(qrMessage.lastIndexOf('/')+1);
                     dialog = alertDialogService.createBuilder(this, qrMessage,
                             "Generate public key?", "Generate key",
                             this::generateAndPostPublicKey);
