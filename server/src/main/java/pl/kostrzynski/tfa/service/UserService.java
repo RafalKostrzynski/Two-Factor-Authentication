@@ -54,6 +54,7 @@ public class UserService {
     }
 
     public User verifyToken(String token, String purpose) {
+        // TODO add verificationToken to user when second auth
         User user = verificationTokenService.findUserByVerificationToken(token);
         if (purpose.equals("verify-email")) user.setEmailVerified(true);
         else if (user.isEmailVerified() && purpose.equals("add-public")) user.setEnabled(true);

@@ -1,5 +1,6 @@
 package pl.kostrzynski.tfa.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -20,11 +21,13 @@ public class SecondAuth {
     @Column(name = "public_key", nullable = false, unique = true)
     @NotNull(message = "Please provide public key")
     private byte[] publicKeyBytes;
-    @Column(nullable = false)
-    private boolean active;
     @Column(unique = true)
     private String androidID;
+    @Column(nullable = false)
+    @JsonIgnore
+    private boolean active;
     @OneToOne
+    @JsonIgnore
     private User user;
 
     @Override
