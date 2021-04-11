@@ -21,7 +21,14 @@ public class VerificationTokenService {
 
     public String createUUIDLink(User user, String purpose, HttpServletRequest httpServletRequest) {
         String token = UUID.randomUUID().toString();
-        VerificationToken verificationToken = new VerificationToken(user, token);
+        VerificationToken verificationToken;
+
+        if(purpose.equals("add-public")){
+            verificationToken = verificationTokenRepository.findByUser(user)
+                    .orElseThrow(() -> new IllegalArgumentException("Couldn't find provided user"));
+            verificationToken.setValue(token);
+        }else verificationToken = new VerificationToken(user, token);
+
         verificationTokenRepository.save(verificationToken);
         return "https://" + httpServletRequest.getServerName() + ":" + httpServletRequest.getServerPort() + httpServletRequest.getContextPath()
                 + "/tfa/service/rest/v1/" + purpose + "/" + token;
@@ -32,6 +39,4 @@ public class VerificationTokenService {
                 .orElseThrow(() -> new IllegalArgumentException("Couldn't find provided token"))
                 .getUser();
     }
-
-
 }

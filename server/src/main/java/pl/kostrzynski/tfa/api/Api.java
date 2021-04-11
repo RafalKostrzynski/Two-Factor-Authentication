@@ -51,6 +51,7 @@ public class Api {
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 
+    // is used when uses didn't received the verification email
     @PatchMapping("verification-mail")
     public ResponseEntity<HttpStatus> sendVerificationMail(@Valid @RequestBody User user, HttpServletRequest httpServletRequest)
             throws MessagingException {
@@ -72,10 +73,5 @@ public class Api {
                 HttpStatus.ACCEPTED);
 
         throw new ApiMethodException("Email could not be verified, try again", ApiErrorCodeEnum.NOT_ACCEPTABLE);
-    }
-
-    @GetMapping()
-    public String hello() {
-        return "Hello World";
     }
 }
