@@ -55,8 +55,8 @@ public class UserService {
 
     public User verifyToken(String token, String purpose) {
         User user = verificationTokenService.findUserByVerificationToken(token);
-        if (purpose.equals("verify-email")) user.setEmailVerified(true);
-        else if (user.isEmailVerified() && purpose.equals("add-public")) user.setEnabled(true);
+        if (purpose.equals("verify-email") && !user.isEmailVerified()) user.setEmailVerified(true);
+        else if (user.isEmailVerified() && !user.isEnabled() && purpose.equals("add-public")) user.setEnabled(true);
         else throw new IllegalArgumentException("Couldn't verify token");
         return userRepository.save(user);
     }
