@@ -4,7 +4,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-import pl.kostrzynski.tfa.api.Api;
+import pl.kostrzynski.tfa.api.FirstFactorApi;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.service.ApiInfo;
@@ -12,7 +12,7 @@ import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
-@ComponentScan(basePackageClasses = {Api.class} )
+@ComponentScan(basePackageClasses = {FirstFactorApi.class} )
 @EnableSwagger2
 @PropertySource("classpath:swagger.properties")
 @Configuration
