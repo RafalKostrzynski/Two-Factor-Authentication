@@ -26,6 +26,7 @@ import pl.kostrzynski.twofactorauthentication.R;
 import pl.kostrzynski.twofactorauthentication.runnable.CreatePostSaveKeyRunnable;
 import pl.kostrzynski.twofactorauthentication.service.AlertDialogService;
 import pl.kostrzynski.twofactorauthentication.service.ECCService;
+import pl.kostrzynski.twofactorauthentication.service.HttpRequestService;
 import pl.kostrzynski.twofactorauthentication.service.PreferenceService;
 
 import java.io.File;
@@ -53,6 +54,7 @@ public class FullscreenActivity extends AppCompatActivity {
     private TextView privateKeyName;
 
     private final String POST_PUBLIC_KEY_SERVICE_URL = "https://localhost:8443/tfa/service/rest/v1/add-public/";
+    private final String PATCH_PUBLIC_KEY_SERVICE_URL = "https://localhost:8443/tfa/service/rest/v1/check-key-gen/";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -197,41 +199,62 @@ public class FullscreenActivity extends AppCompatActivity {
             }
         } else if (IntentIntegrator.parseActivityResult(requestCode, resultCode, data) != null) {
             IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
-            if (result.getContents() != null) {
-                AlertDialog dialog;
-                String qrMessage = result.getContents();
-                ECCService eccService = new ECCService();
-                AlertDialogService alertDialogService = new AlertDialogService();
-                // Generate save and post keys
-                if (qrMessage.startsWith(POST_PUBLIC_KEY_SERVICE_URL)) {
-                    qrMessage = qrMessage.substring(qrMessage.lastIndexOf('/')+1);
-                    dialog = alertDialogService.createBuilder(this, qrMessage,
-                            "Generate public key?", "Generate key",
-                            this::generateAndPostPublicKey);
-                }
-                // decode otp
-                else if (eccService.isValidCiphertext(qrMessage)) {
-                    dialog = alertDialogService.createBuilder(this, qrMessage, "Scanned qr-code",
-                            "Encode password", eccService::decodeMessage);
-                }
-                // create error dialog
-                else {
-                    dialog = alertDialogService.createBuilder(this, qrMessage,
-                            "Something went wrong please try again");
-                }
-                dialog.show();
-            } else {
-                Toast.makeText(this, "Something went wrong please try again", Toast.LENGTH_SHORT).show();
-            }
+            createDialogForGeneratedKey(result);
         }
     }
 
-    private void generateAndPostPublicKey(String token) {
+    private void createDialogForGeneratedKey(IntentResult result) {
+        if (result.getContents() != null) {
+            AlertDialog dialog;
+            String qrMessage = result.getContents();
+            ECCService eccService = new ECCService();
+            AlertDialogService alertDialogService = new AlertDialogService();
+            // Generate save and post keys
+
+            if (qrMessage.startsWith(POST_PUBLIC_KEY_SERVICE_URL)) {
+                PreferenceService preferenceService = new PreferenceService();
+                qrMessage = qrMessage.substring(qrMessage.lastIndexOf('/') + 1);
+                if (preferenceService.keyExists(this)) {
+                    dialog = alertDialogService.createBuilder(this,
+                            "If you want to generate a new key please visit settings page",
+                            "There already is a key in your storage.");
+                } else {
+                    dialog = alertDialogService.createBuilder(this, qrMessage,
+                            "To generate a new key pair press 'Generate keys'",
+                            "Generate key pair?", "Generate keys",
+                            true, this::generateAndPostPublicKey);
+                }
+            } else if (qrMessage.startsWith(PATCH_PUBLIC_KEY_SERVICE_URL)) {
+                qrMessage = qrMessage.substring(qrMessage.lastIndexOf('/') + 1);
+                dialog = alertDialogService.createBuilder(this, qrMessage,
+                        "To update the old key pair press 'Generate keys'\n" +
+                                "Do it only if you are sure about overriding the old key pair!",
+                        "Update key pair?", "Generate keys",
+                        this::requestGenerateAndPutPublicKey);
+            }
+            // decode otp
+            else if (eccService.isValidCiphertext(qrMessage)) {
+                dialog = alertDialogService.createBuilder(this, qrMessage,
+                        "Press 'Encode password' to authenticate",
+                        "One more step to authenticate",
+                        "Encode password", eccService::decodeMessage);
+            }
+            // create error dialog
+            else {
+                dialog = alertDialogService.createBuilder(this, qrMessage,
+                        "Something went wrong please try again");
+            }
+            dialog.show();
+        } else {
+            Toast.makeText(this, "Something went wrong please try again", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void generateAndPostPublicKey(String token, boolean isPostMethod) {
         try {
             readWriteFilePermissionCheck();
-
             Thread createSaveAndPostKeysThread = new Thread(
-                    new CreatePostSaveKeyRunnable(token, this));
+                    new CreatePostSaveKeyRunnable(token, this, isPostMethod));
             createSaveAndPostKeysThread.start();
 
             createSaveAndPostKeysThread.join();
@@ -241,6 +264,25 @@ public class FullscreenActivity extends AppCompatActivity {
 
         } catch (Exception e) {
             Toast.makeText(this, "Something went wrong, please try again", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void requestGenerateAndPutPublicKey(String token) {
+        HttpRequestService httpRequestService = new HttpRequestService();
+        boolean checkKeyGen = false;
+        try {
+            checkKeyGen = httpRequestService.checkGenerateKey(token);
+        } catch (InterruptedException ignored) {
+            Toast.makeText(this, "Something went wrong, please try again", Toast.LENGTH_SHORT).show();
+        }
+        if (checkKeyGen) {
+            generateAndPostPublicKey(token, false);
+        } else {
+            AlertDialogService alertDialogService = new AlertDialogService();
+            AlertDialog dialog = alertDialogService.createBuilder(this,
+                    "Server declined the request please check if change of key is possible",
+                    "Couldn't create a new key");
+            dialog.show();
         }
     }
 
@@ -295,10 +337,5 @@ public class FullscreenActivity extends AppCompatActivity {
     };
 
     private final Handler mHideHandler = new Handler();
-    private final Runnable mHideRunnable = new Runnable() {
-        @Override
-        public void run() {
-            hide();
-        }
-    };
+    private final Runnable mHideRunnable = this::hide;
 }

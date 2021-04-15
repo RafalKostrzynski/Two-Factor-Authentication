@@ -27,5 +27,9 @@ public class PreferenceService {
         editor.apply();
     }
 
-
+    public boolean keyExists(Context context) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
+        String path = sharedPreferences.getString(TEXT, "");
+        return new File(path).exists();
+    }
 }

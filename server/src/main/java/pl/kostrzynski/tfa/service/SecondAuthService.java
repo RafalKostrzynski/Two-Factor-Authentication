@@ -2,6 +2,8 @@ package pl.kostrzynski.tfa.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import pl.kostrzynski.tfa.exception.ApiErrorCodeEnum;
+import pl.kostrzynski.tfa.exception.ApiMethodException;
 import pl.kostrzynski.tfa.model.SecondAuth;
 import pl.kostrzynski.tfa.model.User;
 import pl.kostrzynski.tfa.repository.SecondAuthRepository;
@@ -33,5 +35,26 @@ public class SecondAuthService {
             secondAuth.setUser(user);
             secondAuthRepository.save(secondAuth);
         }
+    }
+
+    public void changeKeyStatus(User user, boolean changeKey) {
+        SecondAuth secondAuth = getSecondAuthByUser(user);
+        secondAuth.setChangeKey(changeKey);
+        secondAuthRepository.save(secondAuth);
+    }
+
+    public void updateSecondAuth(User user, SecondAuth secondAuth){
+        secondAuthRepository.findSecondAuthByUser(user)
+                .map(e->changeSecondAuth(e,secondAuth)).orElseThrow(() ->
+                new NoSuchElementException("No SecondAuth for user " + user.getUsername() + " found"));
+    }
+
+    private boolean changeSecondAuth(SecondAuth oldSecondAuth, SecondAuth newSecondAuth){
+        if(oldSecondAuth.isChangeKey()){
+            oldSecondAuth.setPublicKeyBytes(newSecondAuth.getPublicKeyBytes());
+            oldSecondAuth.setChangeKey(false);
+            secondAuthRepository.save(oldSecondAuth);
+            return true;
+        }else throw new ApiMethodException("Cant change key", ApiErrorCodeEnum.NOT_ACCEPTABLE);
     }
 }

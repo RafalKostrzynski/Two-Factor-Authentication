@@ -23,11 +23,11 @@ public class VerificationTokenService {
         String token = UUID.randomUUID().toString();
         VerificationToken verificationToken;
 
-        if(purpose.equals("add-public")){
+        if (purpose.equals("add-public") || purpose.equals("check-key-gen")) {
             verificationToken = verificationTokenRepository.findByUser(user)
                     .orElseThrow(() -> new IllegalArgumentException("Couldn't find provided user"));
             verificationToken.setValue(token);
-        }else verificationToken = new VerificationToken(user, token);
+        } else verificationToken = new VerificationToken(user, token);
 
         verificationTokenRepository.save(verificationToken);
         return "https://" + httpServletRequest.getServerName() + ":" + httpServletRequest.getServerPort() + httpServletRequest.getContextPath()

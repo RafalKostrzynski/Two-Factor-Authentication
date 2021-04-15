@@ -9,14 +9,14 @@ import retrofit2.Retrofit;
 
 import java.io.IOException;
 
-public class PostPublicKeyRunnable implements Runnable {
+public class PutPublicKeyRunnable implements Runnable {
 
     private final String token;
     private final String androidID;
     private final byte[] publicKeyBytes;
     private final Context context;
 
-    public PostPublicKeyRunnable(String token, String androidID, byte[] publicKeyBytes, Context context) {
+    public PutPublicKeyRunnable(String token, String androidID, byte[] publicKeyBytes, Context context) {
         this.token = token;
         this.androidID = androidID;
         this.publicKeyBytes = publicKeyBytes;
@@ -26,13 +26,13 @@ public class PostPublicKeyRunnable implements Runnable {
     @Override
     public void run() {
         try {
-            sendPostRequest(context, publicKeyBytes, androidID, token);
+            sendPutRequest(context, publicKeyBytes, androidID, token);
         } catch (IOException exception) {
             throw new IllegalArgumentException("Error occurred while executing post method");
         }
     }
 
-    private void sendPostRequest(Context context, byte[] publicKeyBytes, String androidId, String token) throws IOException {
+    private void sendPutRequest(Context context, byte[] publicKeyBytes, String androidId, String token) throws IOException {
         SecondAuth secondAuth = new SecondAuth(publicKeyBytes, androidId);
         sendPost(context, secondAuth, token);
     }
@@ -42,7 +42,7 @@ public class PostPublicKeyRunnable implements Runnable {
         Retrofit retrofit = httpRequestService.getRetrofit();
         RequestApi requestApi = retrofit.create(RequestApi.class);
 
-        Call<Void> call = requestApi.createSecondAuth(token, secondAuth);
+        Call<Void> call = requestApi.updateSecondAuth(token, secondAuth);
         HttpRequestService.executeCreateAndUpdateCall(context, call);
     }
 }

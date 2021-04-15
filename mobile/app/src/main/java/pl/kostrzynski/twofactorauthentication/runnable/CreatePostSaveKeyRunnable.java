@@ -18,10 +18,12 @@ public class CreatePostSaveKeyRunnable implements Runnable {
 
     private final String token;
     private final Context context;
+    private final boolean isPostMethod;
 
-    public CreatePostSaveKeyRunnable(String token, Context context) {
+    public CreatePostSaveKeyRunnable(String token, Context context, boolean isPostMethod) {
         this.token = token;
         this.context = context;
+        this.isPostMethod = isPostMethod;
     }
 
     @Override
@@ -36,15 +38,15 @@ public class CreatePostSaveKeyRunnable implements Runnable {
 
             savePrivateKeyPathToPreferences(privateKeyFile);
 
-             // This is used because third party apps have no access to Imei number since android 10.
+            // This is used because third party apps have no access to Imei number since android 10.
             @SuppressLint("HardwareIds")
             String secretAndroidId = Settings.Secure.
                     getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
-
             byte[] publicKeyBytes = keyPair.getPublic().getEncoded();
-            Runnable postPublicKeyRunnable = secretAndroidId == null ?
-                    new PostPublicKeyRunnable(token, publicKeyBytes, context) :
-                    new PostPublicKeyRunnable(token, secretAndroidId, publicKeyBytes, context);
+
+            Runnable postPublicKeyRunnable = isPostMethod ?
+                    new PostPublicKeyRunnable(token, secretAndroidId, publicKeyBytes, context) :
+                    new PutPublicKeyRunnable(token, secretAndroidId, publicKeyBytes, context);
 
             Thread postPublicKeyThread = new Thread(postPublicKeyRunnable);
             postPublicKeyThread.start();

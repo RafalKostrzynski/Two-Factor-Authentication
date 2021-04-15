@@ -27,6 +27,10 @@ public class UserService {
         this.mailSenderService = mailSenderService;
     }
 
+    public User getUserByUsername(String username){
+        return userRepository.findByUsername(username);
+    }
+
     public void addNewUser(User user, HttpServletRequest httpServletRequest) throws MessagingException {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
