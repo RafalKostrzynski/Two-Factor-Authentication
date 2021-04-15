@@ -16,6 +16,11 @@ import pl.kostrzynski.tfa.service.VerificationTokenService;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
+/**
+ * This is the API for the second authorization step
+ * <p>
+ * See the swagger documentation on the API methods under https://localhost:8443/swagger-ui/index.html
+ */
 @RestController
 @RequestMapping(value = "tfa/service/rest/v1/second-auth", produces = MediaType.APPLICATION_JSON_VALUE)
 public class SecondFactorApi {
