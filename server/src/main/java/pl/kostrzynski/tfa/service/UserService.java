@@ -41,14 +41,16 @@ public class UserService {
         String url = verificationTokenService.createUUIDLink(user, "verify-email", httpServletRequest);
         String textMessage = "Nice to meet you " + user.getUsername() + "!\n\n" +
                 "This is your Verification Token.\n" +
-                "Please enter it to verify your email address.\n\n" + url;
+                "Please enter it to verify your email address.\n\n" + url
+                +"\n\nThis token is available for 24 hours, after this time it will expire";
         mailSenderService.sendMail(user.getEmail(), "Verification Token",
                 textMessage, false);
     }
 
     public boolean userExistsForLaterVerificationMail(User user) {
         ExampleMatcher modelMatcher = ExampleMatcher.matching()
-                .withIgnorePaths("id");
+                .withIgnorePaths("id","password");
+        user.setEmailVerified(false);
         return userExists(user, modelMatcher);
     }
 
