@@ -2,11 +2,14 @@ package pl.kostrzynski.tfa.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import pl.kostrzynski.tfa.exception.ApiErrorCodeEnum;
+import pl.kostrzynski.tfa.exception.ApiMethodException;
 import pl.kostrzynski.tfa.model.User;
 import pl.kostrzynski.tfa.model.VerificationToken;
 import pl.kostrzynski.tfa.repository.VerificationTokenRepository;
 
 import javax.servlet.http.HttpServletRequest;
+import java.time.LocalTime;
 import java.util.UUID;
 
 @Service
@@ -27,6 +30,7 @@ public class VerificationTokenService {
             verificationToken = verificationTokenRepository.findByUser(user)
                     .orElseThrow(() -> new IllegalArgumentException("Couldn't find provided user"));
             verificationToken.setValue(token);
+            verificationToken.setExpirationTime(LocalTime.now().plusHours(24));
         } else verificationToken = new VerificationToken(user, token);
 
         verificationTokenRepository.save(verificationToken);
@@ -35,8 +39,9 @@ public class VerificationTokenService {
     }
 
     public User findUserByVerificationToken(String token) {
-        return verificationTokenRepository.findByValue(token)
-                .orElseThrow(() -> new IllegalArgumentException("Couldn't find provided token"))
-                .getUser();
+        VerificationToken verificationToken = verificationTokenRepository.findByValue(token)
+                .orElseThrow(() -> new IllegalArgumentException("Couldn't find provided token"));
+        if(verificationToken.tokenNotExpired()) return verificationToken.getUser();
+        throw new ApiMethodException("Token expired", ApiErrorCodeEnum.NOT_ACCEPTABLE);
     }
 }

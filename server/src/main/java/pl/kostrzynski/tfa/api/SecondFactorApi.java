@@ -17,7 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 /**
- * This is the API for the second authorization step
+ * This is the API for the second authentication step
  * <p>
  * See the swagger documentation on the API methods under https://localhost:8443/swagger-ui/index.html
  */
