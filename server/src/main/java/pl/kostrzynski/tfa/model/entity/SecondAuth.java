@@ -18,10 +18,10 @@ public class SecondAuth {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-    @Column(name = "public_key", nullable = false, unique = true)
+    @Column(name = "public_key", nullable = false)
     @NotNull(message = "Please provide public key")
     private byte[] publicKeyBytes;
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     @NotNull(message = "Please provide the androidID")
     private String androidID;
     @Column(nullable = false)

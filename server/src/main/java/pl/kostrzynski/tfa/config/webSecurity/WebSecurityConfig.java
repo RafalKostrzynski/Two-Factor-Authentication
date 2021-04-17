@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -15,6 +16,7 @@ import org.springframework.security.web.authentication.rememberme.PersistentToke
 import javax.sql.DataSource;
 
 @Configuration
+@EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final UserDetailsService userDetailsService;
@@ -39,12 +41,16 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
-                .antMatchers("/for-user").authenticated()
-                .antMatchers("tfa/service/rest/v1/first-auth").permitAll()
+                .antMatchers("/tfa/service/rest/v1/first-auth/**", "/tfa/service/rest/v1/second-auth/**")
+                .permitAll()
+                .anyRequest()
+                .authenticated()
                 .and()
                 .rememberMe().tokenRepository(persistentTokenRepository())
                 .and()
-                .logout().logoutSuccessUrl("/for-all")
+                .httpBasic()
+//                .and()
+//                .logout().logoutSuccessUrl("/for-all")
                 .and().requiresChannel().anyRequest().requiresSecure();
 
         // TODO delete this (its only purpose is to allow easier manual testing)
