@@ -28,9 +28,8 @@ public class UserService {
     }
 
     public User getUserByUsername(String username) {
-        User user = userRepository.findByUsername(username);
-        if(user!=null) return user;
-        throw new ApiMethodException("Can't find this user", ApiErrorCodeEnum.NOT_FOUND);
+        return userRepository.findByUsername(username).orElseThrow(
+                ()-> new ApiMethodException(String.format("Username %s not found", username),ApiErrorCodeEnum.NOT_FOUND));
     }
 
     public void addNewUser(User user, HttpServletRequest httpServletRequest) throws MessagingException {

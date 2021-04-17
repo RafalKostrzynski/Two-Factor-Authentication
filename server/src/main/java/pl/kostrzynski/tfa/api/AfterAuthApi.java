@@ -46,6 +46,8 @@ public class AfterAuthApi {
     public ResponseEntity<String> createTokenForNewKey(@RequestBody @Valid User user,
                                                        HttpServletRequest httpServletRequest) {
 
+        // TODO get user from session cookies not argument
+
         User databaseUser = userService.getUserByUsername(user.getUsername());
         SecondAuth secondAuth = secondAuthService.changeKeyStatus(databaseUser, true);
         return new ResponseEntity<>(

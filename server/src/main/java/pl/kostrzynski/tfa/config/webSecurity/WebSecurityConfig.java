@@ -38,6 +38,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         return new BCryptPasswordEncoder();
     }
 
+    // TODO implement db cookie store
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
@@ -46,16 +47,23 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .anyRequest()
                 .authenticated()
                 .and()
+                // TODO it doesn't work, fix (database throws noTableException)
                 .rememberMe().tokenRepository(persistentTokenRepository())
                 .and()
-                .httpBasic()
-//                .and()
-//                .logout().logoutSuccessUrl("/for-all")
-                .and().requiresChannel().anyRequest().requiresSecure();
+                .formLogin()
+                .and()
+                .logout()
+                // TODO use http POST for logout
+                .logoutUrl("/logout")
+                .clearAuthentication(true)
+                .invalidateHttpSession(true)
+                .deleteCookies("JSESSIONID","remember-me")
+                .and()
+                .requiresChannel().anyRequest().requiresSecure();
 
         // TODO delete this (its only purpose is to allow easier manual testing)
+        // TODO csrf is needed when user uses browser
         http.csrf().disable();
-        http.headers().disable();
     }
 
     @Bean
