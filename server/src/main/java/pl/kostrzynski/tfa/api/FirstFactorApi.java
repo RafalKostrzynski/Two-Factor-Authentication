@@ -47,7 +47,7 @@ public class FirstFactorApi {
     public ResponseEntity<HttpStatus> sendVerificationMail(@Valid @RequestBody User user, HttpServletRequest httpServletRequest)
             throws MessagingException {
         User databaseUser = userService.getUserByUsername(user.getUsername());
-        if (user.isEmailVerified()) throw new ApiMethodException("This users email address already is verified",
+        if (databaseUser.isEmailVerified()) throw new ApiMethodException("This users email address already is verified",
                 ApiErrorCodeEnum.FORBIDDEN);
 
         userService.sendVerificationEmail(databaseUser, httpServletRequest);
@@ -58,11 +58,9 @@ public class FirstFactorApi {
     public ResponseEntity<String> verifyEmailAndGenerateTokenForNewPublicKey(@PathVariable String token,
                                                                              HttpServletRequest httpServletRequest) {
         User user = userService.verifyToken(token, "verify-email");
-        if (user.isEmailVerified()) return new ResponseEntity<>(
+        return new ResponseEntity<>(
                 verificationTokenService.createUUIDLink(user, "add-public", httpServletRequest),
                 HttpStatus.ACCEPTED);
-
-        throw new ApiMethodException("Email could not be verified, try again", ApiErrorCodeEnum.FORBIDDEN);
     }
 
 //    @GetMapping("/login")

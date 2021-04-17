@@ -9,7 +9,7 @@ import pl.kostrzynski.tfa.model.entity.VerificationToken;
 import pl.kostrzynski.tfa.repository.VerificationTokenRepository;
 
 import javax.servlet.http.HttpServletRequest;
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -31,7 +31,7 @@ public class VerificationTokenService {
                 verificationToken = verificationTokenRepository.findByUser(user)
                         .orElseThrow(() -> new IllegalArgumentException("Couldn't find provided user"));
                 verificationToken.setValue(token);
-                verificationToken.setExpirationTime(LocalTime.now().plusHours(24));
+                verificationToken.setExpirationTime(LocalDateTime.now().plusHours(24));
                 break;
             }
             case "verify-email": {

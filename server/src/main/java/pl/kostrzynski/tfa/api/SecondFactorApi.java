@@ -7,7 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.kostrzynski.tfa.model.entity.SecondAuth;
 import pl.kostrzynski.tfa.service.SecondAuthService;
-import pl.kostrzynski.tfa.service.UserService;
 
 import javax.validation.Valid;
 
@@ -21,12 +20,10 @@ import javax.validation.Valid;
 public class SecondFactorApi {
 
     private final SecondAuthService secondAuthService;
-    private final UserService userService;
 
     @Autowired
-    public SecondFactorApi(SecondAuthService secondAuthService, UserService userService) {
+    public SecondFactorApi(SecondAuthService secondAuthService) {
         this.secondAuthService = secondAuthService;
-        this.userService = userService;
     }
 
     @PostMapping("{token}")

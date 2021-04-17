@@ -6,8 +6,7 @@ import lombok.Setter;
 import pl.kostrzynski.tfa.model.Token;
 
 import javax.persistence.*;
-import java.time.LocalTime;
-import java.util.Objects;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -19,7 +18,7 @@ public class VerificationToken extends Token {
     private User user;
 
     public VerificationToken(User user, String value) {
-        super(value, LocalTime.now().plusHours(24));
+        super(value, LocalDateTime.now().plusHours(24));
         this.user = user;
     }
 }

@@ -7,7 +7,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 
 @MappedSuperclass
 @NoArgsConstructor
@@ -17,14 +17,14 @@ public class Token {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     private String value;
-    private LocalTime expirationTime;
+    private LocalDateTime expirationTime;
 
-    public Token(String value, LocalTime expirationTime) {
+    public Token(String value, LocalDateTime expirationTime) {
         this.value = value;
         this.expirationTime = expirationTime;
     }
 
     public boolean tokenNotExpired() {
-        return expirationTime.isAfter(LocalTime.now());
+        return expirationTime.isAfter(LocalDateTime.now());
     }
 }

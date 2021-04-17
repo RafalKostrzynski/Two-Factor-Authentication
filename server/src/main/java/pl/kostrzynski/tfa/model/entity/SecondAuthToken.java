@@ -6,7 +6,7 @@ import lombok.Setter;
 import pl.kostrzynski.tfa.model.Token;
 
 import javax.persistence.*;
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -18,7 +18,7 @@ public class SecondAuthToken extends Token {
     private SecondAuth secondAuth;
 
     public SecondAuthToken(String value, SecondAuth secondAuth) {
-        super(value,LocalTime.now().plusMinutes(15));
+        super(value, LocalDateTime.now().plusMinutes(15));
         this.secondAuth = secondAuth;
     }
 

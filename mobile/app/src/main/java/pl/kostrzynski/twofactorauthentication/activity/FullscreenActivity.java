@@ -53,8 +53,8 @@ public class FullscreenActivity extends AppCompatActivity {
     private View mContentView;
     private TextView privateKeyName;
 
-    private final String POST_PUBLIC_KEY_SERVICE_URL = "https://localhost:8443/tfa/service/rest/v1/add-public/";
-    private final String PATCH_PUBLIC_KEY_SERVICE_URL = "https://localhost:8443/tfa/service/rest/v1/check-key-gen/";
+    private final String POST_PUBLIC_KEY_SERVICE_URL = "https://localhost:8443/tfa/service/rest/v1/first-auth/add-public/";
+    private final String PATCH_PUBLIC_KEY_SERVICE_URL = "https://localhost:8443/tfa/service/rest/v1/for-user/check-key-gen/";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
