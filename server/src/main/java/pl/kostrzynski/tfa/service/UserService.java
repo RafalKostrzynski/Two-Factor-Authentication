@@ -3,6 +3,8 @@ package pl.kostrzynski.tfa.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import pl.kostrzynski.tfa.exception.ApiErrorCodeEnum;
+import pl.kostrzynski.tfa.exception.ApiMethodException;
 import pl.kostrzynski.tfa.model.entity.User;
 import pl.kostrzynski.tfa.repository.UserRepository;
 
@@ -26,7 +28,9 @@ public class UserService {
     }
 
     public User getUserByUsername(String username) {
-        return userRepository.findByUsername(username);
+        User user = userRepository.findByUsername(username);
+        if(user!=null) return user;
+        throw new ApiMethodException("Can't find this user", ApiErrorCodeEnum.NOT_FOUND);
     }
 
     public void addNewUser(User user, HttpServletRequest httpServletRequest) throws MessagingException {

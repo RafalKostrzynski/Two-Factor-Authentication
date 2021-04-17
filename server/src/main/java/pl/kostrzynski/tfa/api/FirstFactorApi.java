@@ -27,7 +27,6 @@ public class FirstFactorApi {
     private final UserService userService;
     private final VerificationTokenService verificationTokenService;
 
-
     @Autowired
     public FirstFactorApi(UserService userService,
                           VerificationTokenService verificationTokenService) {

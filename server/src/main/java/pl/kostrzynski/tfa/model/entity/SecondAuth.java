@@ -22,6 +22,7 @@ public class SecondAuth {
     @NotNull(message = "Please provide public key")
     private byte[] publicKeyBytes;
     @Column(unique = true)
+    @NotNull(message = "Please provide the androidID")
     private String androidID;
     @Column(nullable = false)
     @JsonIgnore
