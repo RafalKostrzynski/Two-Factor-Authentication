@@ -1,11 +1,9 @@
 package pl.kostrzynski.tfa.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import pl.kostrzynski.tfa.model.User;
+import pl.kostrzynski.tfa.model.entity.User;
 import pl.kostrzynski.tfa.repository.UserRepository;
 
 import javax.mail.MessagingException;
@@ -27,7 +25,7 @@ public class UserService {
         this.mailSenderService = mailSenderService;
     }
 
-    public User getUserByUsername(String username){
+    public User getUserByUsername(String username) {
         return userRepository.findByUsername(username);
     }
 
@@ -42,25 +40,26 @@ public class UserService {
         String textMessage = "Nice to meet you " + user.getUsername() + "!\n\n" +
                 "This is your Verification Token.\n" +
                 "Please enter it to verify your email address.\n\n" + url
-                +"\n\nThis token is available for 24 hours, after this time it will expire";
+                + "\n\nThis token is available for 24 hours, after this it will expire";
         mailSenderService.sendMail(user.getEmail(), "Verification Token",
                 textMessage, false);
     }
 
-    public boolean userExistsForLaterVerificationMail(User user) {
-        ExampleMatcher modelMatcher = ExampleMatcher.matching()
-                .withIgnorePaths("id","password");
-        user.setEmailVerified(false);
-        return userExists(user, modelMatcher);
-    }
-
-    public boolean userExists(User user, ExampleMatcher modelMatcher) {
-        Example<User> userExample = Example.of(user, modelMatcher);
-        return userRepository.exists(userExample);
-    }
+    // Took out because it might be useful in the future
+//    public boolean userExistsForLaterVerificationMail(User user) {
+//        ExampleMatcher modelMatcher = ExampleMatcher.matching()
+//                .withIgnorePaths("id","password");
+//        user.setEmailVerified(false);
+//        return userExists(user, modelMatcher);
+//    }
+//
+//    public boolean userExists(User user, ExampleMatcher modelMatcher) {
+//        Example<User> userExample = Example.of(user, modelMatcher);
+//        return userRepository.exists(userExample);
+//    }
 
     public User verifyToken(String token, String purpose) {
-        User user = verificationTokenService.findUserByVerificationToken(token);
+        User user = verificationTokenService.getUserByVerificationToken(token);
         if (purpose.equals("verify-email") && !user.isEmailVerified()) user.setEmailVerified(true);
         else if (user.isEmailVerified() && !user.isEnabled() && purpose.equals("add-public")) user.setEnabled(true);
         else throw new IllegalArgumentException("Couldn't verify token");

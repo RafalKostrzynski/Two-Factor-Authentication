@@ -4,8 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pl.kostrzynski.tfa.exception.ApiErrorCodeEnum;
 import pl.kostrzynski.tfa.exception.ApiMethodException;
-import pl.kostrzynski.tfa.model.SecondAuth;
-import pl.kostrzynski.tfa.model.User;
+import pl.kostrzynski.tfa.model.entity.SecondAuth;
+import pl.kostrzynski.tfa.model.entity.User;
 import pl.kostrzynski.tfa.repository.SecondAuthRepository;
 
 import java.util.NoSuchElementException;
@@ -16,12 +16,14 @@ public class SecondAuthService {
     private final SecondAuthRepository secondAuthRepository;
     private final UserService userService;
     private final ECCHandler eccHandler;
+    private final SecondAuthTokenService secondAuthTokenService;
 
     @Autowired
-    public SecondAuthService(SecondAuthRepository secondAuthRepository, UserService userService, ECCHandler eccHandler) {
+    public SecondAuthService(SecondAuthRepository secondAuthRepository, UserService userService, ECCHandler eccHandler, SecondAuthTokenService secondAuthTokenService) {
         this.secondAuthRepository = secondAuthRepository;
         this.userService = userService;
         this.eccHandler = eccHandler;
+        this.secondAuthTokenService = secondAuthTokenService;
     }
 
     public SecondAuth getSecondAuthByUser(User user) {
@@ -37,24 +39,22 @@ public class SecondAuthService {
         }
     }
 
-    public void changeKeyStatus(User user, boolean changeKey) {
+    public SecondAuth changeKeyStatus(User user, boolean changeKey) {
         SecondAuth secondAuth = getSecondAuthByUser(user);
         secondAuth.setChangeKey(changeKey);
-        secondAuthRepository.save(secondAuth);
+        return secondAuthRepository.save(secondAuth);
     }
 
-    public void updateSecondAuth(User user, SecondAuth secondAuth){
-        secondAuthRepository.findSecondAuthByUser(user)
-                .map(e->changeSecondAuth(e,secondAuth)).orElseThrow(() ->
-                new NoSuchElementException("No SecondAuth for user " + user.getUsername() + " found"));
+    public void updateSecondAuth(String token, SecondAuth secondAuth){
+        SecondAuth databaseSecondAuth = secondAuthTokenService.getSecondAuthByToken(token);
+        changeSecondAuth(databaseSecondAuth, secondAuth);
     }
 
-    private boolean changeSecondAuth(SecondAuth oldSecondAuth, SecondAuth newSecondAuth){
+    private void changeSecondAuth(SecondAuth oldSecondAuth, SecondAuth newSecondAuth){
         if(oldSecondAuth.isChangeKey()){
             oldSecondAuth.setPublicKeyBytes(newSecondAuth.getPublicKeyBytes());
             oldSecondAuth.setChangeKey(false);
             secondAuthRepository.save(oldSecondAuth);
-            return true;
-        }else throw new ApiMethodException("Cant change key", ApiErrorCodeEnum.NOT_ACCEPTABLE);
+        }else throw new ApiMethodException("Can't change key", ApiErrorCodeEnum.NOT_ACCEPTABLE);
     }
 }

@@ -15,7 +15,7 @@ public class SessionInitializerObject {
         this.encodedOTP = encodedOTP;
     }
 
-    public boolean isNotExpired(){
-        return validationEnd.isBefore(LocalTime.now());
+    public boolean isNotExpired() {
+        return validationEnd.isAfter(LocalTime.now());
     }
 }

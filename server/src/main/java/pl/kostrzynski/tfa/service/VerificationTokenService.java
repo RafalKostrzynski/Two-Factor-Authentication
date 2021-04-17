@@ -4,8 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pl.kostrzynski.tfa.exception.ApiErrorCodeEnum;
 import pl.kostrzynski.tfa.exception.ApiMethodException;
-import pl.kostrzynski.tfa.model.User;
-import pl.kostrzynski.tfa.model.VerificationToken;
+import pl.kostrzynski.tfa.model.entity.User;
+import pl.kostrzynski.tfa.model.entity.VerificationToken;
 import pl.kostrzynski.tfa.repository.VerificationTokenRepository;
 
 import javax.servlet.http.HttpServletRequest;
@@ -26,22 +26,31 @@ public class VerificationTokenService {
         String token = UUID.randomUUID().toString();
         VerificationToken verificationToken;
 
-        if (purpose.equals("add-public") || purpose.equals("check-key-gen")) {
-            verificationToken = verificationTokenRepository.findByUser(user)
-                    .orElseThrow(() -> new IllegalArgumentException("Couldn't find provided user"));
-            verificationToken.setValue(token);
-            verificationToken.setExpirationTime(LocalTime.now().plusHours(24));
-        } else verificationToken = new VerificationToken(user, token);
+        switch (purpose) {
+            case "add-public": {
+                verificationToken = verificationTokenRepository.findByUser(user)
+                        .orElseThrow(() -> new IllegalArgumentException("Couldn't find provided user"));
+                verificationToken.setValue(token);
+                verificationToken.setExpirationTime(LocalTime.now().plusHours(24));
+                break;
+            }
+            case "verify-email": {
+                verificationToken = new VerificationToken(user, token);
+                break;
+            }
+            default:
+                throw new ApiMethodException("Something went wrong please try again", ApiErrorCodeEnum.NOT_ACCEPTABLE);
+        }
 
         verificationTokenRepository.save(verificationToken);
         return "https://" + httpServletRequest.getServerName() + ":" + httpServletRequest.getServerPort() + httpServletRequest.getContextPath()
-                + "/tfa/service/rest/v1/" + purpose + "/" + token;
+                + "/tfa/service/rest/v1/first-auth/" + purpose + "/" + token;
     }
 
-    public User findUserByVerificationToken(String token) {
+    public User getUserByVerificationToken(String token) {
         VerificationToken verificationToken = verificationTokenRepository.findByValue(token)
                 .orElseThrow(() -> new IllegalArgumentException("Couldn't find provided token"));
-        if(verificationToken.tokenNotExpired()) return verificationToken.getUser();
+        if (verificationToken.tokenNotExpired()) return verificationToken.getUser();
         throw new ApiMethodException("Token expired", ApiErrorCodeEnum.NOT_ACCEPTABLE);
     }
 }

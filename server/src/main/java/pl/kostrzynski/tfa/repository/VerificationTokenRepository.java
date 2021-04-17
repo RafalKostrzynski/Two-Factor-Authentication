@@ -1,8 +1,8 @@
 package pl.kostrzynski.tfa.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import pl.kostrzynski.tfa.model.User;
-import pl.kostrzynski.tfa.model.VerificationToken;
+import pl.kostrzynski.tfa.model.entity.User;
+import pl.kostrzynski.tfa.model.entity.VerificationToken;
 
 import java.util.Optional;
 

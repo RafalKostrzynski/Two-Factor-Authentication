@@ -1,4 +1,4 @@
-package pl.kostrzynski.tfa.model;
+package pl.kostrzynski.tfa.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;

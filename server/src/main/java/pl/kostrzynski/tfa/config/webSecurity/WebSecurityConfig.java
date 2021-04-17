@@ -38,10 +38,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.authorizeRequests().antMatchers("/for-user").authenticated()
-                .antMatchers("signup").permitAll()
-                .and()
-                .formLogin().loginPage("/login").defaultSuccessUrl("/for-user").permitAll()
+        http.authorizeRequests()
+                .antMatchers("/for-user").authenticated()
+                .antMatchers("tfa/service/rest/v1/first-auth").permitAll()
                 .and()
                 .rememberMe().tokenRepository(persistentTokenRepository())
                 .and()

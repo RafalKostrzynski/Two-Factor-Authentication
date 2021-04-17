@@ -50,6 +50,10 @@ public class GlobalExceptionAdvice {
                 httpStatus = HttpStatus.NOT_FOUND;
                 message = "Requested data not found";
                 break;
+            case FORBIDDEN:
+                httpStatus = HttpStatus.FORBIDDEN;
+                message = "Can't execute this operation";
+                break;
             default: {
                 httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
                 message = "Unknown error occurred";
