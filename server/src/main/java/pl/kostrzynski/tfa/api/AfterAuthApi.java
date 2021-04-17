@@ -15,6 +15,11 @@ import pl.kostrzynski.tfa.service.UserService;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
+/**
+ * This is the API for operations requested by authenticated users
+ * <p>
+ * See the swagger documentation on the API methods under https://localhost:8443/swagger-ui/index.html
+ */
 @RestController
 @RequestMapping(value = "tfa/service/rest/v1/for-user", produces = MediaType.APPLICATION_JSON_VALUE)
 public class AfterAuthApi {
