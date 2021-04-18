@@ -13,18 +13,18 @@ public class JwtTokenService {
         this.jwtConfig = jwtConfig;
     }
 
-    public Claims getClaimsFromJWT(String token) {
+    public Claims getClaimsFromJWT(String jwtToken) {
         return Jwts.parser()
                 .setSigningKey(jwtConfig.getSecret().getBytes())
-                .parseClaimsJws(token)
+                .parseClaimsJws(jwtToken)
                 .getBody();
     }
 
-    public boolean validateToken(String jwtToken){
+    public boolean validateToken(String jwtToken) {
         try {
-            Jwts.parser().setSigningKey(jwtConfig.getSecret()).parseClaimsJws(jwtToken);
+            Jwts.parser().setSigningKey(jwtConfig.getSecret().getBytes()).parseClaimsJws(jwtToken);
             return true;
-        }catch (Exception e){
+        } catch (Exception e) {
             return false;
         }
     }
