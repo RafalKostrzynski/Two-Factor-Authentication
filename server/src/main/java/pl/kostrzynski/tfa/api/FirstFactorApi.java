@@ -36,18 +36,16 @@ public class FirstFactorApi {
     private final AuthenticationManager authenticationManager;
     private final JwtTokenService jwtTokenService;
     private final SecondAuthService secondAuthService;
-    private final JwtConfig jwtConfig;
 
     @Autowired
     public FirstFactorApi(UserService userService,
                           VerificationTokenService verificationTokenService, AuthenticationManager authenticationManager,
-                          JwtTokenService jwtTokenService, SecondAuthService secondAuthService, JwtConfig jwtConfig) {
+                          JwtTokenService jwtTokenService, SecondAuthService secondAuthService) {
         this.userService = userService;
         this.verificationTokenService = verificationTokenService;
         this.authenticationManager = authenticationManager;
         this.jwtTokenService = jwtTokenService;
         this.secondAuthService = secondAuthService;
-        this.jwtConfig = jwtConfig;
     }
 
     @PostMapping("user")
@@ -86,7 +84,7 @@ public class FirstFactorApi {
         // TODO save the OTP in the db
         String otp = secondAuthService.generatePayload();
         return new ResponseEntity<>(new AuthenticationResponse(jwtToken, otp,
-                jwtConfig.getExpirationTimePreAuthenticated()),
+                30),
                 HttpStatus.ACCEPTED);
     }
 }
