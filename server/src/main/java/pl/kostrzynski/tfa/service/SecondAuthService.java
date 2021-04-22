@@ -9,6 +9,7 @@ import pl.kostrzynski.tfa.model.entity.User;
 import pl.kostrzynski.tfa.repository.SecondAuthRepository;
 
 import java.util.NoSuchElementException;
+import java.util.Random;
 
 @Service
 public class SecondAuthService {
@@ -45,16 +46,29 @@ public class SecondAuthService {
         return secondAuthRepository.save(secondAuth);
     }
 
-    public void updateSecondAuth(String token, SecondAuth secondAuth){
+    public void updateSecondAuth(String token, SecondAuth secondAuth) {
         SecondAuth databaseSecondAuth = secondAuthTokenService.getSecondAuthByToken(token);
         changeSecondAuth(databaseSecondAuth, secondAuth);
     }
 
-    private void changeSecondAuth(SecondAuth oldSecondAuth, SecondAuth newSecondAuth){
-        if(oldSecondAuth.isChangeKey()){
+    public String generatePayload() {
+        String chars = "abcdefghijklmnopqrstuvwxyz"
+                + "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                + "0123456789!@%$%&^?|~'#+=";
+
+        final int PW_LENGTH = 30;
+        Random rnd = new Random();
+        StringBuilder pass = new StringBuilder();
+        for (int i = 0; i < PW_LENGTH; i++)
+            pass.append(chars.charAt(rnd.nextInt(chars.length())));
+        return pass.toString();
+    }
+
+    private void changeSecondAuth(SecondAuth oldSecondAuth, SecondAuth newSecondAuth) {
+        if (oldSecondAuth.isChangeKey()) {
             oldSecondAuth.setPublicKeyBytes(newSecondAuth.getPublicKeyBytes());
             oldSecondAuth.setChangeKey(false);
             secondAuthRepository.save(oldSecondAuth);
-        }else throw new ApiMethodException("Can't change key", ApiErrorCodeEnum.NOT_ACCEPTABLE);
+        } else throw new ApiMethodException("Can't change key", ApiErrorCodeEnum.NOT_ACCEPTABLE);
     }
 }

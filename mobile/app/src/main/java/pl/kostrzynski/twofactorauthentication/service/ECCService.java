@@ -13,7 +13,7 @@ public class ECCService {
 
     public KeyPair generateKeyPair() throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
         KeyPairGenerator generator = KeyPairGenerator.getInstance("EC");
-        generator.initialize(new ECGenParameterSpec("secp521r1"));
+        generator.initialize(new ECGenParameterSpec("secp256r1"));
         return generator.generateKeyPair();
     }
 

@@ -9,8 +9,10 @@ import org.springframework.stereotype.Component;
 @NoArgsConstructor
 @Component
 public class JwtConfig {
+    @Value("${expirationTimeAuthenticatedMS}")
+    private int expirationTimeAuthenticated;
+    @Value("${expirationTimePreAuthenticatedMS}")
+    private int expirationTimePreAuthenticated;
     @Value("${JwtSecretKey}")
-    private int expirationTime;
-    @Value("${expirationTimeMS}")
     private String secret;
 }

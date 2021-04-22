@@ -4,10 +4,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import pl.kostrzynski.tfa.exception.ApiErrorCodeEnum;
 import pl.kostrzynski.tfa.exception.ApiMethodException;
+import pl.kostrzynski.tfa.jwt.JwtConfig;
+import pl.kostrzynski.tfa.jwt.JwtTokenService;
+import pl.kostrzynski.tfa.model.AuthenticationResponse;
 import pl.kostrzynski.tfa.model.entity.User;
+import pl.kostrzynski.tfa.service.SecondAuthService;
 import pl.kostrzynski.tfa.service.UserService;
 import pl.kostrzynski.tfa.service.VerificationTokenService;
 
@@ -26,12 +33,21 @@ public class FirstFactorApi {
 
     private final UserService userService;
     private final VerificationTokenService verificationTokenService;
+    private final AuthenticationManager authenticationManager;
+    private final JwtTokenService jwtTokenService;
+    private final SecondAuthService secondAuthService;
+    private final JwtConfig jwtConfig;
 
     @Autowired
     public FirstFactorApi(UserService userService,
-                          VerificationTokenService verificationTokenService) {
+                          VerificationTokenService verificationTokenService, AuthenticationManager authenticationManager,
+                          JwtTokenService jwtTokenService, SecondAuthService secondAuthService, JwtConfig jwtConfig) {
         this.userService = userService;
         this.verificationTokenService = verificationTokenService;
+        this.authenticationManager = authenticationManager;
+        this.jwtTokenService = jwtTokenService;
+        this.secondAuthService = secondAuthService;
+        this.jwtConfig = jwtConfig;
     }
 
     @PostMapping("user")
@@ -62,8 +78,15 @@ public class FirstFactorApi {
                 HttpStatus.ACCEPTED);
     }
 
-//    @GetMapping("/login")
-//    public ResponseEntity<SessionInitializerObject> initializeLoginSession(@Valid @RequestBody User user,
-//                                                                           HttpServletRequest httpServletRequest){
-//    }
+    @PostMapping("/sign-in")
+    public ResponseEntity<AuthenticationResponse> initializeLogin(@Valid @RequestBody User user) {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
+        String jwtToken = jwtTokenService.createToken(authentication, false);
+        // TODO save the OTP in the db
+        String otp = secondAuthService.generatePayload();
+        return new ResponseEntity<>(new AuthenticationResponse(jwtToken, otp,
+                jwtConfig.getExpirationTimePreAuthenticated()),
+                HttpStatus.ACCEPTED);
+    }
 }
