@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.kostrzynski.tfa.exception.ApiErrorCodeEnum;
 import pl.kostrzynski.tfa.exception.ApiMethodException;
+import pl.kostrzynski.tfa.model.SecondAuthDto;
 import pl.kostrzynski.tfa.model.entity.SecondAuth;
 import pl.kostrzynski.tfa.model.entity.User;
 import pl.kostrzynski.tfa.service.SecondAuthService;
@@ -36,8 +37,8 @@ public class AfterAuthApi {
 
     // update key after security checks
     @PutMapping("pub-key/{token}")
-    public ResponseEntity<HttpStatus> updatePublicKey(@PathVariable String token, @RequestBody @Valid SecondAuth secondAuth) {
-        secondAuthService.updateSecondAuth(token, secondAuth);
+    public ResponseEntity<HttpStatus> updatePublicKey(@PathVariable String token, @RequestBody @Valid SecondAuthDto secondAuthDto) {
+        secondAuthService.updateSecondAuth(token, secondAuthDto);
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 
@@ -46,7 +47,7 @@ public class AfterAuthApi {
     public ResponseEntity<String> createTokenForNewKey(@RequestBody @Valid User user,
                                                        HttpServletRequest httpServletRequest) {
 
-        // TODO get user from session cookies not argument
+        // TODO get user from Principals not argument
 
         User databaseUser = userService.getUserByUsername(user.getUsername());
         SecondAuth secondAuth = secondAuthService.changeKeyStatus(databaseUser, true);

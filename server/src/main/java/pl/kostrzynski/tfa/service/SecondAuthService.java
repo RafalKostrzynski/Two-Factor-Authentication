@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pl.kostrzynski.tfa.exception.ApiErrorCodeEnum;
 import pl.kostrzynski.tfa.exception.ApiMethodException;
+import pl.kostrzynski.tfa.model.SecondAuthDto;
 import pl.kostrzynski.tfa.model.entity.SecondAuth;
 import pl.kostrzynski.tfa.model.entity.User;
 import pl.kostrzynski.tfa.repository.SecondAuthRepository;
@@ -15,13 +16,16 @@ import java.util.Random;
 public class SecondAuthService {
 
     private final SecondAuthRepository secondAuthRepository;
+    private final SmartphoneDetailsService smartphoneDetailsService;
     private final UserService userService;
     private final ECCHandler eccHandler;
     private final SecondAuthTokenService secondAuthTokenService;
 
     @Autowired
-    public SecondAuthService(SecondAuthRepository secondAuthRepository, UserService userService, ECCHandler eccHandler, SecondAuthTokenService secondAuthTokenService) {
+    public SecondAuthService(SecondAuthRepository secondAuthRepository, SmartphoneDetailsService smartphoneDetailsService,
+                             UserService userService, ECCHandler eccHandler, SecondAuthTokenService secondAuthTokenService) {
         this.secondAuthRepository = secondAuthRepository;
+        this.smartphoneDetailsService = smartphoneDetailsService;
         this.userService = userService;
         this.eccHandler = eccHandler;
         this.secondAuthTokenService = secondAuthTokenService;
@@ -32,11 +36,13 @@ public class SecondAuthService {
                 new NoSuchElementException("No SecondAuth for user " + user.getUsername() + " found"));
     }
 
-    public void addSecondAuth(String token, SecondAuth secondAuth) {
+    public void addSecondAuth(String token, SecondAuthDto secondAuthDto) {
+        SecondAuth secondAuth = secondAuthDto.getSecondAuth();
         if (eccHandler.isValidPublicKey(secondAuth.getPublicKeyBytes())) {
             User user = userService.verifyToken(token, "add-public");
             secondAuth.setUser(user);
-            secondAuthRepository.save(secondAuth);
+            SecondAuth dbSecondAuth = secondAuthRepository.save(secondAuth);
+            smartphoneDetailsService.addSmartphoneDetails(secondAuthDto.getSmartphoneDetails(), dbSecondAuth);
         }
     }
 
@@ -46,9 +52,11 @@ public class SecondAuthService {
         return secondAuthRepository.save(secondAuth);
     }
 
-    public void updateSecondAuth(String token, SecondAuth secondAuth) {
+    public void updateSecondAuth(String token, SecondAuthDto secondAuthDto) {
+        SecondAuth secondAuth = secondAuthDto.getSecondAuth();
         SecondAuth databaseSecondAuth = secondAuthTokenService.getSecondAuthByToken(token);
-        changeSecondAuth(databaseSecondAuth, secondAuth);
+        SecondAuth changedSecondAUth = changeSecondAuth(databaseSecondAuth, secondAuth);
+        smartphoneDetailsService.updateSmartphoneDetails(secondAuthDto.getSmartphoneDetails(), changedSecondAUth);
     }
 
     public String generatePayload() {
@@ -64,11 +72,11 @@ public class SecondAuthService {
         return pass.toString();
     }
 
-    private void changeSecondAuth(SecondAuth oldSecondAuth, SecondAuth newSecondAuth) {
+    private SecondAuth changeSecondAuth(SecondAuth oldSecondAuth, SecondAuth newSecondAuth) {
         if (oldSecondAuth.isChangeKey()) {
             oldSecondAuth.setPublicKeyBytes(newSecondAuth.getPublicKeyBytes());
             oldSecondAuth.setChangeKey(false);
-            secondAuthRepository.save(oldSecondAuth);
+            return secondAuthRepository.save(oldSecondAuth);
         } else throw new ApiMethodException("Can't change key", ApiErrorCodeEnum.NOT_ACCEPTABLE);
     }
 }

@@ -22,11 +22,6 @@ public class SecondAuth {
     @NotNull(message = "Please provide public key")
     private byte[] publicKeyBytes;
     @Column(unique = true, nullable = false)
-    @NotNull(message = "Please provide the androidID")
-    private String androidID;
-    @Column(nullable = false)
-    @JsonIgnore
-    private boolean active;
     @JsonIgnore
     private boolean changeKey;
     @OneToOne
@@ -38,12 +33,12 @@ public class SecondAuth {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         SecondAuth that = (SecondAuth) o;
-        return id == that.id && active == that.active && changeKey == that.changeKey && Arrays.equals(publicKeyBytes, that.publicKeyBytes) && Objects.equals(androidID, that.androidID);
+        return id == that.id && changeKey == that.changeKey && Arrays.equals(publicKeyBytes, that.publicKeyBytes);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(id, androidID, active, changeKey);
+        int result = Objects.hash(id, changeKey);
         result = 31 * result + Arrays.hashCode(publicKeyBytes);
         return result;
     }
@@ -53,8 +48,6 @@ public class SecondAuth {
         return "SecondAuth{" +
                 "id=" + id +
                 ", publicKeyBytes=" + Arrays.toString(publicKeyBytes) +
-                ", androidID='" + androidID + '\'' +
-                ", active=" + active +
                 ", changeKey=" + changeKey +
                 '}';
     }
