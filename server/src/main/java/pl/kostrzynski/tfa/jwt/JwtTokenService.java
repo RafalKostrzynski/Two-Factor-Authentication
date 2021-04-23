@@ -24,7 +24,8 @@ public class JwtTokenService {
                 jwtConfig.getExpirationTimeAuthenticated() :
                 jwtConfig.getExpirationTimePreAuthenticated()));
 
-        return Jwts.builder().setSubject(authentication.getName()).claim(AUTHENTICATION_STATE, authenticationState)
+        return Jwts.builder().setSubject(authentication.getName())
+                .claim(AUTHENTICATION_STATE, authenticationState)
                 .setIssuedAt(new Date()).setExpiration(expirationDate)
                 .signWith(SignatureAlgorithm.HS512, jwtConfig.getSecret().getBytes())
                 .compact();
@@ -37,14 +38,15 @@ public class JwtTokenService {
                 .getBody();
     }
 
-    public String getUsernameFromToken(String jwtToken){
+    public String getUsernameFromToken(String jwtToken) {
         Claims claims = getClaimsFromJwt(jwtToken);
         return claims.getSubject();
     }
 
-    public AuthenticationState getAuthenticationStateFromToken(String jwtToken){
+    public AuthenticationState getAuthenticationStateFromToken(String jwtToken) {
         Claims claims = getClaimsFromJwt(jwtToken);
-        return claims.get("AuthenticationState", AuthenticationState.class);
+        String authenticationState = claims.get("AuthenticationState", String.class);
+        return AuthenticationState.valueOf(authenticationState);
     }
 
     public boolean validateToken(String jwtToken) {

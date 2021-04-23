@@ -3,6 +3,7 @@ package pl.kostrzynski.tfa.config.webSecurity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.BeanIds;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -40,17 +41,18 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
-                .antMatchers("/tfa/service/rest/v1/first-auth/**", "/tfa/service/rest/v1/second-auth/**")
-                .permitAll()
-                // TODO change second-auth to be accessible only with pre_authorized_token
-                .anyRequest()
-                .authenticated()
-                .and()
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .antMatchers("/tfa/service/rest/v1/first-auth/**").permitAll()
+                .antMatchers("/tfa/service/rest/v1/for-user/**").hasRole("USER")
+                .antMatchers("/tfa/service/rest/v1/second-auth/verify").hasRole("MOBILE")
+                .antMatchers("/tfa/service/rest/v1/second-auth/authenticate").hasRole("PRE_AUTHENTICATED_USER")
+                .antMatchers(HttpMethod.POST, "/tfa/service/rest/v1/second-auth/{token}").permitAll()
+                .anyRequest().authenticated()
                 .and()
                 .requiresChannel().anyRequest().requiresSecure();
 
-        http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and()
+                .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 
 
         // TODO delete this (its only purpose is to allow easier manual testing)
