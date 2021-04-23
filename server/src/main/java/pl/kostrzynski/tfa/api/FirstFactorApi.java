@@ -10,10 +10,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import pl.kostrzynski.tfa.exception.ApiErrorCodeEnum;
 import pl.kostrzynski.tfa.exception.ApiMethodException;
-import pl.kostrzynski.tfa.jwt.JwtConfig;
 import pl.kostrzynski.tfa.jwt.JwtTokenService;
 import pl.kostrzynski.tfa.model.AuthenticationResponse;
 import pl.kostrzynski.tfa.model.entity.User;
+import pl.kostrzynski.tfa.model.enums.AuthenticationState;
 import pl.kostrzynski.tfa.service.SecondAuthService;
 import pl.kostrzynski.tfa.service.UserService;
 import pl.kostrzynski.tfa.service.VerificationTokenService;
@@ -80,10 +80,12 @@ public class FirstFactorApi {
     public ResponseEntity<AuthenticationResponse> initializeLogin(@Valid @RequestBody User user) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
-        String jwtToken = jwtTokenService.createToken(authentication, false);
-        // TODO save the OTP in the db
+        String jwtTokenWeb = jwtTokenService.createToken(authentication, AuthenticationState.PRE_AUTHENTICATED);
+        // TODO create logic that makes a string to show as qr
+        String jwtTokenMobile = jwtTokenService.createToken(authentication, AuthenticationState.MOBILE);
         String otp = secondAuthService.generatePayload();
-        return new ResponseEntity<>(new AuthenticationResponse(jwtToken, otp,
+
+        return new ResponseEntity<>(new AuthenticationResponse(jwtTokenWeb, otp,
                 30),
                 HttpStatus.ACCEPTED);
     }

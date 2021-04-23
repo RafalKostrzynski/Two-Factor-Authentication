@@ -5,6 +5,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import pl.kostrzynski.tfa.model.enums.AuthenticationState;
 
 import java.util.Date;
 
@@ -12,28 +13,38 @@ import java.util.Date;
 public class JwtTokenService {
 
     private final JwtConfig jwtConfig;
-    private static final String AUTHENTICATED = "authenticated";
+    private static final String AUTHENTICATION_STATE = "AuthenticationState";
 
     public JwtTokenService(JwtConfig jwtConfig) {
         this.jwtConfig = jwtConfig;
     }
 
-    public String createToken(Authentication authentication, boolean authenticated) {
-        Date expirationDate = new Date(new Date().getTime() + (authenticated ?
+    public String createToken(Authentication authentication, AuthenticationState authenticationState) {
+        Date expirationDate = new Date(new Date().getTime() + (authenticationState == AuthenticationState.AUTHENTICATED ?
                 jwtConfig.getExpirationTimeAuthenticated() :
                 jwtConfig.getExpirationTimePreAuthenticated()));
 
-        return Jwts.builder().setSubject(authentication.getName()).claim(AUTHENTICATED, authenticated)
+        return Jwts.builder().setSubject(authentication.getName()).claim(AUTHENTICATION_STATE, authenticationState)
                 .setIssuedAt(new Date()).setExpiration(expirationDate)
                 .signWith(SignatureAlgorithm.HS512, jwtConfig.getSecret().getBytes())
                 .compact();
     }
 
-    public Claims getClaimsFromJWT(String jwtToken) {
+    private Claims getClaimsFromJwt(String jwtToken) {
         return Jwts.parser()
                 .setSigningKey(jwtConfig.getSecret().getBytes())
                 .parseClaimsJws(jwtToken)
                 .getBody();
+    }
+
+    public String getUsernameFromToken(String jwtToken){
+        Claims claims = getClaimsFromJwt(jwtToken);
+        return claims.getSubject();
+    }
+
+    public AuthenticationState getAuthenticationStateFromToken(String jwtToken){
+        Claims claims = getClaimsFromJwt(jwtToken);
+        return claims.get("AuthenticationState", AuthenticationState.class);
     }
 
     public boolean validateToken(String jwtToken) {
