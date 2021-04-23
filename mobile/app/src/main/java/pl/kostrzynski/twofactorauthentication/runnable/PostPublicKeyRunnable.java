@@ -3,6 +3,8 @@ package pl.kostrzynski.twofactorauthentication.runnable;
 import android.content.Context;
 import pl.kostrzynski.twofactorauthentication.apiInterface.RequestApi;
 import pl.kostrzynski.twofactorauthentication.model.SecondAuth;
+import pl.kostrzynski.twofactorauthentication.model.SecondAuthDto;
+import pl.kostrzynski.twofactorauthentication.model.SmartphoneDetails;
 import pl.kostrzynski.twofactorauthentication.service.HttpRequestService;
 import retrofit2.Call;
 import retrofit2.Retrofit;
@@ -33,16 +35,16 @@ public class PostPublicKeyRunnable implements Runnable {
     }
 
     private void sendPostRequest(Context context, byte[] publicKeyBytes, String androidId, String token) throws IOException {
-        SecondAuth secondAuth = new SecondAuth(publicKeyBytes, androidId);
-        sendPost(context, secondAuth, token);
+        SecondAuthDto secondAuthDto = new SecondAuthDto(new SecondAuth(publicKeyBytes), new SmartphoneDetails(androidId));
+        sendPost(context, secondAuthDto, token);
     }
 
-    private void sendPost(Context context, SecondAuth secondAuth, String token) {
+    private void sendPost(Context context, SecondAuthDto secondAuthDto, String token) {
         HttpRequestService httpRequestService = new HttpRequestService();
         Retrofit retrofit = httpRequestService.getRetrofit();
         RequestApi requestApi = retrofit.create(RequestApi.class);
 
-        Call<Void> call = requestApi.createSecondAuth(token, secondAuth);
+        Call<Void> call = requestApi.createSecondAuth(token, secondAuthDto);
         HttpRequestService.executeCreateAndUpdateCall(context, call);
     }
 }
