@@ -1,5 +1,7 @@
 package pl.kostrzynski.tfa.api;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -12,6 +14,7 @@ import pl.kostrzynski.tfa.exception.ApiErrorCodeEnum;
 import pl.kostrzynski.tfa.exception.ApiMethodException;
 import pl.kostrzynski.tfa.jwt.JwtTokenService;
 import pl.kostrzynski.tfa.model.AuthenticationResponse;
+import pl.kostrzynski.tfa.model.QrCodeDetail;
 import pl.kostrzynski.tfa.model.entity.User;
 import pl.kostrzynski.tfa.model.enums.AuthenticationState;
 import pl.kostrzynski.tfa.service.SecondAuthService;
@@ -27,6 +30,7 @@ import javax.validation.Valid;
  * <p>
  * See the swagger documentation on the API methods under https://localhost:8443/swagger-ui/index.html
  */
+// TODO change endpoint to ...unauthorized?
 @RestController
 @RequestMapping(value = "tfa/service/rest/v1/first-auth", produces = MediaType.APPLICATION_JSON_VALUE)
 public class FirstFactorApi {
@@ -77,15 +81,17 @@ public class FirstFactorApi {
     }
 
     @PostMapping("/sign-in")
-    public ResponseEntity<AuthenticationResponse> initializeLogin(@Valid @RequestBody User user) {
+    public ResponseEntity<AuthenticationResponse> initializeLogin(@Valid @RequestBody User user) throws JsonProcessingException {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
-        String jwtTokenWeb = jwtTokenService.createToken(authentication, AuthenticationState.PRE_AUTHENTICATED);
-        // TODO create logic that makes a string to show as qr
-        String jwtTokenMobile = jwtTokenService.createToken(authentication, AuthenticationState.MOBILE);
-        String otp = secondAuthService.generatePayload();
 
-        return new ResponseEntity<>(new AuthenticationResponse(jwtTokenWeb, otp,
+        String payload = secondAuthService.generatePayload();
+        String jwtTokenMobile = jwtTokenService.createToken(authentication, AuthenticationState.MOBILE);
+        ObjectMapper objectMapper = new ObjectMapper();
+        String qrCode = objectMapper.writeValueAsString(new QrCodeDetail(payload, jwtTokenMobile));
+        String jwtTokenWeb = jwtTokenService.createToken(authentication, AuthenticationState.PRE_AUTHENTICATED);
+
+        return new ResponseEntity<>(new AuthenticationResponse(jwtTokenWeb, qrCode,
                 30),
                 HttpStatus.ACCEPTED);
     }

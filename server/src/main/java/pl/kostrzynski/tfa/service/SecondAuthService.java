@@ -9,6 +9,7 @@ import pl.kostrzynski.tfa.model.entity.SecondAuth;
 import pl.kostrzynski.tfa.model.entity.User;
 import pl.kostrzynski.tfa.repository.SecondAuthRepository;
 
+import java.security.SecureRandom;
 import java.util.NoSuchElementException;
 import java.util.Random;
 
@@ -62,10 +63,10 @@ public class SecondAuthService {
     public String generatePayload() {
         String chars = "abcdefghijklmnopqrstuvwxyz"
                 + "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                + "0123456789!@%$%&^?|~'#+=";
+                + "0123456789!@%$%&^?|~#+=";
 
-        final int PW_LENGTH = 30;
-        Random rnd = new Random();
+        final int PW_LENGTH = 20;
+        Random rnd = new SecureRandom();
         StringBuilder pass = new StringBuilder();
         for (int i = 0; i < PW_LENGTH; i++)
             pass.append(chars.charAt(rnd.nextInt(chars.length())));

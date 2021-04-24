@@ -1,5 +1,6 @@
 package pl.kostrzynski.tfa.exception;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,13 +13,14 @@ import javax.mail.MessagingException;
 public class GlobalExceptionAdvice {
 
     @ExceptionHandler({MessagingException.class, IllegalArgumentException.class,
-            SecurityException.class, ApiMethodException.class, DataIntegrityViolationException.class})
+            SecurityException.class, ApiMethodException.class, DataIntegrityViolationException.class,
+            JsonProcessingException.class})
     public final ResponseEntity<ApiError> exceptionHandler(Exception exception) {
         HttpStatus httpStatus;
         String error;
         if (exception instanceof ApiMethodException) {
             return createResponseEntityForApiMethodException((ApiMethodException) exception);
-        } else if (exception instanceof MessagingException) {
+        } else if (exception instanceof MessagingException || exception instanceof JsonProcessingException) {
             httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
             error = "Couldn't send requested Email";
         } else if (exception instanceof IllegalArgumentException
