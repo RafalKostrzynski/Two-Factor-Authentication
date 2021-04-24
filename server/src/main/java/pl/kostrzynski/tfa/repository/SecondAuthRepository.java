@@ -8,4 +8,5 @@ import java.util.Optional;
 
 public interface SecondAuthRepository extends JpaRepository<SecondAuth, Long> {
     Optional<SecondAuth> findSecondAuthByUser(User user);
+    Optional<SecondAuth> findSecondAuthByUser_Username(String username);
 }

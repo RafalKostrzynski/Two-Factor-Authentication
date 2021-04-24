@@ -15,19 +15,25 @@ public class SmartphoneDetailsService {
         this.smartphoneDetailsRepository = smartphoneDetailsRepository;
     }
 
+    public SmartphoneDetails getSmartphoneDetailsBySecondAuthId(long secondAuthId) {
+        return smartphoneDetailsRepository.findBySecondAuth_Id(secondAuthId)
+                .orElseThrow(() -> new IllegalArgumentException("Couldn't find smartphone details"));
+    }
+
     @Async
-    public void addSmartphoneDetails(SmartphoneDetails smartphoneDetails, SecondAuth secondAuth){
+    public void addSmartphoneDetails(SmartphoneDetails smartphoneDetails, SecondAuth secondAuth) {
         smartphoneDetails.setSecondAuth(secondAuth);
         smartphoneDetailsRepository.save(smartphoneDetails);
     }
+
     @Async
     public void updateSmartphoneDetails(SmartphoneDetails smartphoneDetails, SecondAuth secondAuth) {
-        smartphoneDetailsRepository.findBySecondAuth(secondAuth).map(e->changeSmartphoneDetails(e, smartphoneDetails))
+        smartphoneDetailsRepository.findBySecondAuth(secondAuth).map(e -> changeSmartphoneDetails(e, smartphoneDetails))
                 .orElseThrow(() -> new IllegalArgumentException("Couldn't find smartphone details"));
     }
 
     private boolean changeSmartphoneDetails(SmartphoneDetails databaseSmartphoneDetails,
-                                            SmartphoneDetails newSmartphoneDetails){
+                                            SmartphoneDetails newSmartphoneDetails) {
         databaseSmartphoneDetails.setAndroidID(newSmartphoneDetails.getAndroidID());
         databaseSmartphoneDetails.setBrand(newSmartphoneDetails.getBrand());
         databaseSmartphoneDetails.setManufacturer(newSmartphoneDetails.getManufacturer());

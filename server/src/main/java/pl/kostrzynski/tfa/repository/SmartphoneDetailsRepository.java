@@ -8,4 +8,5 @@ import java.util.Optional;
 
 public interface SmartphoneDetailsRepository extends JpaRepository<SmartphoneDetails, Long> {
     Optional<SmartphoneDetails>findBySecondAuth(SecondAuth secondAuth);
+    Optional<SmartphoneDetails>findBySecondAuth_Id(long secondAuthId);
 }

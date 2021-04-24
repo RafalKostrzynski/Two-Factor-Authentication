@@ -1,6 +1,7 @@
 package pl.kostrzynski.tfa.service.entityService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import pl.kostrzynski.tfa.exception.ApiErrorCodeEnum;
 import pl.kostrzynski.tfa.exception.ApiMethodException;
@@ -11,6 +12,7 @@ import pl.kostrzynski.tfa.repository.SecondAuthRepository;
 import pl.kostrzynski.tfa.service.ECCHandler;
 
 import java.security.SecureRandom;
+import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
 import java.util.Random;
 
@@ -64,6 +66,12 @@ public class SecondAuthService {
         SecondAuth databaseSecondAuth = secondAuthTokenService.getSecondAuthByToken(token);
         SecondAuth changedSecondAUth = changeSecondAuth(databaseSecondAuth, secondAuth);
         smartphoneDetailsService.updateSmartphoneDetails(secondAuthDto.getSmartphoneDetails(), changedSecondAUth);
+    }
+
+    @Async
+    public void changeSecondAuthExpirationTime(SecondAuth secondAuth, int expirationTime) {
+        secondAuth.setExpirationTime(LocalDateTime.now().plusSeconds(expirationTime));
+        secondAuthRepository.save(secondAuth);
     }
 
     public String generatePayload() {

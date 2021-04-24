@@ -17,9 +17,9 @@ import pl.kostrzynski.tfa.model.AuthenticationResponse;
 import pl.kostrzynski.tfa.model.QrCodeDetail;
 import pl.kostrzynski.tfa.model.entity.User;
 import pl.kostrzynski.tfa.model.enums.AuthenticationState;
-import pl.kostrzynski.tfa.service.SecondAuthService;
-import pl.kostrzynski.tfa.service.UserService;
-import pl.kostrzynski.tfa.service.VerificationTokenService;
+import pl.kostrzynski.tfa.service.entityService.SecondAuthService;
+import pl.kostrzynski.tfa.service.entityService.UserService;
+import pl.kostrzynski.tfa.service.entityService.VerificationTokenService;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;

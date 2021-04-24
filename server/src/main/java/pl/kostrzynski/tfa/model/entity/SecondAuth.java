@@ -7,6 +7,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -24,9 +25,15 @@ public class SecondAuth {
     @Column(unique = true, nullable = false)
     @JsonIgnore
     private boolean changeKey;
+    @JsonIgnore
+    private LocalDateTime expirationTime;
     @OneToOne
     @JsonIgnore
     private User user;
+
+    public boolean isExpired(){
+        return expirationTime.isAfter(LocalDateTime.now());
+    }
 
     @Override
     public boolean equals(Object o) {
