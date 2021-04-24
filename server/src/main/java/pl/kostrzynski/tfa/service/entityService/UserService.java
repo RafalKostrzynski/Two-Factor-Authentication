@@ -1,4 +1,4 @@
-package pl.kostrzynski.tfa.service;
+package pl.kostrzynski.tfa.service.entityService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -7,6 +7,7 @@ import pl.kostrzynski.tfa.exception.ApiErrorCodeEnum;
 import pl.kostrzynski.tfa.exception.ApiMethodException;
 import pl.kostrzynski.tfa.model.entity.User;
 import pl.kostrzynski.tfa.repository.UserRepository;
+import pl.kostrzynski.tfa.service.MailSenderService;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;

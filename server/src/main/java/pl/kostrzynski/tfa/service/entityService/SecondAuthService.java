@@ -1,4 +1,4 @@
-package pl.kostrzynski.tfa.service;
+package pl.kostrzynski.tfa.service.entityService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -8,6 +8,7 @@ import pl.kostrzynski.tfa.model.SecondAuthDto;
 import pl.kostrzynski.tfa.model.entity.SecondAuth;
 import pl.kostrzynski.tfa.model.entity.User;
 import pl.kostrzynski.tfa.repository.SecondAuthRepository;
+import pl.kostrzynski.tfa.service.ECCHandler;
 
 import java.security.SecureRandom;
 import java.util.NoSuchElementException;
@@ -35,6 +36,11 @@ public class SecondAuthService {
     public SecondAuth getSecondAuthByUser(User user) {
         return secondAuthRepository.findSecondAuthByUser(user).orElseThrow(() ->
                 new NoSuchElementException("No SecondAuth for user " + user.getUsername() + " found"));
+    }
+
+    public SecondAuth getSecondAuthByUsername(String username) {
+        return secondAuthRepository.findSecondAuthByUser_Username(username).orElseThrow(() ->
+                new NoSuchElementException("No SecondAuth for user " + username + " found"));
     }
 
     public void addSecondAuth(String token, SecondAuthDto secondAuthDto) {

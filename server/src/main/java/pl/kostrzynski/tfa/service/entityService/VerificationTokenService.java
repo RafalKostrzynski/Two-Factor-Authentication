@@ -1,4 +1,4 @@
-package pl.kostrzynski.tfa.service;
+package pl.kostrzynski.tfa.service.entityService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

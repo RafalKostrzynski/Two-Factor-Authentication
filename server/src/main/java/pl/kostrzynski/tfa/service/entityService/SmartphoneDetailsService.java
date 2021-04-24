@@ -1,4 +1,4 @@
-package pl.kostrzynski.tfa.service;
+package pl.kostrzynski.tfa.service.entityService;
 
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
