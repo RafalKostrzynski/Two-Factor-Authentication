@@ -17,13 +17,14 @@ import pl.kostrzynski.tfa.model.AuthenticationResponse;
 import pl.kostrzynski.tfa.model.QrCodeDetail;
 import pl.kostrzynski.tfa.model.entity.User;
 import pl.kostrzynski.tfa.model.enums.AuthenticationState;
-import pl.kostrzynski.tfa.service.entityService.SecondAuthService;
+import pl.kostrzynski.tfa.service.entityService.PayloadService;
 import pl.kostrzynski.tfa.service.entityService.UserService;
 import pl.kostrzynski.tfa.service.entityService.VerificationTokenService;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.time.LocalDateTime;
 
 /**
  * This is the API for the first authentication step
@@ -39,17 +40,17 @@ public class FirstFactorApi {
     private final VerificationTokenService verificationTokenService;
     private final AuthenticationManager authenticationManager;
     private final JwtTokenService jwtTokenService;
-    private final SecondAuthService secondAuthService;
+    private final PayloadService payloadService;
 
     @Autowired
     public FirstFactorApi(UserService userService,
                           VerificationTokenService verificationTokenService, AuthenticationManager authenticationManager,
-                          JwtTokenService jwtTokenService, SecondAuthService secondAuthService) {
+                          JwtTokenService jwtTokenService, PayloadService payloadService) {
         this.userService = userService;
         this.verificationTokenService = verificationTokenService;
         this.authenticationManager = authenticationManager;
         this.jwtTokenService = jwtTokenService;
-        this.secondAuthService = secondAuthService;
+        this.payloadService = payloadService;
     }
 
     @PostMapping("user")
@@ -85,11 +86,12 @@ public class FirstFactorApi {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
 
-        String payload = secondAuthService.generatePayload();
+        String payload = payloadService.generatePayload();
         String jwtTokenMobile = jwtTokenService.createToken(authentication, AuthenticationState.MOBILE);
         ObjectMapper objectMapper = new ObjectMapper();
         String qrCode = objectMapper.writeValueAsString(new QrCodeDetail(payload, jwtTokenMobile));
         String jwtTokenWeb = jwtTokenService.createToken(authentication, AuthenticationState.PRE_AUTHENTICATED);
+        payloadService.setPayload(payload, user.getUsername(), false, LocalDateTime.now().plusSeconds(35));
 
         return new ResponseEntity<>(new AuthenticationResponse(jwtTokenWeb, qrCode,
                 30),

@@ -50,7 +50,7 @@ public class VerificationTokenService {
     public User getUserByVerificationToken(String token) {
         VerificationToken verificationToken = verificationTokenRepository.findByValue(token)
                 .orElseThrow(() -> new IllegalArgumentException("Couldn't find provided token"));
-        if (verificationToken.tokenNotExpired()) return verificationToken.getUser();
+        if (verificationToken.isNotExpired()) return verificationToken.getUser();
         throw new ApiMethodException("Token expired", ApiErrorCodeEnum.NOT_ACCEPTABLE);
     }
 }

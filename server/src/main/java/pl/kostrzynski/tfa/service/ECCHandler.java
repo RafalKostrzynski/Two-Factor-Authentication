@@ -1,6 +1,7 @@
 package pl.kostrzynski.tfa.service;
 
 import org.springframework.stereotype.Service;
+import pl.kostrzynski.tfa.model.entity.Payload;
 import pl.kostrzynski.tfa.model.entity.SecondAuth;
 import pl.kostrzynski.tfa.model.entity.SmartphoneDetails;
 
@@ -31,7 +32,8 @@ public class ECCHandler {
 //        return Base64.getEncoder().encodeToString(cipherContent);
 //    }
 
-    public boolean isValidSignature(String signature, SmartphoneDetails smartphoneDetails, SecondAuth secondAuth) {
+    public boolean isValidSignature(String signature, SmartphoneDetails smartphoneDetails,
+                                    SecondAuth secondAuth, Payload payload) {
         PublicKey publicKey = getPublicKeyFromBytes(secondAuth.getPublicKeyBytes());
         try {
             Signature ecdsaVerify = Signature.getInstance("secp256r1");

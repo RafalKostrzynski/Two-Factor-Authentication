@@ -25,15 +25,9 @@ public class SecondAuth {
     @Column(unique = true, nullable = false)
     @JsonIgnore
     private boolean changeKey;
-    @JsonIgnore
-    private LocalDateTime expirationTime;
     @OneToOne
     @JsonIgnore
     private User user;
-
-    public boolean isExpired(){
-        return expirationTime.isAfter(LocalDateTime.now());
-    }
 
     @Override
     public boolean equals(Object o) {

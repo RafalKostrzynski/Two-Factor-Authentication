@@ -24,7 +24,7 @@ public class Token {
         this.expirationTime = expirationTime;
     }
 
-    public boolean tokenNotExpired() {
+    public boolean isNotExpired() {
         return expirationTime.isAfter(LocalDateTime.now());
     }
 }

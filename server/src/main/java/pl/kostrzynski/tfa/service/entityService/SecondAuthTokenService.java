@@ -30,7 +30,7 @@ public class SecondAuthTokenService {
     public SecondAuth getSecondAuthByToken(String token) {
         SecondAuthToken secondAuthToken = secondAuthTokenRepository.findByValue(token)
                 .orElseThrow(() -> new IllegalArgumentException("Couldn't find provided token"));
-        if (secondAuthToken.tokenNotExpired()) return secondAuthToken.getSecondAuth();
+        if (secondAuthToken.isNotExpired()) return secondAuthToken.getSecondAuth();
         throw new ApiMethodException("Token expired", ApiErrorCodeEnum.NOT_ACCEPTABLE);
     }
 }

@@ -1,7 +1,6 @@
 package pl.kostrzynski.tfa.service.entityService;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import pl.kostrzynski.tfa.exception.ApiErrorCodeEnum;
 import pl.kostrzynski.tfa.exception.ApiMethodException;
@@ -11,10 +10,7 @@ import pl.kostrzynski.tfa.model.entity.User;
 import pl.kostrzynski.tfa.repository.SecondAuthRepository;
 import pl.kostrzynski.tfa.service.ECCHandler;
 
-import java.security.SecureRandom;
-import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
-import java.util.Random;
 
 @Service
 public class SecondAuthService {
@@ -66,25 +62,6 @@ public class SecondAuthService {
         SecondAuth databaseSecondAuth = secondAuthTokenService.getSecondAuthByToken(token);
         SecondAuth changedSecondAUth = changeSecondAuth(databaseSecondAuth, secondAuth);
         smartphoneDetailsService.updateSmartphoneDetails(secondAuthDto.getSmartphoneDetails(), changedSecondAUth);
-    }
-
-    @Async
-    public void changeSecondAuthExpirationTime(SecondAuth secondAuth, int expirationTime) {
-        secondAuth.setExpirationTime(LocalDateTime.now().plusSeconds(expirationTime));
-        secondAuthRepository.save(secondAuth);
-    }
-
-    public String generatePayload() {
-        String chars = "abcdefghijklmnopqrstuvwxyz"
-                + "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                + "0123456789!@%$%&^?|~#+=";
-
-        final int PW_LENGTH = 20;
-        Random rnd = new SecureRandom();
-        StringBuilder pass = new StringBuilder();
-        for (int i = 0; i < PW_LENGTH; i++)
-            pass.append(chars.charAt(rnd.nextInt(chars.length())));
-        return pass.toString();
     }
 
     private SecondAuth changeSecondAuth(SecondAuth oldSecondAuth, SecondAuth newSecondAuth) {
