@@ -74,34 +74,6 @@
                       android:textSize="20sp"
                       android:layout_marginBottom="40dp"
                       android:gravity="center"/>
-
-            <LinearLayout android:id="@+id/loadKeyControls"
-                          style="?metaButtonBarStyle"
-                          android:layout_width="match_parent"
-                          android:layout_height="wrap_content"
-                          android:layout_gravity="bottom"
-                          android:orientation="horizontal">
-                <Button android:id="@+id/generate_ECC_button"
-                        android:text="@string/generate_key_pair"
-                        style="?metaButtonBarButtonStyle"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginBottom="100dp"
-                        android:layout_marginLeft="10dp"
-                        android:layout_marginRight="10dp"
-                        android:background="@color/black_overlay"/>
-                <Button android:id="@+id/read_PK_button"
-                        android:text="@string/load_private_key"
-                        style="?metaButtonBarButtonStyle"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginBottom="100dp"
-                        android:layout_marginLeft="10dp"
-                        android:layout_marginRight="10dp"
-                        android:background="@color/black_overlay"/>
-            </LinearLayout>
         </LinearLayout>
 
         <LinearLayout android:id="@+id/fullscreen_content_controls"
