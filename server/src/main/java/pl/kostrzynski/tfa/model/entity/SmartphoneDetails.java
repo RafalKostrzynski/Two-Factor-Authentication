@@ -29,6 +29,10 @@ public class SmartphoneDetails {
     @OneToOne
     private SecondAuth secondAuth;
 
+    public String getSmartphoneDetails(){
+        return getAndroidID()+getManufacturer()+getBrand()+getType();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

@@ -38,16 +38,15 @@ public class ECCHandler {
         try {
             Signature ecdsaVerify = Signature.getInstance("secp256r1");
             ecdsaVerify.initVerify(publicKey);
-            ecdsaVerify.update(getMessage(smartphoneDetails).getBytes(StandardCharsets.UTF_8));
+            ecdsaVerify.update(getMessage(smartphoneDetails, payload).getBytes(StandardCharsets.UTF_8));
             return ecdsaVerify.verify(Base64.getDecoder().decode(signature));
         } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {
             throw new SecurityException("Something went wrong please try again later");
         }
     }
 
-    // TODO create message with generated payload
-    private String getMessage(SmartphoneDetails smartphoneDetails) {
-        return "null";
+    private String getMessage(SmartphoneDetails smartphoneDetails, Payload payload) {
+        return payload.getValue()+smartphoneDetails.getSmartphoneDetails();
     }
 
     public boolean isValidPublicKey(byte[] publicKey) {
