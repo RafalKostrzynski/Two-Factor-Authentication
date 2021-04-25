@@ -33,6 +33,11 @@ public class UserService {
                 ()-> new ApiMethodException(String.format("Username %s not found", username),ApiErrorCodeEnum.NOT_FOUND));
     }
 
+    public User getUserByEmail(String email) {
+        return userRepository.findByEmail(email).orElseThrow(
+                ()-> new ApiMethodException(String.format("Email %s not found", email),ApiErrorCodeEnum.NOT_FOUND));
+    }
+
     public void addNewUser(User user, HttpServletRequest httpServletRequest) throws MessagingException {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);

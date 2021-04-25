@@ -29,32 +29,19 @@ public class PayloadService {
     @Async
     public void setPayload(String payloadValue, String username, boolean active, LocalDateTime expirationTime) {
         payloadRepository.findByUser_Username(username).map(e -> updatePayload(e, payloadValue, active, expirationTime))
-                .orElse(savePayload(
-                        new Payload(payloadValue, active, expirationTime, userService.getUserByUsername(username))));
+                .orElseGet(() -> savePayload(new Payload(payloadValue, active, expirationTime, userService.getUserByUsername(username))));
     }
 
     @Async
     public void changeActiveState(Payload payload, boolean active) {
         payload.setActive(active);
-        payloadRepository.save(payload);
+        savePayload(payload);
     }
 
     @Async
     public void payloadWasUsed(Payload payload) {
         payload.setExpirationTime(LocalDateTime.now());
         changeActiveState(payload, false);
-    }
-
-    private boolean updatePayload(Payload databasePayload, String newPayloadValue, boolean active, LocalDateTime expirationTime) {
-        databasePayload.setValue(newPayloadValue);
-        databasePayload.setActive(active);
-        databasePayload.setExpirationTime(expirationTime);
-        return savePayload(databasePayload);
-    }
-
-    private boolean savePayload(Payload payload) {
-        payloadRepository.save(payload);
-        return true;
     }
 
     public String generatePayload() {
@@ -68,5 +55,17 @@ public class PayloadService {
         for (int i = 0; i < PW_LENGTH; i++)
             pass.append(chars.charAt(random.nextInt(chars.length())));
         return pass.toString();
+    }
+
+    private boolean updatePayload(Payload databasePayload, String newPayloadValue, boolean active, LocalDateTime expirationTime) {
+        databasePayload.setValue(newPayloadValue);
+        databasePayload.setActive(active);
+        databasePayload.setExpirationTime(expirationTime);
+        return savePayload(databasePayload);
+    }
+
+    private boolean savePayload(Payload payload) {
+        payloadRepository.save(payload);
+        return true;
     }
 }

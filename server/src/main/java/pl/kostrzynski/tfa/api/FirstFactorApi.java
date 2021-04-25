@@ -62,10 +62,11 @@ public class FirstFactorApi {
 
     // it is used when user didn't received the verification email
     @PatchMapping("verification-mail")
-    public ResponseEntity<HttpStatus> sendVerificationMail(@Valid @RequestBody User user, HttpServletRequest httpServletRequest)
+    public ResponseEntity<HttpStatus> sendVerificationMail(@RequestParam String email, HttpServletRequest httpServletRequest)
             throws MessagingException {
-        User databaseUser = userService.getUserByUsername(user.getUsername());
-        if (databaseUser.isEmailVerified()) throw new ApiMethodException("This users email address already is verified",
+        User databaseUser = userService.getUserByEmail(email);
+        if (databaseUser.isEmailVerified()) throw new ApiMethodException("Can't verify this user. " +
+                "User doesn't exist or is already verified",
                 ApiErrorCodeEnum.FORBIDDEN);
 
         userService.sendVerificationEmail(databaseUser, httpServletRequest);

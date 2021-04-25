@@ -24,23 +24,11 @@ public class VerificationTokenService {
 
     public String createUUIDLink(User user, String purpose, HttpServletRequest httpServletRequest) {
         String token = UUID.randomUUID().toString();
-        VerificationToken verificationToken;
-
-        switch (purpose) {
-            case "add-public": {
-                verificationToken = verificationTokenRepository.findByUser(user)
-                        .orElseThrow(() -> new IllegalArgumentException("Couldn't find provided user"));
-                verificationToken.setValue(token);
-                verificationToken.setExpirationTime(LocalDateTime.now().plusHours(24));
-                break;
-            }
-            case "verify-email": {
-                verificationToken = new VerificationToken(user, token);
-                break;
-            }
-            default:
-                throw new ApiMethodException("Something went wrong please try again", ApiErrorCodeEnum.NOT_ACCEPTABLE);
-        }
+        VerificationToken verificationToken = verificationTokenRepository.findByUser(user).map(e -> {
+            e.setValue(token);
+            e.setExpirationTime(LocalDateTime.now().plusHours(24));
+            return e;
+        }).orElseGet(() -> new VerificationToken(user, token));
 
         verificationTokenRepository.save(verificationToken);
         return "https://" + httpServletRequest.getServerName() + ":" + httpServletRequest.getServerPort() + httpServletRequest.getContextPath()
