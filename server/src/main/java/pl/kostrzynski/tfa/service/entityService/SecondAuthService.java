@@ -59,8 +59,13 @@ public class SecondAuthService {
 
     public void updateSecondAuth(String token, SecondAuthDto secondAuthDto) {
         SecondAuth secondAuth = secondAuthDto.getSecondAuth();
+
+        // TODO is it needed?
+        //-----------------------------------------------------
         SecondAuth databaseSecondAuth = secondAuthTokenService.getSecondAuthByToken(token);
         SecondAuth changedSecondAUth = changeSecondAuth(databaseSecondAuth, secondAuth);
+        //-----------------------------------------------------
+
         smartphoneDetailsService.updateSmartphoneDetails(secondAuthDto.getSmartphoneDetails(), changedSecondAUth);
     }
 

@@ -62,9 +62,9 @@ public class SecondFactorApi {
         SecondAuth secondAuth = secondAuthService.getSecondAuthByUsername(principal.getName());
         SmartphoneDetails smartphoneDetails = smartphoneDetailsService.getSmartphoneDetailsBySecondAuthId(secondAuth.getId());
         Payload payload = payloadService.getPayloadByUsername(principal.getName());
-        if (eccHandler.isValidSignature(signature, smartphoneDetails, secondAuth, payload)){
+        if (eccHandler.isValidSignature(signature, smartphoneDetails, secondAuth, payload)) {
             payloadService.changeActiveState(payload, true);
-                    new ResponseEntity<>(HttpStatus.ACCEPTED);
+            return new ResponseEntity<>(HttpStatus.ACCEPTED);
         }
         throw new ApiMethodException("Signature not valid", ApiErrorCodeEnum.FORBIDDEN);
     }
@@ -76,7 +76,7 @@ public class SecondFactorApi {
         if (payload.isActive() && payload.isNotExpired()) {
             payloadService.payloadWasUsed(payload);
             String jwtToken = jwtTokenService.createToken((Authentication) principal, AuthenticationState.AUTHENTICATED);
-            new ResponseEntity<>(new AuthenticationResponse(jwtToken, 14), HttpStatus.ACCEPTED);
+            return new ResponseEntity<>(new AuthenticationResponse(jwtToken, 14), HttpStatus.ACCEPTED);
         }
         throw new ApiMethodException("Token expired", ApiErrorCodeEnum.FORBIDDEN);
     }
