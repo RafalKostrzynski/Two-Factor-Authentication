@@ -45,6 +45,7 @@ public class PostPublicKeyRunnable implements Runnable {
         RequestApi requestApi = retrofit.create(RequestApi.class);
 
         Call<Void> call = requestApi.createSecondAuth(token, secondAuthDto);
-        HttpRequestService.executeCreateAndUpdateCall(context, call);
+        HttpRequestService.executeCreateAndUpdateCall(context, call,
+                "Public key stored successfully", "Public key could not be stored");
     }
 }

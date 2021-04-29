@@ -36,8 +36,10 @@ public class ECCHandler {
                                     SecondAuth secondAuth, Payload payload) {
         PublicKey publicKey = getPublicKeyFromBytes(secondAuth.getPublicKeyBytes());
         try {
+            // TODO validate the algorithm should be P-256 with sha512
             Signature ecdsaVerify = Signature.getInstance("secp256r1");
             ecdsaVerify.initVerify(publicKey);
+            // TODO why do I sign it here?
             ecdsaVerify.update(getMessage(smartphoneDetails, payload).getBytes(StandardCharsets.UTF_8));
             return ecdsaVerify.verify(Base64.getDecoder().decode(signature));
         } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {

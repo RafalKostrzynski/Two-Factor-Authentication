@@ -4,13 +4,11 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.view.View;
 import android.widget.Button;
@@ -24,20 +22,17 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
-import org.json.JSONException;
-import org.json.JSONObject;
 import pl.kostrzynski.twofactorauthentication.R;
 import pl.kostrzynski.twofactorauthentication.model.QRPayload;
 import pl.kostrzynski.twofactorauthentication.runnable.CreatePostSaveKeyRunnable;
-import pl.kostrzynski.twofactorauthentication.service.AlertDialogService;
-import pl.kostrzynski.twofactorauthentication.service.ECCService;
-import pl.kostrzynski.twofactorauthentication.service.HttpRequestService;
-import pl.kostrzynski.twofactorauthentication.service.PreferenceService;
+import pl.kostrzynski.twofactorauthentication.runnable.PostSignedMessageRunnable;
+import pl.kostrzynski.twofactorauthentication.service.*;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.security.KeyPair;
+import java.io.IOException;
+import java.security.*;
+import java.security.cert.CertificateException;
 import java.security.interfaces.ECPrivateKey;
 
 
@@ -57,6 +52,9 @@ public class FullscreenActivity extends AppCompatActivity {
 
     private View mContentView;
     private TextView privateKeyName;
+    private final PreferenceService preferenceService = new PreferenceService();
+    private final FileService fileService = new FileService();
+    private final AlertDialogService alertDialogService = new AlertDialogService();
 
     private final String POST_PUBLIC_KEY_SERVICE_URL = "https://localhost:8443/tfa/service/rest/v1/first-auth/add-public/";
     private final String PATCH_PUBLIC_KEY_SERVICE_URL = "https://localhost:8443/tfa/service/rest/v1/for-user/check-key-gen/";
@@ -74,9 +72,8 @@ public class FullscreenActivity extends AppCompatActivity {
         scanQRButton.setOnClickListener(v -> scanQR());
 
 
-        PreferenceService preferenceService = new PreferenceService();
         String path = preferenceService.loadPathFromPreferences(this);
-        privateKeyName.setText(findFileNameFromString(path));
+        privateKeyName.setText(fileService.findFileNameFromString(path));
     }
 
     private void scanQR() {
@@ -169,18 +166,8 @@ public class FullscreenActivity extends AppCompatActivity {
         }
     }
 
-    private String findFileNameFromString(String path) {
-        try {
-            return path.contains("/") ?
-                    path.substring(path.lastIndexOf("/") + 1, path.lastIndexOf(".")) : "";
-        } catch (Exception e) {
-            return "";
-        }
-    }
-
     public void setAndSavePathTextView(String path) {
-        privateKeyName.setText(findFileNameFromString(path));
-        PreferenceService preferenceService = new PreferenceService();
+        privateKeyName.setText(fileService.findFileNameFromString(path));
         preferenceService.savePathToSharedPreferences(this, path);
     }
 
@@ -191,7 +178,10 @@ public class FullscreenActivity extends AppCompatActivity {
                 Uri uri = data.getData();
                 String path = uri.getPath();
                 path = path.substring(path.indexOf(":") + 1);
+                // TODO insert logic to read private key
+                // ----------------------------------
                 readFileForPK(path);
+                //-----------------------------------
                 setAndSavePathTextView(path);
                 Toast.makeText(this, "Key-path has been stored", Toast.LENGTH_SHORT).show();
             }
@@ -205,11 +195,8 @@ public class FullscreenActivity extends AppCompatActivity {
         if (result.getContents() != null) {
             AlertDialog dialog;
             String qrMessage = result.getContents();
-            ECCService eccService = new ECCService();
-            AlertDialogService alertDialogService = new AlertDialogService();
             // Generate save and post keys
             if (qrMessage.startsWith(POST_PUBLIC_KEY_SERVICE_URL)) {
-                PreferenceService preferenceService = new PreferenceService();
                 qrMessage = qrMessage.substring(qrMessage.lastIndexOf('/') + 1);
                 if (preferenceService.keyExists(this)) {
                     dialog = alertDialogService.createBuilder(this,
@@ -229,17 +216,22 @@ public class FullscreenActivity extends AppCompatActivity {
                         "Update key pair?", "Generate keys",
                         this::requestGenerateAndPutPublicKey);
             }
-            // decode otp
-            // TODO logic to map message into payload class
+            // make a signature and sent to Server
             else if (isValidJsonObject(qrMessage)) {
+                // TODO uncomment needed methods
                 QRPayload qrPayload = getQRPayloadFromString(qrMessage);
-
-                dialog = alertDialogService.createBuilder(this, qrMessage,
-                        "Press 'Encode password' to authenticate",
+                //             fileService.getPrivateKeyBytes(preferenceService.loadPathFromPreferences(this), this);
+                //      if (qrPayload.getExpirationTime().isAfter(LocalDateTime.now())) {
+                dialog = alertDialogService.createBuilder(this, qrPayload,
+                        "Press 'Verify' to authenticate",
                         "One more step to authenticate",
-                        "Encode password", eccService::decodeMessage);
+                        "Verify", this::signMessageAndSendRequest);
+                //   } else {
+//                    dialog = alertDialogService.createBuilder(this, "Token expired create a new one"
+//                            , "Token expired!");
+                //  }
             }
-            // create error dialog
+            // error dialog
             else {
                 dialog = alertDialogService.createBuilder(this, qrMessage,
                         "Something went wrong please try again");
@@ -250,12 +242,27 @@ public class FullscreenActivity extends AppCompatActivity {
         }
     }
 
+    private void signMessageAndSendRequest(QRPayload payload) {
+        readWriteFilePermissionCheck();
+        ECCService eccService = new ECCService();
+        try {
+            // TODO this method needs more data (SmartphoneDetails)
+            payload.setPayload(eccService.signMessage(payload.getPayload()));
+            Thread thread = new Thread(new PostSignedMessageRunnable(this, payload));
+            thread.start();
+        } catch (KeyStoreException | SignatureException | InvalidKeyException | UnrecoverableEntryException |
+                IOException | CertificateException | NoSuchAlgorithmException e) {
+
+            Toast.makeText(this, "Something went wrong please try again", Toast.LENGTH_SHORT).show();
+        }
+    }
+
     private QRPayload getQRPayloadFromString(String qrMessage) {
         Gson gson = new Gson();
         return gson.fromJson(qrMessage, QRPayload.class);
     }
 
-    private boolean isValidJsonObject(String message){
+    private boolean isValidJsonObject(String message) {
         try {
             getQRPayloadFromString(message);
             return true;
@@ -270,11 +277,9 @@ public class FullscreenActivity extends AppCompatActivity {
             Thread createSaveAndPostKeysThread = new Thread(
                     new CreatePostSaveKeyRunnable(token, this, isPostMethod));
             createSaveAndPostKeysThread.start();
-
             createSaveAndPostKeysThread.join();
-            PreferenceService preferenceService = new PreferenceService();
             String path = preferenceService.loadPathFromPreferences(this);
-            privateKeyName.setText(findFileNameFromString(path));
+            privateKeyName.setText(fileService.findFileNameFromString(path));
 
         } catch (Exception e) {
             Toast.makeText(this, "Something went wrong, please try again", Toast.LENGTH_SHORT).show();
@@ -292,7 +297,6 @@ public class FullscreenActivity extends AppCompatActivity {
         if (checkKeyGen) {
             generateAndPostPublicKey(token, false);
         } else {
-            AlertDialogService alertDialogService = new AlertDialogService();
             AlertDialog dialog = alertDialogService.createBuilder(this,
                     "Server declined the request please check if change of key is possible",
                     "Couldn't create a new key");
@@ -322,11 +326,11 @@ public class FullscreenActivity extends AppCompatActivity {
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-
         mHideHandler.removeCallbacks(mHideRunnable);
         mHideHandler.postDelayed(mHideRunnable, 100);
     }
 
+    // --------------- UI logic ---------------
     private void hide() {
         // Hide UI first
         ActionBar actionBar = getSupportActionBar();

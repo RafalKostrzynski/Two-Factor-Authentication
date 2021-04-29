@@ -14,4 +14,7 @@ public interface RequestApi {
 
     @PUT("for-user/pub-key/{token}")
     Call<Void> updateSecondAuth(@Path("token") String token, @Body SecondAuthDto secondAuth);
+
+    @POST("second-auth/verify")
+    Call<Void> verifyPayload(@Body String signature);
 }

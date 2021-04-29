@@ -90,7 +90,7 @@ public class FirstFactorApi {
         String payload = payloadService.generatePayload();
         String jwtTokenMobile = jwtTokenService.createToken(authentication, AuthenticationState.MOBILE);
         ObjectMapper objectMapper = new ObjectMapper();
-        String qrCode = objectMapper.writeValueAsString(new QrCodeDetail(payload, jwtTokenMobile));
+        String qrCode = objectMapper.writeValueAsString(new QrCodeDetail(payload, jwtTokenMobile, LocalDateTime.now().plusSeconds(30)));
         String jwtTokenWeb = jwtTokenService.createToken(authentication, AuthenticationState.PRE_AUTHENTICATED);
         payloadService.setPayload(payload, user.getUsername(), false, LocalDateTime.now().plusSeconds(35));
 

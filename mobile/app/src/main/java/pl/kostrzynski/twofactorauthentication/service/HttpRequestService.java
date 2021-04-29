@@ -19,7 +19,7 @@ import java.security.cert.X509Certificate;
 public class HttpRequestService {
 
     private final String BASE_URL = "https://192.168.178.119:8443/tfa/service/rest/v1/";
-    // TODO save this in other place
+    // this certificate is needed because the website's certificate is self-signed
     private final X509Certificate certificatePem = Certificates.decodeCertificatePem("-----BEGIN CERTIFICATE-----\n" +
             "MIIDdTCCAl2gAwIBAgIIeiGsWQWp2t8wDQYJKoZIhvcNAQELBQAwaTELMAkGA1UE\n" +
             "BhMCREUxEDAOBgNVBAgTB0hhbWJ1cmcxEDAOBgNVBAcTB0hhbWJ1cmcxDDAKBgNV\n" +
@@ -42,13 +42,14 @@ public class HttpRequestService {
             "qqh5/vZPcDkQ7AwhoTt27ym1WTUbvwCgyg==\n" +
             "-----END CERTIFICATE-----\n");
 
-    public static void executeCreateAndUpdateCall(Context context, Call<Void> call) {
+    public static void executeCreateAndUpdateCall(Context context, Call<Void> call,
+                                                  String successfulMessage, String failureMessage) {
         call.enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 if (response.isSuccessful())
-                    Toast.makeText(context, "Public key stored successfully", Toast.LENGTH_SHORT).show();
-                else Toast.makeText(context, "Public key could not be stored", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, successfulMessage, Toast.LENGTH_SHORT).show();
+                else Toast.makeText(context, failureMessage, Toast.LENGTH_SHORT).show();
                 // TODO delete key
             }
 
@@ -56,6 +57,23 @@ public class HttpRequestService {
             public void onFailure(Call<Void> call, Throwable t) {
                 Toast.makeText(context, "Unexpected error occurred, try again later", Toast.LENGTH_SHORT).show();
                 // TODO delete key
+            }
+        });
+    }
+
+    public static void executeVerificationCall(Context context, Call<Void> call,
+                                               String successfulMessage, String failureMessage) {
+        call.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful())
+                    Toast.makeText(context, successfulMessage, Toast.LENGTH_SHORT).show();
+                else Toast.makeText(context, failureMessage, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Toast.makeText(context, "Unexpected error occurred, try again later", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -94,5 +112,4 @@ public class HttpRequestService {
                 .client(client)
                 .build();
     }
-
 }
