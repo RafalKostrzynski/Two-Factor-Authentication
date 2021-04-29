@@ -1,7 +1,5 @@
 package pl.kostrzynski.tfa.api;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -83,14 +81,13 @@ public class FirstFactorApi {
     }
 
     @PostMapping("/sign-in")
-    public ResponseEntity<AuthenticationResponse> initializeLogin(@Valid @RequestBody User user) throws JsonProcessingException {
+    public ResponseEntity<AuthenticationResponse> initializeLogin(@Valid @RequestBody User user) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
 
         String payload = payloadService.generatePayload();
         String jwtTokenMobile = jwtTokenService.createToken(authentication, AuthenticationState.MOBILE);
-        ObjectMapper objectMapper = new ObjectMapper();
-        String qrCode = objectMapper.writeValueAsString(new QrCodeDetail(payload, jwtTokenMobile, LocalDateTime.now().plusSeconds(30)));
+        QrCodeDetail qrCode = new QrCodeDetail(payload, jwtTokenMobile, LocalDateTime.now().plusSeconds(30).toString());
         String jwtTokenWeb = jwtTokenService.createToken(authentication, AuthenticationState.PRE_AUTHENTICATED);
         payloadService.setPayload(payload, user.getUsername(), false, LocalDateTime.now().plusSeconds(35));
 

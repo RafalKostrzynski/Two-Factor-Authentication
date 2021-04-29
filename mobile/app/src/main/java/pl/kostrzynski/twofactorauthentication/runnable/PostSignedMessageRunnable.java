@@ -11,26 +11,32 @@ public class PostSignedMessageRunnable implements Runnable {
 
     private final Context context;
     private final QRPayload qrPayload;
+    private final byte[] signature;
 
-    public PostSignedMessageRunnable(Context context, QRPayload qrPayload) {
+    public PostSignedMessageRunnable(Context context, QRPayload qrPayload, byte[] signature) {
         this.context = context;
         this.qrPayload = qrPayload;
+        this.signature = signature;
     }
 
     @Override
     public void run() {
-        sendPost(context, qrPayload.getJwtToken(), qrPayload.getPayload());
+        sendPost(context, qrPayload.getJwtToken(), signature);
     }
 
     // TODO set jwt header
-    private void sendPost(Context context, String jwtToken, String signature) {
+    private void sendPost(Context context, String jwtToken, byte[] signature) {
         HttpRequestService httpRequestService = new HttpRequestService();
         Retrofit retrofit = httpRequestService.getRetrofit();
         RequestApi requestApi = retrofit.create(RequestApi.class);
 
-        Call<Void> call = requestApi.verifyPayload(signature);
+        Call<Void> call = requestApi.verifyPayload(getBearerToken(jwtToken), signature);
         HttpRequestService.executeVerificationCall(context, call,
                 "Verified successfully, you will be authenticated in a few seconds",
                 "Could not verify please try again");
+    }
+
+    private String getBearerToken(String jwtToken){
+        return "Bearer "+jwtToken;
     }
 }

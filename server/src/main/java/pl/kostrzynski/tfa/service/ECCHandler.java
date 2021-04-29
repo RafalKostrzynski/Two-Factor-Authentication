@@ -5,11 +5,9 @@ import pl.kostrzynski.tfa.model.entity.Payload;
 import pl.kostrzynski.tfa.model.entity.SecondAuth;
 import pl.kostrzynski.tfa.model.entity.SmartphoneDetails;
 
-import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.Base64;
 
 @Service
 public class ECCHandler {
@@ -24,31 +22,23 @@ public class ECCHandler {
         }
     }
 
-//    public String encodeContent(String content, PublicKey key) throws BadPaddingException, IllegalBlockSizeException, NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
-//        byte[] contentBytes = content.getBytes();
-//        Cipher cipher = Cipher.getInstance("EC");
-//        cipher.init(Cipher.ENCRYPT_MODE, key);
-//        byte[] cipherContent = cipher.doFinal(contentBytes);
-//        return Base64.getEncoder().encodeToString(cipherContent);
-//    }
-
-    public boolean isValidSignature(String signature, SmartphoneDetails smartphoneDetails,
+    public boolean isValidSignature(byte[] signature, SmartphoneDetails smartphoneDetails,
                                     SecondAuth secondAuth, Payload payload) {
+
+        // TODO fix this not sure if the publicKey must be created here
         PublicKey publicKey = getPublicKeyFromBytes(secondAuth.getPublicKeyBytes());
         try {
-            // TODO validate the algorithm should be P-256 with sha512
-            Signature ecdsaVerify = Signature.getInstance("secp256r1");
+            Signature ecdsaVerify = Signature.getInstance("SHA512withECDSA");
             ecdsaVerify.initVerify(publicKey);
-            // TODO why do I sign it here?
-            ecdsaVerify.update(getMessage(smartphoneDetails, payload).getBytes(StandardCharsets.UTF_8));
-            return ecdsaVerify.verify(Base64.getDecoder().decode(signature));
+            ecdsaVerify.update(getMessage(smartphoneDetails, payload).getBytes());
+            return ecdsaVerify.verify(signature);
         } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {
             throw new SecurityException("Something went wrong please try again later");
         }
     }
 
     private String getMessage(SmartphoneDetails smartphoneDetails, Payload payload) {
-        return payload.getValue()+smartphoneDetails.getSmartphoneDetails();
+        return payload.getValue() + smartphoneDetails.getSmartphoneDetails();
     }
 
     public boolean isValidPublicKey(byte[] publicKey) {

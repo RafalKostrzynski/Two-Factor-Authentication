@@ -17,6 +17,10 @@ public class SmartphoneDetails {
         this.type = Build.TYPE;
     }
 
+    public String getSmartphoneDetails(){
+        return getAndroidID()+getManufacturer()+getBrand()+getType();
+    }
+
     public String getAndroidID() {
         return androidID;
     }
