@@ -57,7 +57,7 @@ public class SecondFactorApi {
 
     // Method for mobile
     @PostMapping("verify")
-    public ResponseEntity<HttpStatus> verifyUser(Principal principal, @RequestBody byte[] signature) {
+    public ResponseEntity<HttpStatus> verifyUser(Principal principal, @RequestBody String signature) {
         // verify signature
         SecondAuth secondAuth = secondAuthService.getSecondAuthByUsername(principal.getName());
         SmartphoneDetails smartphoneDetails = smartphoneDetailsService.getSmartphoneDetailsBySecondAuthId(secondAuth.getId());

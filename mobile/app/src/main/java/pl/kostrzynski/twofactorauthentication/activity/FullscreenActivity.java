@@ -143,7 +143,7 @@ public class FullscreenActivity extends AppCompatActivity {
 
             SmartphoneDetails smartphoneDetails = new SmartphoneDetails(secretAndroidId);
             String message = payload.getPayload() + smartphoneDetails.getSmartphoneDetails();
-            byte[] signature = eccService.signMessage(message);
+            String signature = eccService.signMessage(message);
             Thread thread = new Thread(new PostSignedMessageRunnable(this, payload, signature));
             thread.start();
 

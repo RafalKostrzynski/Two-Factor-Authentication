@@ -8,6 +8,7 @@ import pl.kostrzynski.tfa.model.entity.SmartphoneDetails;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Base64;
 
 @Service
 public class ECCHandler {
@@ -22,16 +23,15 @@ public class ECCHandler {
         }
     }
 
-    public boolean isValidSignature(byte[] signature, SmartphoneDetails smartphoneDetails,
+    public boolean isValidSignature(String signature, SmartphoneDetails smartphoneDetails,
                                     SecondAuth secondAuth, Payload payload) {
 
-        // TODO fix this not sure if the publicKey must be created here
         PublicKey publicKey = getPublicKeyFromBytes(secondAuth.getPublicKeyBytes());
         try {
             Signature ecdsaVerify = Signature.getInstance("SHA512withECDSA");
             ecdsaVerify.initVerify(publicKey);
             ecdsaVerify.update(getMessage(smartphoneDetails, payload).getBytes());
-            return ecdsaVerify.verify(signature);
+            return ecdsaVerify.verify(Base64.getDecoder().decode(signature.substring(1, signature.length() - 1)));
         } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {
             throw new SecurityException("Something went wrong please try again later");
         }

@@ -16,5 +16,5 @@ public interface RequestApi {
     Call<Void> updateSecondAuth(@Path("token") String token, @Body SecondAuthDto secondAuth);
 
     @POST("second-auth/verify")
-    Call<Void> verifyPayload(@Header("Authorization") String jwtToken ,@Body byte[] signature);
+    Call<Void> verifyPayload(@Header("Authorization") String jwtToken ,@Body String signature);
 }
