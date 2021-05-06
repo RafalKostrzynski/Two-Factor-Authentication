@@ -20,7 +20,8 @@ public class JwtTokenService {
     }
 
     public String createToken(Authentication authentication, AuthenticationState authenticationState) {
-        Date expirationDate = new Date(new Date().getTime() + (authenticationState == AuthenticationState.AUTHENTICATED ?
+        Date expirationDate = new Date(new Date().getTime() + (
+                authenticationState == AuthenticationState.AUTHENTICATED  ?
                 jwtConfig.getExpirationTimeAuthenticated() :
                 jwtConfig.getExpirationTimePreAuthenticated()));
 

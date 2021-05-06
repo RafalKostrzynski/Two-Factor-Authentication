@@ -15,6 +15,7 @@ import pl.kostrzynski.tfa.model.AuthenticationResponse;
 import pl.kostrzynski.tfa.model.QrCodeDetail;
 import pl.kostrzynski.tfa.model.entity.User;
 import pl.kostrzynski.tfa.model.enums.AuthenticationState;
+import pl.kostrzynski.tfa.model.enums.QrPurpose;
 import pl.kostrzynski.tfa.service.entityService.PayloadService;
 import pl.kostrzynski.tfa.service.entityService.UserService;
 import pl.kostrzynski.tfa.service.entityService.VerificationTokenService;
@@ -86,13 +87,14 @@ public class FirstFactorApi {
                 new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
 
         String payload = payloadService.generatePayload();
-        String jwtTokenMobile = jwtTokenService.createToken(authentication, AuthenticationState.MOBILE);
-        QrCodeDetail qrCode = new QrCodeDetail(payload, jwtTokenMobile, LocalDateTime.now().plusSeconds(30).toString());
+        String jwtTokenMobile = jwtTokenService.createToken(authentication, AuthenticationState.MOBILE_PRE_AUTHENTICATED);
+        QrCodeDetail qrCode = new QrCodeDetail(
+                QrPurpose.AUTHENTICATE, payload, jwtTokenMobile, LocalDateTime.now().plusSeconds(60).toString());
         String jwtTokenWeb = jwtTokenService.createToken(authentication, AuthenticationState.PRE_AUTHENTICATED);
-        payloadService.setPayload(payload, user.getUsername(), false, LocalDateTime.now().plusSeconds(35));
+        payloadService.setPayload(payload, user.getUsername(), false, LocalDateTime.now().plusSeconds(65));
 
         return new ResponseEntity<>(new AuthenticationResponse(jwtTokenWeb, qrCode,
-                30),
+                60),
                 HttpStatus.ACCEPTED);
     }
 }

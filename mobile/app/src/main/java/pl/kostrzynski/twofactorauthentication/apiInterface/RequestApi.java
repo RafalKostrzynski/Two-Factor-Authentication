@@ -6,15 +6,16 @@ import retrofit2.http.*;
 
 public interface RequestApi {
 
-    @GET("for-user/check-key-gen/{token}")
-    Call<Void> checkGenerateKeyPossibility(@Path("token") String token);
-
     @POST("second-auth/{token}")
     Call<Void> createSecondAuth(@Path("token") String token, @Body SecondAuthDto secondAuth);
 
-    @PUT("for-user/pub-key/{token}")
-    Call<Void> updateSecondAuth(@Path("token") String token, @Body SecondAuthDto secondAuth);
+    @GET("for-user/pub-key/update/request")
+    Call<Void> requestUpdateSecondAuth(@Header("Authorization") String jwtToken);
+
+    @PUT("for-user/pub-key/update")
+    Call<Void> updateSecondAuth(@Header("Authorization") String jwtToken,
+                                @Body SecondAuthDto secondAuthDto);
 
     @POST("second-auth/verify")
-    Call<Void> verifyPayload(@Header("Authorization") String jwtToken ,@Body String signature);
+    Call<Void> verifyPayload(@Header("Authorization") String jwtToken, @Body String signature);
 }

@@ -13,17 +13,21 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonSyntaxException;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import pl.kostrzynski.twofactorauthentication.R;
 import pl.kostrzynski.twofactorauthentication.model.QRPayload;
 import pl.kostrzynski.twofactorauthentication.model.SmartphoneDetails;
+import pl.kostrzynski.twofactorauthentication.model.enums.QrPurpose;
 import pl.kostrzynski.twofactorauthentication.runnable.CreatePostSaveKeyRunnable;
 import pl.kostrzynski.twofactorauthentication.runnable.PostSignedMessageRunnable;
+import pl.kostrzynski.twofactorauthentication.runnable.PutPublicKeyRunnable;
 import pl.kostrzynski.twofactorauthentication.service.AlertDialogService;
 import pl.kostrzynski.twofactorauthentication.service.ECCService;
-import pl.kostrzynski.twofactorauthentication.service.HttpRequestService;
 import pl.kostrzynski.twofactorauthentication.service.PreferenceService;
 
 import java.io.IOException;
@@ -51,7 +55,6 @@ public class FullscreenActivity extends AppCompatActivity {
     private final AlertDialogService alertDialogService = new AlertDialogService();
 
     private final String POST_PUBLIC_KEY_SERVICE_URL = "https://localhost:8443/tfa/service/rest/v1/first-auth/add-public/";
-    private final String PATCH_PUBLIC_KEY_SERVICE_URL = "https://localhost:8443/tfa/service/rest/v1/for-user/check-key-gen/";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,6 +83,7 @@ public class FullscreenActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
         if (IntentIntegrator.parseActivityResult(requestCode, resultCode, data) != null) {
             IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
             createDialogForGeneratedKey(result);
@@ -104,22 +108,24 @@ public class FullscreenActivity extends AppCompatActivity {
                             "Generate key pair?", "Generate keys",
                             true, this::generateAndPostPublicKey);
                 }
-            } else if (qrMessage.startsWith(PATCH_PUBLIC_KEY_SERVICE_URL)) {
-                qrMessage = qrMessage.substring(qrMessage.lastIndexOf('/') + 1);
-                dialog = alertDialogService.createBuilder(this, qrMessage,
-                        "To update the old key pair press 'Generate keys'\n" +
-                                "Do it only if you are sure about overriding the old key pair!",
-                        "Update key pair?", "Generate keys",
-                        this::requestGenerateAndPutPublicKey);
             }
             // make a signature and sent to Server
             else if (isValidJsonObject(qrMessage)) {
                 QRPayload qrPayload = getQRPayloadFromString(qrMessage);
                 if (qrPayload.getExpirationTime().isAfter(LocalDateTime.now())) {
-                    dialog = alertDialogService.createBuilder(this, qrPayload,
-                            "Press 'Verify' to authenticate",
-                            "One more step to authenticate",
-                            "Verify", this::signMessageAndSendRequest);
+                    if (qrPayload.getPurpose().equals(QrPurpose.AUTHENTICATE))
+                        dialog = alertDialogService.createBuilder(this, qrPayload,
+                                "Press 'Verify' to authenticate",
+                                "One more step to authenticate",
+                                "Verify", this::signMessageAndSendRequest);
+                    else if (qrPayload.getPurpose().equals(QrPurpose.CHANGE_KEY))
+                        dialog = alertDialogService.createBuilder(this, qrPayload,
+                                "To update the old key pair press 'Generate keys'\n" +
+                                        "Do it only if you are sure about overriding the old key pair!", "Update key pair?",
+                                "Generate keys", this::updateKey);
+                    else dialog = alertDialogService.createBuilder(this, "Unknown error occurred, " +
+                                        "please try again later",
+                                "Unknown error!");
                 } else {
                     dialog = alertDialogService.createBuilder(this, "Token expired create a new one",
                             "Token expired!");
@@ -138,9 +144,9 @@ public class FullscreenActivity extends AppCompatActivity {
 
     private void signMessageAndSendRequest(QRPayload payload) {
         try {
+            @SuppressLint("HardwareIds")
             String secretAndroidId = Settings.Secure.
                     getString(this.getContentResolver(), Settings.Secure.ANDROID_ID);
-
             SmartphoneDetails smartphoneDetails = new SmartphoneDetails(secretAndroidId);
             String message = payload.getPayload() + smartphoneDetails.getSmartphoneDetails();
             String signature = eccService.signMessage(message);
@@ -150,6 +156,29 @@ public class FullscreenActivity extends AppCompatActivity {
         } catch (KeyStoreException | SignatureException | InvalidKeyException | UnrecoverableEntryException |
                 IOException | CertificateException | NoSuchAlgorithmException e) {
             Toast.makeText(this, "Something went wrong please try again", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void updateKey(QRPayload payload) {
+        @SuppressLint("HardwareIds")
+        String secretAndroidId = Settings.Secure.
+                getString(this.getContentResolver(), Settings.Secure.ANDROID_ID);
+        SmartphoneDetails smartphoneDetails = new SmartphoneDetails(secretAndroidId);
+        Thread thread = new Thread(new PutPublicKeyRunnable(smartphoneDetails, payload, this));
+        thread.start();
+    }
+
+    private void generateAndPostPublicKey(String token, boolean isPostMethod) {
+        try {
+            Thread createSaveAndPostKeysThread = new Thread(
+                    new CreatePostSaveKeyRunnable(token, this));
+            createSaveAndPostKeysThread.start();
+            createSaveAndPostKeysThread.join();
+            // call this from within the method
+            Toast.makeText(this, "Key stored successfully!", Toast.LENGTH_SHORT).show();
+
+        } catch (Exception e) {
+            Toast.makeText(this, "Something went wrong, please try again", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -167,37 +196,6 @@ public class FullscreenActivity extends AppCompatActivity {
             return true;
         } catch (JsonSyntaxException e) {
             return false;
-        }
-    }
-
-    private void generateAndPostPublicKey(String token, boolean isPostMethod) {
-        try {
-            Thread createSaveAndPostKeysThread = new Thread(
-                    new CreatePostSaveKeyRunnable(token, this, isPostMethod));
-            createSaveAndPostKeysThread.start();
-            createSaveAndPostKeysThread.join();
-            Toast.makeText(this, "Key stored successfully!", Toast.LENGTH_SHORT).show();
-
-        } catch (Exception e) {
-            Toast.makeText(this, "Something went wrong, please try again", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    private void requestGenerateAndPutPublicKey(String token) {
-        HttpRequestService httpRequestService = new HttpRequestService();
-        boolean checkKeyGen = false;
-        try {
-            checkKeyGen = httpRequestService.checkGenerateKey(token);
-        } catch (InterruptedException ignored) {
-            Toast.makeText(this, "Something went wrong, please try again", Toast.LENGTH_SHORT).show();
-        }
-        if (checkKeyGen) {
-            generateAndPostPublicKey(token, false);
-        } else {
-            AlertDialog dialog = alertDialogService.createBuilder(this,
-                    "Server declined the request please check if change of key is possible",
-                    "Couldn't create a new key");
-            dialog.show();
         }
     }
 

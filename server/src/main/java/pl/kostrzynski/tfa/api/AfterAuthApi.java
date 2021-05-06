@@ -3,18 +3,19 @@ package pl.kostrzynski.tfa.api;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import pl.kostrzynski.tfa.exception.ApiErrorCodeEnum;
-import pl.kostrzynski.tfa.exception.ApiMethodException;
+import pl.kostrzynski.tfa.jwt.JwtTokenService;
+import pl.kostrzynski.tfa.model.QrCodeDetail;
 import pl.kostrzynski.tfa.model.SecondAuthDto;
 import pl.kostrzynski.tfa.model.entity.SecondAuth;
-import pl.kostrzynski.tfa.model.entity.User;
-import pl.kostrzynski.tfa.service.SecondAuthService;
-import pl.kostrzynski.tfa.service.SecondAuthTokenService;
-import pl.kostrzynski.tfa.service.UserService;
+import pl.kostrzynski.tfa.model.enums.AuthenticationState;
+import pl.kostrzynski.tfa.model.enums.QrPurpose;
+import pl.kostrzynski.tfa.service.entityService.SecondAuthService;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.security.Principal;
+import java.time.LocalDateTime;
 
 /**
  * This is the API for operations requested by authenticated users
@@ -26,42 +27,33 @@ import javax.validation.Valid;
 public class AfterAuthApi {
 
     private final SecondAuthService secondAuthService;
-    private final UserService userService;
-    private final SecondAuthTokenService secondAuthTokenService;
+    private final JwtTokenService jwtTokenService;
 
-    public AfterAuthApi(SecondAuthService secondAuthService, UserService userService, SecondAuthTokenService secondAuthTokenService) {
+    public AfterAuthApi(SecondAuthService secondAuthService, JwtTokenService jwtTokenService) {
         this.secondAuthService = secondAuthService;
-        this.userService = userService;
-        this.secondAuthTokenService = secondAuthTokenService;
+        this.jwtTokenService = jwtTokenService;
     }
 
     // update key after security checks
-    @PutMapping("pub-key/{token}")
-    public ResponseEntity<HttpStatus> updatePublicKey(@PathVariable String token, @RequestBody @Valid SecondAuthDto secondAuthDto) {
-        secondAuthService.updateSecondAuth(token, secondAuthDto);
+    @PutMapping("pub-key/update")
+    public ResponseEntity<HttpStatus> updatePublicKey(Principal principal,
+                                                      @RequestBody @Valid SecondAuthDto secondAuthDto) {
+        SecondAuth dbSecondAuth = secondAuthService.getSecondAuthByUsername(principal.getName());
+        secondAuthService.updateSecondAuth(dbSecondAuth, secondAuthDto);
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 
     // request from authenticated user to change key
     @GetMapping("pub-key/new-key-gen")
-    public ResponseEntity<String> createTokenForNewKey(@RequestBody @Valid User user,
-                                                       HttpServletRequest httpServletRequest) {
-
-        // TODO get user from Principals not argument
-
-        User databaseUser = userService.getUserByUsername(user.getUsername());
-        SecondAuth secondAuth = secondAuthService.changeKeyStatus(databaseUser, true);
-        return new ResponseEntity<>(
-                secondAuthTokenService.createUUIDLink(secondAuth, "check-key-gen",
-                        httpServletRequest),
+    public ResponseEntity<QrCodeDetail> createTokenForNewKey(Principal principal) {
+        String jwtTokenMobile = jwtTokenService.createToken((Authentication) principal, AuthenticationState.MOBILE_AUTHENTICATED);
+        return new ResponseEntity<>(new QrCodeDetail(QrPurpose.CHANGE_KEY, "NONE",
+                jwtTokenMobile, LocalDateTime.now().plusSeconds(60).toString()),
                 HttpStatus.ACCEPTED);
     }
 
-    // check if the change key status has been set to true and if the token didn't expire
-    @GetMapping("check-key-gen/{token}")
-    public ResponseEntity<HttpStatus> verifyKeyGenerationRequest(@PathVariable String token) {
-        SecondAuth secondAuth = secondAuthTokenService.getSecondAuthByToken(token);
-        if (secondAuth.isChangeKey()) return new ResponseEntity<>(HttpStatus.ACCEPTED);
-        throw new ApiMethodException("Generation declined", ApiErrorCodeEnum.NOT_ACCEPTABLE);
+    @GetMapping("pub-key/update/request")
+    public ResponseEntity<HttpStatus> verifyRequest() {
+        return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 }

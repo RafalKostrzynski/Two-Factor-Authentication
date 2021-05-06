@@ -29,7 +29,8 @@ public class PayloadService {
     @Async
     public void setPayload(String payloadValue, String username, boolean active, LocalDateTime expirationTime) {
         payloadRepository.findByUser_Username(username).map(e -> updatePayload(e, payloadValue, active, expirationTime))
-                .orElseGet(() -> savePayload(new Payload(payloadValue, active, expirationTime, userService.getUserByUsername(username))));
+                .orElseGet(() -> savePayload(new Payload(
+                        payloadValue, active, expirationTime, userService.getUserByUsername(username))));
     }
 
     @Async

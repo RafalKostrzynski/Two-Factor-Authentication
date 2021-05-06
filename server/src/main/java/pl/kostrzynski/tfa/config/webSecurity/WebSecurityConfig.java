@@ -42,8 +42,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
                 .antMatchers("/tfa/service/rest/v1/first-auth/**").permitAll()
+                .antMatchers("/tfa/service/rest/v1/for-user/pub-key/update",
+                        "/tfa/service/rest/v1/for-user/pub-key/update/request").hasRole("MOBILE_AUTHENTICATED")
                 .antMatchers("/tfa/service/rest/v1/for-user/**").hasRole("USER")
-                .antMatchers("/tfa/service/rest/v1/second-auth/verify").hasRole("MOBILE")
+                .antMatchers("/tfa/service/rest/v1/second-auth/verify").hasRole("MOBILE_PRE_AUTHENTICATED")
                 .antMatchers("/tfa/service/rest/v1/second-auth/authenticate").hasRole("PRE_AUTHENTICATED_USER")
                 .antMatchers(HttpMethod.POST, "/tfa/service/rest/v1/second-auth/{token}").permitAll()
                 .anyRequest().authenticated()

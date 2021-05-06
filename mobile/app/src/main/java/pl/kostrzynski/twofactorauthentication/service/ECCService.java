@@ -6,6 +6,7 @@ import android.util.Base64;
 
 import java.io.IOException;
 import java.security.*;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 
 public class ECCService {
@@ -14,7 +15,6 @@ public class ECCService {
 
     public PublicKey generateKeyPair() throws NoSuchProviderException, NoSuchAlgorithmException,
             InvalidAlgorithmParameterException {
-
         KeyPairGenerator kpg = KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_EC, "AndroidKeyStore");
         kpg.initialize(new KeyGenParameterSpec.Builder(
                 KEYSTORE_ALIAS,
@@ -23,6 +23,13 @@ public class ECCService {
                 .build());
         KeyPair kp = kpg.generateKeyPair();
         return kp.getPublic();
+    }
+
+    public void deleteKey() throws KeyStoreException, CertificateException,
+            IOException, NoSuchAlgorithmException {
+        KeyStore ks = KeyStore.getInstance("AndroidKeyStore");
+        ks.load(null);
+        ks.deleteEntry(KEYSTORE_ALIAS);
     }
 
     public String signMessage(String message) throws KeyStoreException, CertificateException, NoSuchAlgorithmException,
@@ -34,6 +41,7 @@ public class ECCService {
         if (!(entry instanceof KeyStore.PrivateKeyEntry)) {
             throw new KeyStoreException("Unexpected error please try again later");
         }
+
         Signature s = Signature.getInstance("SHA512withECDSA");
         s.initSign(((KeyStore.PrivateKeyEntry) entry).getPrivateKey());
         s.update(message.getBytes());

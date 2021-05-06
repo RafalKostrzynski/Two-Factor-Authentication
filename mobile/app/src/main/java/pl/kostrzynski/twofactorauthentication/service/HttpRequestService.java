@@ -7,6 +7,7 @@ import okhttp3.tls.Certificates;
 import okhttp3.tls.HandshakeCertificates;
 import org.jetbrains.annotations.NotNull;
 import pl.kostrzynski.twofactorauthentication.apiInterface.RequestApi;
+import pl.kostrzynski.twofactorauthentication.model.SmartphoneDetails;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -14,11 +15,17 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 import java.io.IOException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
 public class HttpRequestService {
 
     private final String BASE_URL = "https://192.168.178.119:8443/tfa/service/rest/v1/";
+
     // this certificate is needed because the website's certificate is self-signed
     private final X509Certificate certificatePem = Certificates.decodeCertificatePem("-----BEGIN CERTIFICATE-----\n" +
             "MIIDdTCCAl2gAwIBAgIIeiGsWQWp2t8wDQYJKoZIhvcNAQELBQAwaTELMAkGA1UE\n" +
@@ -42,23 +49,44 @@ public class HttpRequestService {
             "qqh5/vZPcDkQ7AwhoTt27ym1WTUbvwCgyg==\n" +
             "-----END CERTIFICATE-----\n");
 
-    public static void executeCreateAndUpdateCall(Context context, Call<Void> call,
-                                                  String successfulMessage, String failureMessage) {
+    public static void executeCreateUpdate(Context context, Call<Void> call,
+                                           String successfulMessage, String failureMessage) {
+        ECCService eccService = new ECCService();
         call.enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 if (response.isSuccessful())
                     Toast.makeText(context, successfulMessage, Toast.LENGTH_SHORT).show();
-                else Toast.makeText(context, failureMessage, Toast.LENGTH_SHORT).show();
-                // TODO delete key
+                else {
+                    Toast.makeText(context, failureMessage, Toast.LENGTH_SHORT).show();
+                    keyReset(eccService, context);
+                }
             }
 
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
+                keyReset(eccService, context);
                 Toast.makeText(context, "Unexpected error occurred, try again later", Toast.LENGTH_SHORT).show();
-                // TODO delete key
             }
         });
+    }
+
+    public static boolean requestUpdate(Call<Void> call) {
+        try {
+            Response<Void> response = call.execute();
+            return response.isSuccessful();
+        } catch (IOException e) {
+            return false;
+        }
+    }
+
+
+    private static void keyReset(ECCService eccService, Context context) {
+        try {
+            eccService.deleteKey();
+        } catch (KeyStoreException | CertificateException | IOException | NoSuchAlgorithmException e) {
+            Toast.makeText(context, "Unknown exception please contact our service", Toast.LENGTH_SHORT).show();
+        }
     }
 
     public static void executeVerificationCall(Context context, Call<Void> call,
@@ -76,25 +104,6 @@ public class HttpRequestService {
                 Toast.makeText(context, "Unexpected error occurred, try again later", Toast.LENGTH_SHORT).show();
             }
         });
-    }
-
-    public boolean checkGenerateKey(String token) throws InterruptedException {
-        Retrofit retrofit = getRetrofit();
-        RequestApi requestApi = retrofit.create(RequestApi.class);
-        Call<Void> call = requestApi.checkGenerateKeyPossibility(token);
-        final boolean[] result = {false};
-
-        Thread thread = new Thread(() -> {
-            try {
-                Response<Void> response = call.execute();
-                result[0] = response.isSuccessful();
-            } catch (IOException exception) {
-                result[0] = false;
-            }
-        });
-        thread.start();
-        thread.join();
-        return result[0];
     }
 
     @NotNull

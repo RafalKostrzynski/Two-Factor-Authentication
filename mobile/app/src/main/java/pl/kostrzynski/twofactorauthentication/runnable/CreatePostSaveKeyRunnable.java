@@ -12,12 +12,10 @@ public class CreatePostSaveKeyRunnable implements Runnable {
 
     private final String token;
     private final Context context;
-    private final boolean isPostMethod;
 
-    public CreatePostSaveKeyRunnable(String token, Context context, boolean isPostMethod) {
+    public CreatePostSaveKeyRunnable(String token, Context context) {
         this.token = token;
         this.context = context;
-        this.isPostMethod = isPostMethod;
     }
 
     @Override
@@ -32,10 +30,7 @@ public class CreatePostSaveKeyRunnable implements Runnable {
                     getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
             byte[] publicKeyBytes = publicKey.getEncoded();
 
-            Runnable postPublicKeyRunnable = isPostMethod ?
-                    new PostPublicKeyRunnable(token, secretAndroidId, publicKeyBytes, context) :
-                    new PutPublicKeyRunnable(token, secretAndroidId, publicKeyBytes, context);
-
+            Runnable postPublicKeyRunnable = new PostPublicKeyRunnable(token, secretAndroidId, publicKeyBytes, context);
             Thread postPublicKeyThread = new Thread(postPublicKeyRunnable);
             postPublicKeyThread.start();
 

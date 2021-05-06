@@ -2,49 +2,64 @@ package pl.kostrzynski.twofactorauthentication.runnable;
 
 import android.content.Context;
 import pl.kostrzynski.twofactorauthentication.apiInterface.RequestApi;
+import pl.kostrzynski.twofactorauthentication.model.QRPayload;
 import pl.kostrzynski.twofactorauthentication.model.SecondAuth;
 import pl.kostrzynski.twofactorauthentication.model.SecondAuthDto;
 import pl.kostrzynski.twofactorauthentication.model.SmartphoneDetails;
+import pl.kostrzynski.twofactorauthentication.service.ECCService;
 import pl.kostrzynski.twofactorauthentication.service.HttpRequestService;
 import retrofit2.Call;
 import retrofit2.Retrofit;
 
-import java.io.IOException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 
 public class PutPublicKeyRunnable implements Runnable {
 
-    private final String token;
-    private final String androidID;
-    private final byte[] publicKeyBytes;
+    private final SmartphoneDetails smartphoneDetails;
+    private final QRPayload qrPayload;
     private final Context context;
 
-    public PutPublicKeyRunnable(String token, String androidID, byte[] publicKeyBytes, Context context) {
-        this.token = token;
-        this.androidID = androidID;
-        this.publicKeyBytes = publicKeyBytes;
+    public PutPublicKeyRunnable(SmartphoneDetails smartphoneDetails, QRPayload qrPayload, Context context) {
+        this.smartphoneDetails = smartphoneDetails;
+        this.qrPayload = qrPayload;
         this.context = context;
     }
 
     @Override
     public void run() {
+        sendPutRequest(context, qrPayload.getJwtToken(), smartphoneDetails);
+    }
+
+    private void sendPutRequest(Context context, String jwtToken, SmartphoneDetails smartphoneDetails) {
         try {
-            sendPutRequest(context, publicKeyBytes, androidID, token);
-        } catch (IOException exception) {
-            throw new IllegalArgumentException("Error occurred while executing post method");
+            sendPut(context, jwtToken, smartphoneDetails);
+        } catch (InvalidAlgorithmParameterException | NoSuchAlgorithmException | NoSuchProviderException e) {
+            e.printStackTrace();
         }
     }
 
-    private void sendPutRequest(Context context, byte[] publicKeyBytes, String androidId, String token) throws IOException {
-        SecondAuthDto secondAuthDto = new SecondAuthDto(new SecondAuth(publicKeyBytes), new SmartphoneDetails(androidId));
-        sendPut(context, secondAuthDto, token);
-    }
+    private void sendPut(Context context, String jwtToken, SmartphoneDetails smartphoneDetails)
+            throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchProviderException {
 
-    private void sendPut(Context context, SecondAuthDto secondAuthDto, String token) {
         HttpRequestService httpRequestService = new HttpRequestService();
         Retrofit retrofit = httpRequestService.getRetrofit();
         RequestApi requestApi = retrofit.create(RequestApi.class);
-        Call<Void> call = requestApi.updateSecondAuth(token, secondAuthDto);
-        HttpRequestService.executeCreateAndUpdateCall(context, call,
-                "Public key stored successfully", "Public key could not be stored");
+        jwtToken = getBearerToken(jwtToken);
+        Call<Void> requestCall = requestApi.requestUpdateSecondAuth(jwtToken);
+        if (HttpRequestService.requestUpdate(requestCall)) {
+            ECCService eccService = new ECCService();
+            byte[] keyBytes = eccService.generateKeyPair().getEncoded();
+            Call<Void> updateCall = requestApi.updateSecondAuth(jwtToken,
+                    new SecondAuthDto(new SecondAuth(keyBytes), smartphoneDetails));
+            HttpRequestService.executeCreateUpdate(context, updateCall,
+                    "Public key updated successfully",
+                    "Unexpected error occurred. Please contact our service");
+        }
+    }
+
+    private String getBearerToken(String jwtToken) {
+        return "Bearer " + jwtToken;
     }
 }

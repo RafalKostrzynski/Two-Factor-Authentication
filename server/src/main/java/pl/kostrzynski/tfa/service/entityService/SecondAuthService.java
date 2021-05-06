@@ -1,6 +1,7 @@
 package pl.kostrzynski.tfa.service.entityService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import pl.kostrzynski.tfa.exception.ApiErrorCodeEnum;
 import pl.kostrzynski.tfa.exception.ApiMethodException;
@@ -19,16 +20,14 @@ public class SecondAuthService {
     private final SmartphoneDetailsService smartphoneDetailsService;
     private final UserService userService;
     private final ECCHandler eccHandler;
-    private final SecondAuthTokenService secondAuthTokenService;
 
     @Autowired
     public SecondAuthService(SecondAuthRepository secondAuthRepository, SmartphoneDetailsService smartphoneDetailsService,
-                             UserService userService, ECCHandler eccHandler, SecondAuthTokenService secondAuthTokenService) {
+                             UserService userService, ECCHandler eccHandler) {
         this.secondAuthRepository = secondAuthRepository;
         this.smartphoneDetailsService = smartphoneDetailsService;
         this.userService = userService;
         this.eccHandler = eccHandler;
-        this.secondAuthTokenService = secondAuthTokenService;
     }
 
     public SecondAuth getSecondAuthByUser(User user) {
@@ -51,29 +50,14 @@ public class SecondAuthService {
         }
     }
 
-    public SecondAuth changeKeyStatus(User user, boolean changeKey) {
-        SecondAuth secondAuth = getSecondAuthByUser(user);
-        secondAuth.setChangeKey(changeKey);
-        return secondAuthRepository.save(secondAuth);
-    }
-
-    public void updateSecondAuth(String token, SecondAuthDto secondAuthDto) {
-        SecondAuth secondAuth = secondAuthDto.getSecondAuth();
-
-        // TODO is it needed?
-        //-----------------------------------------------------
-        SecondAuth databaseSecondAuth = secondAuthTokenService.getSecondAuthByToken(token);
-        SecondAuth changedSecondAUth = changeSecondAuth(databaseSecondAuth, secondAuth);
-        //-----------------------------------------------------
-
-        smartphoneDetailsService.updateSmartphoneDetails(secondAuthDto.getSmartphoneDetails(), changedSecondAUth);
+    public void updateSecondAuth(SecondAuth databaseSecondAuth, SecondAuthDto secondAuthDto) {
+            SecondAuth secondAuth = secondAuthDto.getSecondAuth();
+            SecondAuth changedSecondAuth = changeSecondAuth(databaseSecondAuth, secondAuth);
+            smartphoneDetailsService.updateSmartphoneDetails(secondAuthDto.getSmartphoneDetails(), changedSecondAuth);
     }
 
     private SecondAuth changeSecondAuth(SecondAuth oldSecondAuth, SecondAuth newSecondAuth) {
-        if (oldSecondAuth.isChangeKey()) {
             oldSecondAuth.setPublicKeyBytes(newSecondAuth.getPublicKeyBytes());
-            oldSecondAuth.setChangeKey(false);
             return secondAuthRepository.save(oldSecondAuth);
-        } else throw new ApiMethodException("Can't change key", ApiErrorCodeEnum.NOT_ACCEPTABLE);
     }
 }
