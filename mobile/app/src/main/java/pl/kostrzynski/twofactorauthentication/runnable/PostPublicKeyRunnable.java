@@ -46,6 +46,6 @@ public class PostPublicKeyRunnable implements Runnable {
 
         Call<Void> call = requestApi.createSecondAuth(token, secondAuthDto);
         HttpRequestService.executeCreateUpdate(context, call,
-                "Public key stored successfully", "Public key could not be stored");
+                "Public key stored successfully!", "Public key could not be stored");
     }
 }

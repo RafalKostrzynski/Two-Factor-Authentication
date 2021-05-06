@@ -186,9 +186,6 @@ public class FullscreenActivity extends AppCompatActivity {
                     new CreatePostSaveKeyRunnable(token, this));
             createSaveAndPostKeysThread.start();
             createSaveAndPostKeysThread.join();
-            // call this from within the method
-            Toast.makeText(this, "Key stored successfully!", Toast.LENGTH_SHORT).show();
-
         } catch (Exception e) {
             Toast.makeText(this, "Something went wrong, please try again", Toast.LENGTH_SHORT).show();
         }
