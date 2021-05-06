@@ -1,5 +1,8 @@
 package pl.kostrzynski.twofactorauthentication.model;
 
+import lombok.Data;
+
+@Data
 public class SecondAuthDto {
     private SecondAuth secondAuth;
     private SmartphoneDetails smartphoneDetails;
@@ -9,19 +12,4 @@ public class SecondAuthDto {
         this.smartphoneDetails = smartphoneDetails;
     }
 
-    public SecondAuth getSecondAuth() {
-        return secondAuth;
-    }
-
-    public void setSecondAuth(SecondAuth secondAuth) {
-        this.secondAuth = secondAuth;
-    }
-
-    public SmartphoneDetails getSmartphoneDetails() {
-        return smartphoneDetails;
-    }
-
-    public void setSmartphoneDetails(SmartphoneDetails smartphoneDetails) {
-        this.smartphoneDetails = smartphoneDetails;
-    }
 }

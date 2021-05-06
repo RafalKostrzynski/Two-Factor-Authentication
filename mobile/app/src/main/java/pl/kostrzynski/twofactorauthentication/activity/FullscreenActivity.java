@@ -94,42 +94,19 @@ public class FullscreenActivity extends AppCompatActivity {
         if (result.getContents() != null) {
             AlertDialog dialog;
             String qrMessage = result.getContents();
-            // Generate save and post keys
-            if (qrMessage.startsWith(POST_PUBLIC_KEY_SERVICE_URL)) {
-                qrMessage = qrMessage.substring(qrMessage.lastIndexOf('/') + 1);
-                // change this
-                if (eccService.keyExists()) {
-                    dialog = alertDialogService.createBuilder(this,
-                            "If you want to generate a new key please visit settings page",
-                            "There already is a key in your storage.");
-                } else {
-                    dialog = alertDialogService.createBuilder(this, qrMessage,
-                            "To generate a new key pair press 'Generate keys'",
-                            "Generate key pair?", "Generate keys",
-                            true, this::generateAndPostPublicKey);
-                }
-            }
             // make a signature and sent to Server
-            else if (isValidJsonObject(qrMessage)) {
+            if (isValidJsonObject(qrMessage)) {
                 QRPayload qrPayload = getQRPayloadFromString(qrMessage);
                 if (qrPayload.getExpirationTime().isAfter(LocalDateTime.now())) {
-                    if (qrPayload.getPurpose().equals(QrPurpose.AUTHENTICATE))
-                        dialog = alertDialogService.createBuilder(this, qrPayload,
-                                "Press 'Verify' to authenticate",
-                                "One more step to authenticate",
-                                "Verify", this::signMessageAndSendRequest);
-                    else if (qrPayload.getPurpose().equals(QrPurpose.CHANGE_KEY))
-                        dialog = alertDialogService.createBuilder(this, qrPayload,
-                                "To update the old key pair press 'Generate keys'\n" +
-                                        "Do it only if you are sure about overriding the old key pair!", "Update key pair?",
-                                "Generate keys", this::updateKey);
-                    else dialog = alertDialogService.createBuilder(this, "Unknown error occurred, " +
-                                        "please try again later",
-                                "Unknown error!");
+                    dialog = QrCodeDialog(qrPayload);
                 } else {
                     dialog = alertDialogService.createBuilder(this, "Token expired create a new one",
                             "Token expired!");
                 }
+            }
+            // Generate save and post keys
+            else if (qrMessage.startsWith(POST_PUBLIC_KEY_SERVICE_URL)) {
+                dialog = generateNewKeyDialog(qrMessage);
             }
             // error dialog
             else {
@@ -140,6 +117,41 @@ public class FullscreenActivity extends AppCompatActivity {
         } else {
             Toast.makeText(this, "Something went wrong please try again", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private AlertDialog QrCodeDialog(QRPayload qrPayload) {
+        AlertDialog dialog;
+        if (qrPayload.getPurpose().equals(QrPurpose.AUTHENTICATE))
+            dialog = alertDialogService.createBuilder(this, qrPayload,
+                    "Press 'Verify' to authenticate",
+                    "One more step to authenticate",
+                    "Verify", this::signMessageAndSendRequest);
+        else if (qrPayload.getPurpose().equals(QrPurpose.CHANGE_KEY))
+            dialog = alertDialogService.createBuilder(this, qrPayload,
+                    "To update the old key pair press 'Generate keys'\n" +
+                            "Do it only if you are sure about overriding the old key pair!", "Update key pair?",
+                    "Generate keys", this::updateKey);
+        else dialog = alertDialogService.createBuilder(this, "Unknown error occurred, " +
+                            "please try again later",
+                    "Unknown error!");
+        return dialog;
+    }
+
+    private AlertDialog generateNewKeyDialog(String qrMessage) {
+        AlertDialog dialog;
+        qrMessage = qrMessage.substring(qrMessage.lastIndexOf('/') + 1);
+        // change this
+        if (eccService.keyExists()) {
+            dialog = alertDialogService.createBuilder(this,
+                    "If you want to generate a new key please visit settings page",
+                    "There already is a key in your storage.");
+        } else {
+            dialog = alertDialogService.createBuilder(this, qrMessage,
+                    "To generate a new key pair press 'Generate keys'",
+                    "Generate key pair?", "Generate keys",
+                    true, this::generateAndPostPublicKey);
+        }
+        return dialog;
     }
 
     private void signMessageAndSendRequest(QRPayload payload) {
@@ -187,7 +199,13 @@ public class FullscreenActivity extends AppCompatActivity {
                 (json, type, jsonDeserializationContext) ->
                         LocalDateTime.parse(json.getAsString(), DateTimeFormatter.ISO_LOCAL_DATE_TIME))
                 .create();
-        return gson.fromJson(qrMessage, QRPayload.class);
+        try{
+            QRPayload qrPayload = gson.fromJson(qrMessage, QRPayload.class);
+            return new QRPayload(qrPayload.getPurpose(), qrPayload.getPayload(),
+                    qrPayload.getJwtToken(), qrPayload.getExpirationTime());
+        }catch (Exception e) {
+            throw new JsonSyntaxException("Invalid Json syntax");
+        }
     }
 
     private boolean isValidJsonObject(String message) {
