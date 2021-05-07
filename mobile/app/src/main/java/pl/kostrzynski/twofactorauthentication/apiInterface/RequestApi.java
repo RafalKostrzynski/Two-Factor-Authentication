@@ -18,4 +18,9 @@ public interface RequestApi {
 
     @POST("second-auth/verify")
     Call<Void> verifyPayload(@Header("Authorization") String jwtToken, @Body String signature);
+
+    @POST("second-auth/change-password")
+    Call<Void> changePassword(@Header("Authorization") String jwtToken,
+                              @Query("password") String password,
+                              @Body String signature);
 }

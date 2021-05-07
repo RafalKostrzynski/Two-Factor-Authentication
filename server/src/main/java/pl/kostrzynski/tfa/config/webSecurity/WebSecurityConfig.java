@@ -47,6 +47,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/tfa/service/rest/v1/for-user/**").hasRole("USER")
                 .antMatchers("/tfa/service/rest/v1/second-auth/verify").hasRole("MOBILE_PRE_AUTHENTICATED")
                 .antMatchers("/tfa/service/rest/v1/second-auth/authenticate").hasRole("PRE_AUTHENTICATED_USER")
+                .antMatchers("/tfa/service/rest/v1/second-auth/change-password").hasRole("MOBILE_RESET_PASSWORD")
                 .antMatchers(HttpMethod.POST, "/tfa/service/rest/v1/second-auth/{token}").permitAll()
                 .anyRequest().authenticated()
                 .and()

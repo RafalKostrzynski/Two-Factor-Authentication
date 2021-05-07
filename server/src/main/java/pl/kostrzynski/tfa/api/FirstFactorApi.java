@@ -59,6 +59,31 @@ public class FirstFactorApi {
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 
+    @PostMapping("forgot-password")
+    public ResponseEntity<HttpStatus> resetPassword(@RequestParam String email, HttpServletRequest httpServletRequest)
+            throws MessagingException {
+        User user = userService.getUserByEmail(email);
+        if (!user.isEnabled()) throw new ApiMethodException("This user is not registered yet" +
+                "Please finish the registration process",
+                ApiErrorCodeEnum.FORBIDDEN);
+        userService.sendPasswordResetMail(user, httpServletRequest);
+        return new ResponseEntity<>(HttpStatus.ACCEPTED);
+    }
+
+    @GetMapping("reset-password/{token}")
+    public ResponseEntity<QrCodeDetail> createDataForResetPassword(@PathVariable String token) {
+        User user = verificationTokenService.getUserByVerificationToken(token);
+        if (!user.isEnabled()) throw new ApiMethodException("This user is not registered yet" +
+                "Please finish the registration process",
+                ApiErrorCodeEnum.FORBIDDEN);
+        String payload = payloadService.generatePayload();
+        String jwtTokenMobile = jwtTokenService.createToken(user.getUsername(), AuthenticationState.MOBILE_RESET_PASSWORD);
+        QrCodeDetail qrCode = new QrCodeDetail(
+                QrPurpose.RESET_PASSWORD, payload, jwtTokenMobile, LocalDateTime.now().plusMinutes(15).toString());
+        payloadService.setPayload(payload, user.getUsername(), false, LocalDateTime.now().plusSeconds(905));
+        return new ResponseEntity<>(qrCode, HttpStatus.ACCEPTED);
+    }
+
     // it is used when user didn't received the verification email
     @PatchMapping("verification-mail")
     public ResponseEntity<HttpStatus> sendVerificationMail(@RequestParam String email, HttpServletRequest httpServletRequest)

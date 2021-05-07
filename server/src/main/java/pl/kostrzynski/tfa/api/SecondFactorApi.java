@@ -19,6 +19,7 @@ import pl.kostrzynski.tfa.service.ECCHandler;
 import pl.kostrzynski.tfa.service.entityService.PayloadService;
 import pl.kostrzynski.tfa.service.entityService.SecondAuthService;
 import pl.kostrzynski.tfa.service.entityService.SmartphoneDetailsService;
+import pl.kostrzynski.tfa.service.entityService.UserService;
 
 import javax.validation.Valid;
 import java.security.Principal;
@@ -37,16 +38,19 @@ public class SecondFactorApi {
     private final PayloadService payloadService;
     private final JwtTokenService jwtTokenService;
     private final ECCHandler eccHandler;
+    private final UserService userService;
 
     @Autowired
     public SecondFactorApi(SecondAuthService secondAuthService,
                            SmartphoneDetailsService smartphoneDetailsService,
-                           PayloadService payloadService, JwtTokenService jwtTokenService, ECCHandler eccHandler) {
+                           PayloadService payloadService, JwtTokenService jwtTokenService,
+                           ECCHandler eccHandler, UserService userService) {
         this.secondAuthService = secondAuthService;
         this.smartphoneDetailsService = smartphoneDetailsService;
         this.payloadService = payloadService;
         this.jwtTokenService = jwtTokenService;
         this.eccHandler = eccHandler;
+        this.userService = userService;
     }
 
     @PostMapping("{token}")
@@ -55,7 +59,7 @@ public class SecondFactorApi {
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 
-    // Method for mobile
+    // Method for mobile authentication
     @PostMapping("verify")
     public ResponseEntity<HttpStatus> verifyUser(Principal principal, @RequestBody String signature) {
         // verify signature
@@ -64,6 +68,23 @@ public class SecondFactorApi {
         Payload payload = payloadService.getPayloadByUsername(principal.getName());
         if (eccHandler.isValidSignature(signature, smartphoneDetails, secondAuth, payload)) {
             payloadService.changeActiveState(payload, true);
+            return new ResponseEntity<>(HttpStatus.ACCEPTED);
+        }
+        throw new ApiMethodException("Signature not valid", ApiErrorCodeEnum.FORBIDDEN);
+    }
+
+    // Method for mobile password change
+    @PostMapping("change-password")
+    public ResponseEntity<HttpStatus> changePassword(Principal principal,
+                                                     @RequestBody String signature, @RequestParam String password) {
+        if (password.length() < 9 || password.length() > 60)
+            throw new ApiMethodException("Password not valid", ApiErrorCodeEnum.NOT_ACCEPTABLE);
+        SecondAuth secondAuth = secondAuthService.getSecondAuthByUsername(principal.getName());
+        SmartphoneDetails smartphoneDetails = smartphoneDetailsService.getSmartphoneDetailsBySecondAuthId(secondAuth.getId());
+        Payload payload = payloadService.getPayloadByUsername(principal.getName());
+        if (eccHandler.isValidSignature(signature, smartphoneDetails, secondAuth, payload) && payload.isNotExpired()) {
+            userService.changePassword(principal.getName(), password);
+            payloadService.payloadWasUsed(payload);
             return new ResponseEntity<>(HttpStatus.ACCEPTED);
         }
         throw new ApiMethodException("Signature not valid", ApiErrorCodeEnum.FORBIDDEN);

@@ -75,6 +75,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             case MOBILE_AUTHENTICATED:
                 authorities = List.of(new SimpleGrantedAuthority(UserRole.MOBILE_AUTHENTICATED));
                 break;
+            case MOBILE_RESET_PASSWORD:
+                authorities = List.of(new SimpleGrantedAuthority(UserRole.MOBILE_RESET_PASSWORD));
+                break;
             default:
                 throw new IOException("Something went wrong please try again later");
         }

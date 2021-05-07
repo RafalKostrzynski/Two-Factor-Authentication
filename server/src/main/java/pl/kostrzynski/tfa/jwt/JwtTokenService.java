@@ -21,11 +21,28 @@ public class JwtTokenService {
 
     public String createToken(Authentication authentication, AuthenticationState authenticationState) {
         Date expirationDate = new Date(new Date().getTime() + (
-                authenticationState == AuthenticationState.AUTHENTICATED  ?
-                jwtConfig.getExpirationTimeAuthenticated() :
-                jwtConfig.getExpirationTimePreAuthenticated()));
+                authenticationState == AuthenticationState.AUTHENTICATED ?
+                        jwtConfig.getExpirationTimeAuthenticated() :
+                        jwtConfig.getExpirationTimePreAuthenticated()));
 
         return Jwts.builder().setSubject(authentication.getName())
+                .claim(AUTHENTICATION_STATE, authenticationState)
+                .setIssuedAt(new Date()).setExpiration(expirationDate)
+                .signWith(SignatureAlgorithm.HS512, jwtConfig.getSecret().getBytes())
+                .compact();
+    }
+
+    public String createToken(String username, AuthenticationState authenticationState) {
+        long expirationTime;
+        if (authenticationState == AuthenticationState.AUTHENTICATED) expirationTime =
+                jwtConfig.getExpirationTimeAuthenticated();
+        else if (authenticationState == AuthenticationState.MOBILE_RESET_PASSWORD) expirationTime =
+                jwtConfig.getExpirationTimeMobileResetPassword();
+        else expirationTime = jwtConfig.getExpirationTimePreAuthenticated();
+
+        Date expirationDate = new Date(new Date().getTime() + expirationTime);
+
+        return Jwts.builder().setSubject(username)
                 .claim(AUTHENTICATION_STATE, authenticationState)
                 .setIssuedAt(new Date()).setExpiration(expirationDate)
                 .signWith(SignatureAlgorithm.HS512, jwtConfig.getSecret().getBytes())

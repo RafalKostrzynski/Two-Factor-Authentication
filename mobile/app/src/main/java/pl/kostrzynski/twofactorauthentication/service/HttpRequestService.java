@@ -6,8 +6,6 @@ import okhttp3.OkHttpClient;
 import okhttp3.tls.Certificates;
 import okhttp3.tls.HandshakeCertificates;
 import org.jetbrains.annotations.NotNull;
-import pl.kostrzynski.twofactorauthentication.apiInterface.RequestApi;
-import pl.kostrzynski.twofactorauthentication.model.SmartphoneDetails;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -15,10 +13,8 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 import java.io.IOException;
-import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
@@ -71,6 +67,23 @@ public class HttpRequestService {
         });
     }
 
+    public static void executeVerificationAndChangePasswordCall(Context context, Call<Void> call,
+                                                                String successfulMessage, String failureMessage) {
+        call.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful())
+                    Toast.makeText(context, successfulMessage, Toast.LENGTH_SHORT).show();
+                else Toast.makeText(context, failureMessage, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Toast.makeText(context, "Unexpected error occurred, try again later", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
     public static boolean requestUpdate(Call<Void> call) {
         try {
             Response<Void> response = call.execute();
@@ -89,23 +102,6 @@ public class HttpRequestService {
         }
     }
 
-    public static void executeVerificationCall(Context context, Call<Void> call,
-                                               String successfulMessage, String failureMessage) {
-        call.enqueue(new Callback<Void>() {
-            @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
-                if (response.isSuccessful())
-                    Toast.makeText(context, successfulMessage, Toast.LENGTH_SHORT).show();
-                else Toast.makeText(context, failureMessage, Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onFailure(Call<Void> call, Throwable t) {
-                Toast.makeText(context, "Unexpected error occurred, try again later", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
     @NotNull
     public Retrofit getRetrofit() {
         HandshakeCertificates certificates = new HandshakeCertificates.Builder()
@@ -120,5 +116,9 @@ public class HttpRequestService {
                 .baseUrl(BASE_URL).addConverterFactory(GsonConverterFactory.create())
                 .client(client)
                 .build();
+    }
+
+    public String getBearerToken(String jwtToken) {
+        return "Bearer " + jwtToken;
     }
 }

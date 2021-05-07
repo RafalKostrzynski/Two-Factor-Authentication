@@ -30,12 +30,12 @@ public class UserService {
 
     public User getUserByUsername(String username) {
         return userRepository.findByUsername(username).orElseThrow(
-                ()-> new ApiMethodException(String.format("Username %s not found", username),ApiErrorCodeEnum.NOT_FOUND));
+                () -> new ApiMethodException(String.format("Username %s not found", username), ApiErrorCodeEnum.NOT_FOUND));
     }
 
     public User getUserByEmail(String email) {
         return userRepository.findByEmail(email).orElseThrow(
-                ()-> new ApiMethodException(String.format("Email %s not found", email),ApiErrorCodeEnum.NOT_FOUND));
+                () -> new ApiMethodException(String.format("Email %s not found", email), ApiErrorCodeEnum.NOT_FOUND));
     }
 
     public void addNewUser(User user, HttpServletRequest httpServletRequest) throws MessagingException {
@@ -81,8 +81,18 @@ public class UserService {
     public User verifyToken(String token, String purpose) {
         User user = verificationTokenService.getUserByVerificationToken(token);
         if (purpose.equals("verify-email") && !user.isEmailVerified()) user.setEmailVerified(true);
-        else if (user.isEmailVerified() && !user.isEnabled() && purpose.equals("add-public")) user.setEnabled(true);
-        else throw new IllegalArgumentException("Couldn't verify token");
+        else if (user.isEmailVerified() && !user.isEnabled() && purpose.equals("add-public")) {
+            verificationTokenService.deleteToken(token);
+            user.setEnabled(true);
+        } else throw new IllegalArgumentException("Couldn't verify token");
         return userRepository.save(user);
+    }
+
+    public void changePassword(String username, String password) {
+        userRepository.findByUsername(username).map(e -> {
+            e.setPassword(passwordEncoder.encode(password));
+            return userRepository.save(e);
+        }).orElseThrow(
+                () -> new ApiMethodException(String.format("Username %s not found", username), ApiErrorCodeEnum.NOT_FOUND));
     }
 }

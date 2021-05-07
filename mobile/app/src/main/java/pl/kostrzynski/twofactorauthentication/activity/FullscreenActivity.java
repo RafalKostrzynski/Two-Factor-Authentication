@@ -19,10 +19,11 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonSyntaxException;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
+import org.jetbrains.annotations.NotNull;
 import pl.kostrzynski.twofactorauthentication.R;
 import pl.kostrzynski.twofactorauthentication.model.QRPayload;
 import pl.kostrzynski.twofactorauthentication.model.SmartphoneDetails;
-import pl.kostrzynski.twofactorauthentication.model.enums.QrPurpose;
+import pl.kostrzynski.twofactorauthentication.runnable.ChangePasswordRunnable;
 import pl.kostrzynski.twofactorauthentication.runnable.CreatePostSaveKeyRunnable;
 import pl.kostrzynski.twofactorauthentication.runnable.PostSignedMessageRunnable;
 import pl.kostrzynski.twofactorauthentication.runnable.PutPublicKeyRunnable;
@@ -97,7 +98,7 @@ public class FullscreenActivity extends AppCompatActivity {
             // make a signature and sent to Server
             if (isValidJsonObject(qrMessage)) {
                 QRPayload qrPayload = getQRPayloadFromString(qrMessage);
-                if (qrPayload.getExpirationTime().isAfter(LocalDateTime.now())) {
+                if (qrPayload.getExpirationTime().plusSeconds(5).isAfter(LocalDateTime.now())) {
                     dialog = QrCodeDialog(qrPayload);
                 } else {
                     dialog = alertDialogService.createBuilder(this, "Token expired create a new one",
@@ -121,19 +122,29 @@ public class FullscreenActivity extends AppCompatActivity {
 
     private AlertDialog QrCodeDialog(QRPayload qrPayload) {
         AlertDialog dialog;
-        if (qrPayload.getPurpose().equals(QrPurpose.AUTHENTICATE))
-            dialog = alertDialogService.createBuilder(this, qrPayload,
-                    "Press 'Verify' to authenticate",
-                    "One more step to authenticate",
-                    "Verify", this::signMessageAndSendRequest);
-        else if (qrPayload.getPurpose().equals(QrPurpose.CHANGE_KEY))
-            dialog = alertDialogService.createBuilder(this, qrPayload,
-                    "To update the old key pair press 'Generate keys'\n" +
-                            "Do it only if you are sure about overriding the old key pair!", "Update key pair?",
-                    "Generate keys", this::updateKey);
-        else dialog = alertDialogService.createBuilder(this, "Unknown error occurred, " +
-                            "please try again later",
-                    "Unknown error!");
+
+        switch (qrPayload.getPurpose()) {
+            case AUTHENTICATE:
+                dialog = alertDialogService.createBuilder(this, qrPayload,
+                        "Press 'Verify' to authenticate",
+                        "One more step to authenticate",
+                        "Verify", this::signMessageAndSendRequest);
+                break;
+            case CHANGE_KEY:
+                dialog = alertDialogService.createBuilder(this, qrPayload,
+                        "To update the old key pair press 'Generate keys'\n" +
+                                "Do it only if you are sure about overriding the old key pair!", "Update key pair?",
+                        "Generate keys", this::updateKey);
+                break;
+            case RESET_PASSWORD:
+                dialog = alertDialogService.createBuilder(this, this, qrPayload, "Reset password request",
+                        "Save new password", this::resetPassword);
+                break;
+            default:
+                dialog = alertDialogService.createBuilder(this, "Unknown error occurred, " +
+                                "please try again later",
+                        "Unknown error!");
+        }
         return dialog;
     }
 
@@ -154,30 +165,46 @@ public class FullscreenActivity extends AppCompatActivity {
         return dialog;
     }
 
-    private void signMessageAndSendRequest(QRPayload payload) {
-        try {
-            @SuppressLint("HardwareIds")
-            String secretAndroidId = Settings.Secure.
-                    getString(this.getContentResolver(), Settings.Secure.ANDROID_ID);
-            SmartphoneDetails smartphoneDetails = new SmartphoneDetails(secretAndroidId);
-            String message = payload.getPayload() + smartphoneDetails.getSmartphoneDetails();
-            String signature = eccService.signMessage(message);
-            Thread thread = new Thread(new PostSignedMessageRunnable(this, payload, signature));
+    private void signMessageAndSendRequest(QRPayload qrPayload) {
+        String signature = getSignature(qrPayload);
+        if (signature != null) {
+            Thread thread = new Thread(new PostSignedMessageRunnable(this, qrPayload, signature));
             thread.start();
-
-        } catch (KeyStoreException | SignatureException | InvalidKeyException | UnrecoverableEntryException |
-                IOException | CertificateException | NoSuchAlgorithmException e) {
-            Toast.makeText(this, "Something went wrong please try again", Toast.LENGTH_SHORT).show();
         }
     }
 
-    private void updateKey(QRPayload payload) {
+    private void resetPassword(QRPayload qrPayload, String password) {
+        String signature = getSignature(qrPayload);
+        if (signature != null) {
+            Thread thread = new Thread(new ChangePasswordRunnable(this, password, signature, qrPayload));
+            thread.start();
+        }
+    }
+
+    private void updateKey(QRPayload qrPayload) {
+        SmartphoneDetails smartphoneDetails = getSmartphoneDetails();
+        Thread thread = new Thread(new PutPublicKeyRunnable(smartphoneDetails, qrPayload, this));
+        thread.start();
+    }
+
+    private String getSignature(QRPayload qrPayload) {
+        try {
+            SmartphoneDetails smartphoneDetails = getSmartphoneDetails();
+            String message = qrPayload.getPayload() + smartphoneDetails.getSmartphoneDetails();
+            return eccService.signMessage(message);
+        } catch (KeyStoreException | SignatureException | InvalidKeyException | UnrecoverableEntryException |
+                IOException | CertificateException | NoSuchAlgorithmException e) {
+            Toast.makeText(this, "Something went wrong please try again", Toast.LENGTH_SHORT).show();
+            return null;
+        }
+    }
+
+    @NotNull
+    private SmartphoneDetails getSmartphoneDetails() {
         @SuppressLint("HardwareIds")
         String secretAndroidId = Settings.Secure.
                 getString(this.getContentResolver(), Settings.Secure.ANDROID_ID);
-        SmartphoneDetails smartphoneDetails = new SmartphoneDetails(secretAndroidId);
-        Thread thread = new Thread(new PutPublicKeyRunnable(smartphoneDetails, payload, this));
-        thread.start();
+        return new SmartphoneDetails(secretAndroidId);
     }
 
     private void generateAndPostPublicKey(String token, boolean isPostMethod) {
@@ -196,11 +223,11 @@ public class FullscreenActivity extends AppCompatActivity {
                 (json, type, jsonDeserializationContext) ->
                         LocalDateTime.parse(json.getAsString(), DateTimeFormatter.ISO_LOCAL_DATE_TIME))
                 .create();
-        try{
+        try {
             QRPayload qrPayload = gson.fromJson(qrMessage, QRPayload.class);
             return new QRPayload(qrPayload.getPurpose(), qrPayload.getPayload(),
                     qrPayload.getJwtToken(), qrPayload.getExpirationTime());
-        }catch (Exception e) {
+        } catch (Exception e) {
             throw new JsonSyntaxException("Invalid Json syntax");
         }
     }

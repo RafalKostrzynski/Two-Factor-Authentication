@@ -7,31 +7,35 @@ import pl.kostrzynski.twofactorauthentication.service.HttpRequestService;
 import retrofit2.Call;
 import retrofit2.Retrofit;
 
-public class PostSignedMessageRunnable implements Runnable {
+public class ChangePasswordRunnable implements Runnable {
 
     private final Context context;
-    private final QRPayload qrPayload;
+    private final String password;
     private final String signature;
+    private final QRPayload qrPayload;
 
-    public PostSignedMessageRunnable(Context context, QRPayload qrPayload, String signature) {
+    public ChangePasswordRunnable(Context context, String password, String signature, QRPayload qrPayload) {
         this.context = context;
-        this.qrPayload = qrPayload;
+        this.password = password;
         this.signature = signature;
+        this.qrPayload = qrPayload;
     }
 
     @Override
     public void run() {
-        sendPost(context, qrPayload.getJwtToken(), signature);
+        changePasswordRequest(context, password, signature, qrPayload);
     }
 
-    private void sendPost(Context context, String jwtToken, String signature) {
+    private void changePasswordRequest(Context context, String password, String signature, QRPayload qrPayload) {
         HttpRequestService httpRequestService = new HttpRequestService();
         Retrofit retrofit = httpRequestService.getRetrofit();
         RequestApi requestApi = retrofit.create(RequestApi.class);
-
-        Call<Void> call = requestApi.verifyPayload(httpRequestService.getBearerToken(jwtToken), signature);
+        Call<Void> call = requestApi.changePassword(
+                httpRequestService.getBearerToken(qrPayload.getJwtToken()),
+                password,
+                signature);
         HttpRequestService.executeVerificationAndChangePasswordCall(context, call,
-                "Verified successfully, you will be authenticated in a few seconds",
-                "Could not verify please try again");
+                "Password changed successfully, you can now authenticate with new credentials",
+                "Could not change password, try again");
     }
 }

@@ -13,6 +13,8 @@ public class JwtConfig {
     private int expirationTimeAuthenticated;
     @Value("${expirationTimePreAuthenticatedMS}")
     private int expirationTimePreAuthenticated;
+    @Value("${expirationTimeMobileResetPassword}")
+    private int expirationTimeMobileResetPassword;
     @Value("${JwtSecretKey}")
     private String secret;
 }
