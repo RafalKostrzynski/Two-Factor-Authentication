@@ -30,7 +30,6 @@ import java.time.LocalDateTime;
  * <p>
  * See the swagger documentation on the API methods under https://localhost:8443/swagger-ui/index.html
  */
-// TODO change endpoint to ...unauthorized?
 @RestController
 @RequestMapping(value = "tfa/service/rest/v1/first-auth", produces = MediaType.APPLICATION_JSON_VALUE)
 public class FirstFactorApi {
