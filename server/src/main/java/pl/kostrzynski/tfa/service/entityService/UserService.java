@@ -60,7 +60,8 @@ public class UserService {
                 "Someone with requested a password reset with this email address.\n" +
                 "Click on this link address to reset your current password.\n\n" + url
                 + "\n\nIf this request was not provided by you, ignore this message" +
-                "This token is available for 24 hours, after this it will expire\n";
+                "This token is available for 24 hours, after this it will expire\n\n" +
+                "After entering the link you will have 15 minutes to create a new password";
         mailSenderService.sendMail(user.getEmail(), "Reset password",
                 textMessage, false);
     }

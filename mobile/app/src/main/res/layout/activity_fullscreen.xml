@@ -64,6 +64,7 @@
                       android:layout_width="match_parent"
                       android:layout_height="wrap_content"
                       android:layout_gravity="bottom"
+                      android:layout_marginBottom="50dp"
                       android:orientation="vertical">
             <TextView android:id="@+id/privateKeyName"
                       android:text="@string/private_key_name"
@@ -73,7 +74,9 @@
                       android:textStyle="bold"
                       android:textSize="20sp"
                       android:layout_marginBottom="40dp"
-                      android:gravity="center"/>
+                      android:gravity="center"
+                      android:fontFamily="@font/archivo_black"
+            />
         </LinearLayout>
 
         <LinearLayout android:id="@+id/fullscreen_content_controls"

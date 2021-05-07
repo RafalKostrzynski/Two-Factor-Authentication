@@ -37,20 +37,10 @@ import java.security.cert.CertificateException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-
-/**
- * An example full-screen activity that shows and hides the system UI (i.e.
- * status bar and navigation/system bar) with user interaction.
- */
 public class FullscreenActivity extends AppCompatActivity {
-    /**
-     * Some older devices needs a small delay between UI widget updates
-     * and a change of the status and navigation bar.
-     */
-    private static final int UI_ANIMATION_DELAY = 300;
 
+    private static final int UI_ANIMATION_DELAY = 300;
     private View mContentView;
-    private TextView privateKeyName;
     private final ECCService eccService = new ECCService();
     private final PreferenceService preferenceService = new PreferenceService();
     private final AlertDialogService alertDialogService = new AlertDialogService();
@@ -60,17 +50,13 @@ public class FullscreenActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_fullscreen);
         mContentView = findViewById(R.id.fullscreen_content);
-        privateKeyName = findViewById(R.id.privateKeyName);
+        TextView privateKeyName = findViewById(R.id.privateKeyName);
         final Button scanQRButton = findViewById(R.id.scan_code_button);
         scanQRButton.setOnClickListener(v -> scanQR());
 
-        // TODO we can save the random message to preferences not the the path
-        // TODO set message that keys have been stored successfully
-        //String path = preferenceService.loadPathFromPreferences(this);
-        //privateKeyName.setText(fileService.findFileNameFromString(path));
+        privateKeyName.setText(preferenceService.loadAdjectiveFromPreferences(this));
     }
 
     private void scanQR() {

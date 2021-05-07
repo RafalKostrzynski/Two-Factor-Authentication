@@ -81,6 +81,7 @@ public class FirstFactorApi {
         QrCodeDetail qrCode = new QrCodeDetail(
                 QrPurpose.RESET_PASSWORD, payload, jwtTokenMobile, LocalDateTime.now().plusMinutes(15).toString());
         payloadService.setPayload(payload, user.getUsername(), false, LocalDateTime.now().plusSeconds(905));
+        verificationTokenService.deleteToken(token);
         return new ResponseEntity<>(qrCode, HttpStatus.ACCEPTED);
     }
 

@@ -1,11 +1,14 @@
 package pl.kostrzynski.twofactorauthentication.service;
 
+import android.app.Activity;
 import android.content.Context;
+import android.widget.TextView;
 import android.widget.Toast;
 import okhttp3.OkHttpClient;
 import okhttp3.tls.Certificates;
 import okhttp3.tls.HandshakeCertificates;
 import org.jetbrains.annotations.NotNull;
+import pl.kostrzynski.twofactorauthentication.R;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -51,18 +54,26 @@ public class HttpRequestService {
         call.enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
-                if (response.isSuccessful())
+                if (response.isSuccessful()) {
                     Toast.makeText(context, successfulMessage, Toast.LENGTH_SHORT).show();
+                    setTextField();
+                }
                 else {
                     Toast.makeText(context, failureMessage, Toast.LENGTH_SHORT).show();
                     keyReset(eccService, context);
                 }
             }
-
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
                 keyReset(eccService, context);
                 Toast.makeText(context, "Unexpected error occurred, try again later", Toast.LENGTH_SHORT).show();
+            }
+
+            private void setTextField() {
+                Activity activity = (Activity) context;
+                TextView keyNameTextView = activity.findViewById(R.id.privateKeyName);
+                PreferenceService preferenceService = new PreferenceService();
+                keyNameTextView.setText(preferenceService.generateAndSaveAdjectiveToSharedPreferences(context));
             }
         });
     }
