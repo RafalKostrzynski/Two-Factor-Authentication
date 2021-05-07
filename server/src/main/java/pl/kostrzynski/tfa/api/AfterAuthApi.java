@@ -9,9 +9,11 @@ import pl.kostrzynski.tfa.jwt.JwtTokenService;
 import pl.kostrzynski.tfa.model.QrCodeDetail;
 import pl.kostrzynski.tfa.model.SecondAuthDto;
 import pl.kostrzynski.tfa.model.entity.SecondAuth;
+import pl.kostrzynski.tfa.model.entity.User;
 import pl.kostrzynski.tfa.model.enums.AuthenticationState;
 import pl.kostrzynski.tfa.model.enums.QrPurpose;
 import pl.kostrzynski.tfa.service.entityService.SecondAuthService;
+import pl.kostrzynski.tfa.service.entityService.UserService;
 
 import javax.validation.Valid;
 import java.security.Principal;
@@ -28,10 +30,17 @@ public class AfterAuthApi {
 
     private final SecondAuthService secondAuthService;
     private final JwtTokenService jwtTokenService;
+    private final UserService userService;
 
-    public AfterAuthApi(SecondAuthService secondAuthService, JwtTokenService jwtTokenService) {
+    public AfterAuthApi(SecondAuthService secondAuthService, JwtTokenService jwtTokenService, UserService userService) {
         this.secondAuthService = secondAuthService;
         this.jwtTokenService = jwtTokenService;
+        this.userService = userService;
+    }
+
+    @PutMapping("user")
+    public ResponseEntity<User> updateUser(Principal principal, @RequestBody @Valid User user) {
+        return new ResponseEntity<>(userService.updateUser(principal.getName(), user), HttpStatus.ACCEPTED);
     }
 
     // update key after security checks

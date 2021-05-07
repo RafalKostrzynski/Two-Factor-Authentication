@@ -54,18 +54,29 @@ public class UserService {
                 textMessage, false);
     }
 
-    // Took out because it might be useful in the future
-//    public boolean userExistsForLaterVerificationMail(User user) {
-//        ExampleMatcher modelMatcher = ExampleMatcher.matching()
-//                .withIgnorePaths("id","password");
-//        user.setEmailVerified(false);
-//        return userExists(user, modelMatcher);
-//    }
-//
-//    public boolean userExists(User user, ExampleMatcher modelMatcher) {
-//        Example<User> userExample = Example.of(user, modelMatcher);
-//        return userRepository.exists(userExample);
-//    }
+    public void sendPasswordResetMail(User user, HttpServletRequest httpServletRequest) throws MessagingException {
+        String url = verificationTokenService.createUUIDLink(user, "reset-password", httpServletRequest);
+        String textMessage = "Hello " + user.getUsername() + "!\n\n" +
+                "Someone with requested a password reset with this email address.\n" +
+                "Click on this link address to reset your current password.\n\n" + url
+                + "\n\nIf this request was not provided by you, ignore this message" +
+                "This token is available for 24 hours, after this it will expire\n";
+        mailSenderService.sendMail(user.getEmail(), "Reset password",
+                textMessage, false);
+    }
+
+    public User updateUser(String username, User updatedUser) {
+        return userRepository.findByUsername(username).map(e -> changeUser(e, updatedUser))
+                .orElseThrow(
+                        () -> new ApiMethodException(String.format("Username %s not found", username), ApiErrorCodeEnum.NOT_FOUND));
+    }
+
+    private User changeUser(User dbUser, User updatedUser) {
+        dbUser.setUsername(updatedUser.getUsername());
+        dbUser.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
+        dbUser.setEmail(updatedUser.getEmail());
+        return userRepository.save(dbUser);
+    }
 
     public User verifyToken(String token, String purpose) {
         User user = verificationTokenService.getUserByVerificationToken(token);
