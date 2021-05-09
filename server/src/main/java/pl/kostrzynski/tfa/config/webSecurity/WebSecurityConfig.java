@@ -57,9 +57,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 
-
-        // TODO delete this (its only purpose is to allow easier manual testing)
-        // TODO csrf is needed when user uses browser
+        // session policy is set to stateless so cookies are not in use, therefore csrf is not needed
         http.csrf().disable();
     }
 
