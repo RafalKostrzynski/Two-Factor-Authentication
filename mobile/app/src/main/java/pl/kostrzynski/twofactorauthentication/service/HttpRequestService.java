@@ -57,12 +57,12 @@ public class HttpRequestService {
                 if (response.isSuccessful()) {
                     Toast.makeText(context, successfulMessage, Toast.LENGTH_SHORT).show();
                     setTextField();
-                }
-                else {
+                } else {
                     Toast.makeText(context, failureMessage, Toast.LENGTH_SHORT).show();
                     keyReset(eccService, context);
                 }
             }
+
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
                 keyReset(eccService, context);

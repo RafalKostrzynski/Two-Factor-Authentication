@@ -46,15 +46,15 @@ public class PreferenceService {
         return getKeyName(adjective);
     }
 
-    private String getKeyName(String adjective){
+    private String getKeyName(String adjective) {
         return adjective.equals("") ?
                 "No key stored yet" :
-                adjective.substring(0, 1).toUpperCase() + adjective.substring(1)+" key available";
+                adjective.substring(0, 1).toUpperCase() + adjective.substring(1) + " key available";
     }
 
-    private String getRandomAdjective(){
+    private String getRandomAdjective() {
         Random random = new Random();
-        return adjective[random.nextInt(adjective.length-1)];
+        return adjective[random.nextInt(adjective.length - 1)];
     }
 
 }

@@ -9,7 +9,6 @@ import android.widget.EditText;
 import pl.kostrzynski.twofactorauthentication.R;
 import pl.kostrzynski.twofactorauthentication.model.QRPayload;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 

@@ -6,7 +6,6 @@ import android.util.Base64;
 
 import java.io.IOException;
 import java.security.*;
-import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 
 public class ECCService {

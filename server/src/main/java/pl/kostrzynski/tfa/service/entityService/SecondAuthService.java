@@ -1,10 +1,7 @@
 package pl.kostrzynski.tfa.service.entityService;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import pl.kostrzynski.tfa.exception.ApiErrorCodeEnum;
-import pl.kostrzynski.tfa.exception.ApiMethodException;
 import pl.kostrzynski.tfa.model.SecondAuthDto;
 import pl.kostrzynski.tfa.model.entity.SecondAuth;
 import pl.kostrzynski.tfa.model.entity.User;
@@ -30,11 +27,6 @@ public class SecondAuthService {
         this.eccHandler = eccHandler;
     }
 
-    public SecondAuth getSecondAuthByUser(User user) {
-        return secondAuthRepository.findSecondAuthByUser(user).orElseThrow(() ->
-                new NoSuchElementException("No SecondAuth for user " + user.getUsername() + " found"));
-    }
-
     public SecondAuth getSecondAuthByUsername(String username) {
         return secondAuthRepository.findSecondAuthByUser_Username(username).orElseThrow(() ->
                 new NoSuchElementException("No SecondAuth for user " + username + " found"));
@@ -51,13 +43,13 @@ public class SecondAuthService {
     }
 
     public void updateSecondAuth(SecondAuth databaseSecondAuth, SecondAuthDto secondAuthDto) {
-            SecondAuth secondAuth = secondAuthDto.getSecondAuth();
-            SecondAuth changedSecondAuth = changeSecondAuth(databaseSecondAuth, secondAuth);
-            smartphoneDetailsService.updateSmartphoneDetails(secondAuthDto.getSmartphoneDetails(), changedSecondAuth);
+        SecondAuth secondAuth = secondAuthDto.getSecondAuth();
+        SecondAuth changedSecondAuth = changeSecondAuth(databaseSecondAuth, secondAuth);
+        smartphoneDetailsService.updateSmartphoneDetails(secondAuthDto.getSmartphoneDetails(), changedSecondAuth);
     }
 
     private SecondAuth changeSecondAuth(SecondAuth oldSecondAuth, SecondAuth newSecondAuth) {
-            oldSecondAuth.setPublicKeyBytes(newSecondAuth.getPublicKeyBytes());
-            return secondAuthRepository.save(oldSecondAuth);
+        oldSecondAuth.setPublicKeyBytes(newSecondAuth.getPublicKeyBytes());
+        return secondAuthRepository.save(oldSecondAuth);
     }
 }

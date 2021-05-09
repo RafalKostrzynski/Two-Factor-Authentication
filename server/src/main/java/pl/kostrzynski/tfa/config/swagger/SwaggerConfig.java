@@ -18,7 +18,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @Configuration
 public class SwaggerConfig {
     private static final String SWAGGER_API_VERSION = "1.0";
-    private static final String title = "2FA";
+    private static final String title = "Two Factor Authentication";
     private static final String description = "BEng Thesis Project about the usage of Public-Key Cryptography in the two factor authentication";
 
     private ApiInfo apiInfo() {
