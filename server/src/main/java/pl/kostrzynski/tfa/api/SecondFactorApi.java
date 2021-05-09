@@ -97,6 +97,7 @@ public class SecondFactorApi {
         if (payload.isActive() && payload.isNotExpired()) {
             payloadService.payloadWasUsed(payload);
             String jwtToken = jwtTokenService.createToken((Authentication) principal, AuthenticationState.AUTHENTICATED);
+            userService.storeToken(jwtToken, principal.getName());
             return new ResponseEntity<>(new AuthenticationResponse(jwtToken, 14), HttpStatus.ACCEPTED);
         }
         throw new ApiMethodException("Token expired", ApiErrorCodeEnum.FORBIDDEN);

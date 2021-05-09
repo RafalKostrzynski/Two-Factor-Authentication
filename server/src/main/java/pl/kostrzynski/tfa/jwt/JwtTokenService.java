@@ -5,6 +5,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import pl.kostrzynski.tfa.model.entity.User;
 import pl.kostrzynski.tfa.model.enums.AuthenticationState;
 
 import java.util.Date;
@@ -59,6 +60,15 @@ public class JwtTokenService {
     public String getUsernameFromToken(String jwtToken) {
         Claims claims = getClaimsFromJwt(jwtToken);
         return claims.getSubject();
+    }
+
+    public boolean validateUsersSingleToken(String jwtToken, User user){
+        AuthenticationState authenticationState =
+                AuthenticationState.valueOf(String.valueOf(getClaimsFromJwt(jwtToken).get("AuthenticationState")));
+        if(authenticationState.equals(AuthenticationState.AUTHENTICATED)){
+            return user.getJwt().equals(jwtToken);
+        }
+        return true;
     }
 
     public AuthenticationState getAuthenticationStateFromToken(String jwtToken) {

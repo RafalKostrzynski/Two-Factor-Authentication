@@ -1,6 +1,7 @@
 package pl.kostrzynski.tfa.service.entityService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import pl.kostrzynski.tfa.exception.ApiErrorCodeEnum;
@@ -42,6 +43,13 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
         sendVerificationEmail(user, httpServletRequest);
+    }
+
+    @Async
+    public void storeToken(String jwtToken, String username){
+        User user = getUserByUsername(username);
+        user.setJwt(jwtToken);
+        userRepository.save(user);
     }
 
     public void sendVerificationEmail(User user, HttpServletRequest httpServletRequest) throws MessagingException {

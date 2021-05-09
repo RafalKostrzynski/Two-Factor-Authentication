@@ -35,6 +35,8 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String password;
     @JsonIgnore
+    private String jwt;
+    @JsonIgnore
     @Column(nullable = false)
     private boolean emailVerified;
     @JsonIgnore
