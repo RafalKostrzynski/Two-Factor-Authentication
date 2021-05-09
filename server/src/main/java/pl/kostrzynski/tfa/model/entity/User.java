@@ -8,6 +8,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import pl.kostrzynski.tfa.model.UserRole;
+import pl.kostrzynski.tfa.model.validator.ValidPassword;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
@@ -31,7 +32,7 @@ public class User implements UserDetails {
     @Size(min = 5, max = 30, message = "Please provide a valid username")
     @Column(nullable = false, unique = true)
     private String username;
-    @Size(min = 9, max = 60, message = "Please provide a valid password")
+    @ValidPassword
     @Column(nullable = false)
     private String password;
     @JsonIgnore
