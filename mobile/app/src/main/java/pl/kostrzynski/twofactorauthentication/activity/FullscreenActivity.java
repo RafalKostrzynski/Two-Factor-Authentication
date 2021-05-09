@@ -44,7 +44,6 @@ public class FullscreenActivity extends AppCompatActivity {
     private final ECCService eccService = new ECCService();
     private final PreferenceService preferenceService = new PreferenceService();
     private final AlertDialogService alertDialogService = new AlertDialogService();
-
     private final String POST_PUBLIC_KEY_SERVICE_URL = "https://localhost:8443/tfa/service/rest/v1/first-auth/add-public/";
 
     @Override
@@ -137,7 +136,6 @@ public class FullscreenActivity extends AppCompatActivity {
     private AlertDialog generateNewKeyDialog(String qrMessage) {
         AlertDialog dialog;
         qrMessage = qrMessage.substring(qrMessage.lastIndexOf('/') + 1);
-        // change this
         if (eccService.keyExists()) {
             dialog = alertDialogService.createBuilder(this,
                     "If you want to generate a new key please visit settings page",
