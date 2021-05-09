@@ -8,4 +8,7 @@
     <string name="generate_key_pair">Generate ECC key-pair</string>
     <string name="insert_password">Insert password</string>
     <string name="repeat_password">Repeat password</string>
+    <string name="passwordRestrictionMessage">Remember: Password must contain at least one digit, uppercase character, a special
+        character and be at least 9 characters long
+    </string>
 </resources>

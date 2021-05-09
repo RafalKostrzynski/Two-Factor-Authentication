@@ -82,13 +82,14 @@ public class FullscreenActivity extends AppCompatActivity {
             String qrMessage = result.getContents();
             // make a signature and sent to Server
             if (isValidJsonObject(qrMessage)) {
-                QRPayload qrPayload = getQRPayloadFromString(qrMessage);
-                if (qrPayload.getExpirationTime().plusSeconds(5).isAfter(LocalDateTime.now())) {
-                    dialog = QrCodeDialog(qrPayload);
-                } else {
-                    dialog = alertDialogService.createBuilder(this, "Token expired create a new one",
-                            "Token expired!");
-                }
+                if (eccService.keyExists()) {
+                    QRPayload qrPayload = getQRPayloadFromString(qrMessage);
+                    if (qrPayload.getExpirationTime().plusSeconds(5).isAfter(LocalDateTime.now())) {
+                        dialog = QrCodeDialog(qrPayload);
+                    } else dialog = alertDialogService.createBuilder(this,
+                            "Token expired create a new one", "Token expired!");
+                } else dialog = alertDialogService.createBuilder(this,
+                        "Can´t do this operation without a key", "Private key is missing!");
             }
             // Generate save and post keys
             else if (qrMessage.startsWith(POST_PUBLIC_KEY_SERVICE_URL)) {

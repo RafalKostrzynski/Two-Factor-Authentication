@@ -5,6 +5,13 @@
                 android:layout_height="match_parent"
                 android:padding="16dp">
 
+    <TextView
+            android:id="@+id/text_view"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:padding="16dp"
+            android:text="@string/passwordRestrictionMessage"/>
+
     <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/password_text_input"
             app:passwordToggleEnabled="true"
@@ -13,7 +20,8 @@
             android:layout_width="match_parent"
             android:padding="16dp"
             app:errorEnabled="true"
-            app:counterEnabled="true">
+            app:counterEnabled="true"
+            android:layout_below="@+id/text_view">
         <com.google.android.material.textfield.TextInputEditText
                 android:hint="@string/insert_password"
                 android:layout_width="match_parent"
