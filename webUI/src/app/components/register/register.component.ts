@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup } from '@angular/forms';
 import { User } from 'src/app/models/user';
 
 @Component({
@@ -8,11 +9,15 @@ import { User } from 'src/app/models/user';
 })
 export class RegisterComponent implements OnInit {
 
-  user: User;
+  user: User | undefined;
+  registrationForm: FormGroup | undefined;
 
-  constructor() { }
+  constructor(private formBuilder: FormBuilder) { }
 
   ngOnInit(): void {
+    this.registrationForm = this.formBuilder.group({
+      
+    })
   }
 
 }

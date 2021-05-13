@@ -1,1 +1,28 @@
-<p>sign-in works!</p>
+<div fxLayoutAlign="center center">
+
+    <mat-card class="sign-in-template">
+        <mat-card-header>
+            <mat-card-title>Sign In</mat-card-title>
+        </mat-card-header>
+
+        <mat-card-content>
+            <form novalidate [formGroup]="signInForm" #fform="ngForm" (ngSubmit)="onSubmit()">
+                <mat-form-field fxLayout="row">
+                    <input matInput placeholder="Username" type="text" formControlName="username" required>
+                    <mat-error *ngIf="signInForm.get('username')?.valid">{{getUsernameErrorMessage()}}</mat-error>
+                </mat-form-field>
+
+                <mat-form-field fxLayout="row">
+                    <input matInput placeholder="Password" type="password" formControlName="password" required>
+                    <mat-error *ngIf="signInForm.get('passwprd')?.valid">{{getPasswordErrorMessage()}}</mat-error>
+                </mat-form-field>
+                <div fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="space-around">
+                    <button type="submit" mat-stroked-button color="accent" [disabled]="signInForm.invalid">Sign
+                        in</button>
+                    <a mat-button routerLink="/forgot-password">Forgot password?</a>
+                </div>
+            </form>
+        </mat-card-content>
+    </mat-card>
+
+</div>
