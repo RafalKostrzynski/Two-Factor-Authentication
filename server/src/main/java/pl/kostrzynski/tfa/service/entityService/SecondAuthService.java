@@ -2,7 +2,7 @@ package pl.kostrzynski.tfa.service.entityService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import pl.kostrzynski.tfa.model.SecondAuthDto;
+import pl.kostrzynski.tfa.model.to.SecondAuthDto;
 import pl.kostrzynski.tfa.model.entity.SecondAuth;
 import pl.kostrzynski.tfa.model.entity.User;
 import pl.kostrzynski.tfa.repository.SecondAuthRepository;

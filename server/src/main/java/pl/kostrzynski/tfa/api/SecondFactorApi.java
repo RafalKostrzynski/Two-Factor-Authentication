@@ -10,7 +10,7 @@ import pl.kostrzynski.tfa.exception.ApiErrorCodeEnum;
 import pl.kostrzynski.tfa.exception.ApiMethodException;
 import pl.kostrzynski.tfa.jwt.JwtTokenService;
 import pl.kostrzynski.tfa.model.AuthenticationResponse;
-import pl.kostrzynski.tfa.model.SecondAuthDto;
+import pl.kostrzynski.tfa.model.to.SecondAuthDto;
 import pl.kostrzynski.tfa.model.entity.Payload;
 import pl.kostrzynski.tfa.model.entity.SecondAuth;
 import pl.kostrzynski.tfa.model.entity.SmartphoneDetails;

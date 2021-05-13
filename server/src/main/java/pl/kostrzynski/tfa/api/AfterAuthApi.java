@@ -7,7 +7,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import pl.kostrzynski.tfa.jwt.JwtTokenService;
 import pl.kostrzynski.tfa.model.QrCodeDetail;
-import pl.kostrzynski.tfa.model.SecondAuthDto;
+import pl.kostrzynski.tfa.model.to.SecondAuthDto;
+import pl.kostrzynski.tfa.model.to.UserDto;
 import pl.kostrzynski.tfa.model.entity.SecondAuth;
 import pl.kostrzynski.tfa.model.entity.User;
 import pl.kostrzynski.tfa.model.enums.AuthenticationState;
@@ -39,8 +40,9 @@ public class AfterAuthApi {
     }
 
     @PutMapping("user")
-    public ResponseEntity<User> updateUser(Principal principal, @RequestBody @Valid User user) {
-        return new ResponseEntity<>(userService.updateUser(principal.getName(), user), HttpStatus.ACCEPTED);
+    public ResponseEntity<UserDto> updateUser(Principal principal, @RequestBody @Valid User user) {
+        User updatedUser = userService.updateUser(principal.getName(), user);
+        return new ResponseEntity<>(new UserDto(updatedUser), HttpStatus.ACCEPTED);
     }
 
     // update key after security checks

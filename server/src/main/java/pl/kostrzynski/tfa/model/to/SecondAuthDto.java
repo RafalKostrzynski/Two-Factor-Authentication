@@ -1,4 +1,4 @@
-package pl.kostrzynski.tfa.model;
+package pl.kostrzynski.tfa.model.to;
 
 import lombok.Data;
 import pl.kostrzynski.tfa.model.entity.SecondAuth;
