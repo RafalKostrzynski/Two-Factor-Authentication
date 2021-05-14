@@ -8,15 +8,20 @@
         <mat-card-content>
             <form novalidate [formGroup]="signInForm" #fform="ngForm" (ngSubmit)="onSubmit()">
                 <mat-form-field fxLayout="row">
-                    <input matInput placeholder="Username" type="text" formControlName="username" required>
-                    <mat-error *ngIf="signInForm.get('username')?.valid">{{getUsernameErrorMessage()}}</mat-error>
+                    <input matInput placeholder="Username" type="text" formControlName="username">
+                    <mat-error *ngIf="!signInForm.get('username')?.valid && 
+                    (signInForm.controls['username'].touched || signInForm.controls['username'].dirty)">
+                        {{getUsernameErrorMessage()}}</mat-error>
                 </mat-form-field>
 
                 <mat-form-field fxLayout="row">
-                    <input matInput placeholder="Password" type="password" formControlName="password" required>
-                    <mat-error *ngIf="signInForm.get('passwprd')?.valid">{{getPasswordErrorMessage()}}</mat-error>
+                    <input matInput placeholder="Password" [type]="hide ? 'password' : 'text'"
+                        formControlName="password">
+                    <mat-icon matSuffix (click)="hide = !hide">{{hide ? 'visibility_off' : 'visibility'}}</mat-icon>
+                    <mat-error *ngIf="!signInForm.get('password')?.valid">
+                        {{getPasswordErrorMessage()}}</mat-error>
                 </mat-form-field>
-                <div fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="space-around">
+                <div fxLayout="row" fxLayoutGap="50px" fxLayoutAlign="space-around">
                     <button type="submit" mat-stroked-button color="accent" [disabled]="signInForm.invalid">Sign
                         in</button>
                     <a mat-button routerLink="/forgot-password">Forgot password?</a>

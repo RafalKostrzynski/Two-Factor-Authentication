@@ -11,45 +11,40 @@ export class SignInComponent implements OnInit {
   @ViewChild('fform') signInFormDirective: any;
 
   signInForm = new FormGroup({
-      username: new FormControl('', [Validators.required, Validators.minLength(5), Validators.maxLength(30)]),
-      password: new FormControl('', [Validators.required, Validators.minLength(9), Validators.maxLength(60), Validators.pattern("((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$")]),
+    username: new FormControl('', [Validators.required, Validators.minLength(5), Validators.maxLength(30)]),
+    password: new FormControl('', [Validators.required, Validators.minLength(9), Validators.maxLength(60), 
+      Validators.pattern("(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+()'=])(?=\\S+$).{9,60}")]),
   })
+  
   user!: User;
-
-  validationMessages = {
-    'username': {
-      'required': 'Username is required.',
-      'minlength': 'Username must be at least 5 characters long.',
-      'maxlength': 'Username can´t be longer than 30 characters.',
-    },
-    'password': {
-      'required': 'Password is required.',
-      'minlength': 'Password must be at least 9 characters long.',
-      'maxlength': 'Password can´t be longer than 60 characters.',
-      'pattern': 'Password must contain at least 1 uppercase, 1 special characters and 1 digit'
-    }
-  };
-
-  getErrorMessage() {
-    if (this.signInForm.errors) {
-      return 'You must enter a value';
-    }
-
-    return this.email.hasError('email') ? 'Not a valid email' : '';
-  }
-  getUsernameErrorMessage(){
-    
-  }
-
-  getPasswordErrorMessage(){
-
-  }
+  hide = true;
   constructor() { }
 
   ngOnInit(): void {
   }
 
-  onSubmit(){
+  getUsernameErrorMessage(): string {
+    return this.getErrorMessage("username", "5", "30");
+  }
+
+  getPasswordErrorMessage(): string {
+    return this.getErrorMessage("password", "9", "60");
+  }
+
+  getErrorMessage(controlName: string, minValue: string, maxValue: string): string {
+    var control = this.signInForm.get(controlName);
+    if(control?.pristine) return '';
+    controlName = controlName.charAt(0).toUpperCase() + controlName.slice(1);
+    var errorMessage = '';
+    if(control?.hasError("required")) errorMessage = `${controlName} is required.`;
+    else if (control?.hasError('minlength'))errorMessage = `${controlName} must be at least ${minValue} characters long.`;
+    else if (control?.hasError('maxlength'))errorMessage = `${controlName} can´t be longer than ${maxValue} characters.`;
+    else if (control?.hasError('pattern'))errorMessage = `${controlName} must contain at least 1 uppercase, 1 special character (@#$%^&+'()=), 1 digit and must not contain white spaces`
+
+    return errorMessage;
+  }
+
+  onSubmit() {
 
   }
 
