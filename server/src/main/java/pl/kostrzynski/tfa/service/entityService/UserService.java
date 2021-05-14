@@ -41,12 +41,16 @@ public class UserService {
 
     public void addNewUser(User user, HttpServletRequest httpServletRequest) throws MessagingException {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        userRepository.save(user);
+        try {
+            userRepository.save(user);
+        } catch (Exception e) {
+            throw new ApiMethodException("Something went wrong", ApiErrorCodeEnum.NOT_ACCEPTABLE);
+        }
         sendVerificationEmail(user, httpServletRequest);
     }
 
     @Async
-    public void storeToken(String jwtToken, String username){
+    public void storeToken(String jwtToken, String username) {
         User user = getUserByUsername(username);
         user.setJwt(jwtToken);
         userRepository.save(user);
@@ -84,7 +88,11 @@ public class UserService {
         dbUser.setUsername(updatedUser.getUsername());
         dbUser.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
         dbUser.setEmail(updatedUser.getEmail());
-        return userRepository.save(dbUser);
+        try {
+            return userRepository.save(dbUser);
+        } catch (Exception e) {
+            throw new ApiMethodException("Something went wrong", ApiErrorCodeEnum.NOT_ACCEPTABLE);
+        }
     }
 
     public User verifyToken(String token, String purpose) {
@@ -100,7 +108,11 @@ public class UserService {
     public void changePassword(String username, String password) {
         userRepository.findByUsername(username).map(e -> {
             e.setPassword(passwordEncoder.encode(password));
-            return userRepository.save(e);
+            try {
+                return userRepository.save(e);
+            } catch (Exception error) {
+                throw new ApiMethodException("Something went wrong", ApiErrorCodeEnum.NOT_ACCEPTABLE);
+            }
         }).orElseThrow(
                 () -> new ApiMethodException(String.format("Username %s not found", username), ApiErrorCodeEnum.NOT_FOUND));
     }
