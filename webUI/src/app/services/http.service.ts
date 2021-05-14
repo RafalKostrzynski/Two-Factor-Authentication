@@ -18,7 +18,7 @@ export class HttpService {
     private processHTTPMsgService: ProcessHTTPMsgService,
     private tokenStorageService: TokenStorageService) { }
 
-  public generateNewKey(): Observable<QrCode> {
+  generateNewKey(): Observable<QrCode> {
     const httpOptions = {
       headers: this._createHeadersWithJWT()
     };
@@ -26,7 +26,7 @@ export class HttpService {
       .pipe(catchError(this.processHTTPMsgService.handleError));
   }
 
-  public verificationMail(email: string): Observable<HttpStatusCode> {
+  verificationMail(email: string): Observable<HttpStatusCode> {
     const httpOptions = {
       headers: this._createHeadersWithoutJWT()
     };
@@ -34,7 +34,7 @@ export class HttpService {
       .pipe(catchError(this.processHTTPMsgService.handleError));
   }
 
-  public forgotPassword(email: string): Observable<HttpStatusCode> {
+  forgotPassword(email: string): Observable<HttpStatusCode> {
     const httpOptions = {
       headers: this._createHeadersWithoutJWT()
     };
@@ -42,7 +42,7 @@ export class HttpService {
       .pipe(catchError(this.processHTTPMsgService.handleError));
   }
 
-  public register(user: User): Observable<HttpStatusCode> {
+  register(user: User): Observable<HttpStatusCode> {
     const httpOptions = {
       headers: this._createHeadersWithoutJWT()
     };
@@ -50,7 +50,7 @@ export class HttpService {
       .pipe(catchError(this.processHTTPMsgService.handleError));
   }
 
-  public signIn(user: User): Observable<AuthenticationResponse> {
+  signIn(user: User): Observable<AuthenticationResponse> {
     const httpOptions = {
       headers: this._createHeadersWithoutJWT()
     };
@@ -58,7 +58,7 @@ export class HttpService {
       .pipe(catchError(this.processHTTPMsgService.handleError));
   }
 
-  public authenticate(): Observable<AuthenticationResponse> {
+  authenticate(): Observable<AuthenticationResponse> {
     const httpOptions = {
       headers: this._createHeadersWithJWT()
     };
@@ -66,7 +66,7 @@ export class HttpService {
       .pipe(catchError(this.processHTTPMsgService.handleError));
   }
 
-  public updateUser(user: User): Observable<User> {
+  updateUser(user: User): Observable<User> {
     const httpOptions = {
       headers: this._createHeadersWithJWT()
     };
@@ -74,7 +74,7 @@ export class HttpService {
       .pipe(catchError(this.processHTTPMsgService.handleError));
   }
 
-  _createHeadersWithJWT(): HttpHeaders {
+  private _createHeadersWithJWT(): HttpHeaders {
     var token = this.tokenStorageService.getToken();
     if (token != "")
       return new HttpHeaders({
@@ -84,7 +84,7 @@ export class HttpService {
     throw Error("Can't find token");
   }
 
-  _createHeadersWithoutJWT(): HttpHeaders {
+  private _createHeadersWithoutJWT(): HttpHeaders {
     return new HttpHeaders({
       'Content-Type': 'application/json'
     })

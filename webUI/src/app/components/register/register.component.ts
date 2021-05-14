@@ -1,6 +1,10 @@
+import { HttpStatusCode } from '@angular/common/http';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { Router } from '@angular/router';
 import { User } from 'src/app/models/user';
+import { HttpService } from 'src/app/services/http.service';
 
 @Component({
   selector: 'app-register',
@@ -17,11 +21,12 @@ export class RegisterComponent implements OnInit {
     Validators.pattern("(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+()'=])(?=\\S+$).{9,60}")]),
     repeatPassword: new FormControl()
   }, { validators: validatePasswords })
-
-  user!: User;
   hide = true;
+  errorMessage?:string;
 
-  constructor() { }
+  constructor(private httpService: HttpService,
+    private router: Router, 
+    private snackBar: MatSnackBar) { }
 
   ngOnInit(): void {
   }
@@ -53,9 +58,12 @@ export class RegisterComponent implements OnInit {
     return errorMessage;
   }
 
-
   onSubmit() {
-
+    var user:User= this.registerForm.value as User;
+    this.httpService.register(user).subscribe((responseCode:HttpStatusCode) =>{
+      if(responseCode==202) this.router.navigate(["/sign-in"]);
+      else this.snackBar.open("Something went wrong please try again!", "Close");
+    }, errorMessage => this.errorMessage = <any>errorMessage)
   }
 
 }
@@ -74,7 +82,6 @@ export const validatePasswords: ValidatorFn = (group: AbstractControl): Validati
 
   return (!same) ? {
     inValidPassword: true
-  } :
-    null;
-
+  } : null;
 }
+

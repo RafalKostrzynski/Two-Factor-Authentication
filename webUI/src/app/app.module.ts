@@ -18,6 +18,7 @@ import { SignInComponent } from './components/sign-in/sign-in.component';
 import { HomeComponent } from './components/home/home.component';
 import { FlexModule } from '@angular/flex-layout';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSnackBarModule } from "@angular/material/snack-bar";
 import { ForgotPasswordComponent } from './components/forgot-password/forgot-password.component';
 
 
@@ -44,7 +45,8 @@ import { ForgotPasswordComponent } from './components/forgot-password/forgot-pas
     FlexModule,
     MatCardModule,
     MatFormFieldModule,
-    MatSelectModule
+    MatSelectModule,
+    MatSnackBarModule
   ],
   providers: [
   ],
