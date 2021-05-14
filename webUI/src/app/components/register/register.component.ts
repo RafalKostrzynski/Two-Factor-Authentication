@@ -22,10 +22,10 @@ export class RegisterComponent implements OnInit {
     repeatPassword: new FormControl()
   }, { validators: validatePasswords })
   hide = true;
-  errorMessage?:string;
+  errorMessage?: string;
 
   constructor(private httpService: HttpService,
-    private router: Router, 
+    private router: Router,
     private snackBar: MatSnackBar) { }
 
   ngOnInit(): void {
@@ -59,9 +59,9 @@ export class RegisterComponent implements OnInit {
   }
 
   onSubmit() {
-    var user:User= this.registerForm.value as User;
-    this.httpService.register(user).subscribe((responseCode:HttpStatusCode) =>{
-      if(responseCode==202) this.router.navigate(["/sign-in"]);
+    var user: User = this.registerForm.value as User;
+    this.httpService.register(user).subscribe((responseCode: HttpStatusCode) => {
+      if (responseCode == 202) this.router.navigate(["/sign-in"]);
       else this.snackBar.open("Something went wrong please try again!", "Close");
     }, errorMessage => this.errorMessage = <any>errorMessage)
   }
