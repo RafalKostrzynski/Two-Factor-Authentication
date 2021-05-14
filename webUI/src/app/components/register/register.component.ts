@@ -61,9 +61,26 @@ export class RegisterComponent implements OnInit {
   onSubmit() {
     var user: User = this.registerForm.value as User;
     this.httpService.register(user).subscribe((responseCode: HttpStatusCode) => {
-      if (responseCode == 202) this.router.navigate(["/sign-in"]);
+      if (responseCode == 202) this.router.navigate(["/after-registration"]);
       else this.snackBar.open("Something went wrong please try again!", "Close");
-    }, errorMessage => this.errorMessage = <any>errorMessage)
+    }, errorMessage => {
+      this.errorMessage = <any>errorMessage
+    })
+  }
+
+  //TODO extract to after afterRegistrationComponent
+  resendMail() {
+    var form = this.registerForm.get('email');
+    if (form?.valid) {
+      this.httpService.verificationMail(form?.value).subscribe((responseCode: HttpStatusCode) => {
+        if (responseCode == 202) this.router.navigate(["/after-registration"]);
+        else this.snackBar.open("Something went wrong please validate data and try again!", "Close");
+      }, errorMessage => {
+        this.errorMessage = <any>errorMessage
+      });
+    } else {
+      this.errorMessage = "Please insert email address into the email field";
+    }
   }
 
 }

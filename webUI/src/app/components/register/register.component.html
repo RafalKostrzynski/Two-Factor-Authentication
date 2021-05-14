@@ -39,6 +39,10 @@
         </form>
       </mat-card-content>
     </form>
+    <!-- TODO extract to afterRegistrationComponent -->
+    <div>
+      Email not received? <button mat-stroked-button (click)="resendMail()">Resend email</button>
+    </div>
     <mat-error *ngIf="errorMessage">{{errorMessage}}</mat-error>
   </mat-card>
 </div>

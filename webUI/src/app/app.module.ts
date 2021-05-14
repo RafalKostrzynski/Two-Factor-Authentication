@@ -20,6 +20,7 @@ import { FlexModule } from '@angular/flex-layout';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSnackBarModule } from "@angular/material/snack-bar";
 import { ForgotPasswordComponent } from './components/forgot-password/forgot-password.component';
+import { AfterRegistrationComponent } from './components/after-registration/after-registration.component';
 
 
 @NgModule({
@@ -30,6 +31,7 @@ import { ForgotPasswordComponent } from './components/forgot-password/forgot-pas
     SignInComponent,
     HomeComponent,
     ForgotPasswordComponent,
+    AfterRegistrationComponent,
   ],
   imports: [
     BrowserModule,
