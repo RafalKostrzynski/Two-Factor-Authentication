@@ -32,8 +32,12 @@ public class VerificationTokenService {
         }).orElseGet(() -> new VerificationToken(user, token));
 
         verificationTokenRepository.save(verificationToken);
-        return "https://" + httpServletRequest.getServerName() + ":" + httpServletRequest.getServerPort() + httpServletRequest.getContextPath()
-                + "/tfa/service/rest/v1/first-auth/" + purpose + "/" + token;
+        return "https://" + httpServletRequest.getServerName() + ":" +
+                // this is because i serve on localhost
+                //httpServletRequest.getServerPort()
+                 "4200/"+
+                httpServletRequest.getContextPath()
+                + purpose + "/" + token;
     }
 
     public User getUserByVerificationToken(String token) {
