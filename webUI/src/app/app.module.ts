@@ -11,7 +11,7 @@ import {MatListModule} from '@angular/material/list';
 import {MatCardModule} from '@angular/material/card';
 import {MatSelectModule} from '@angular/material/select';
 import { ReactiveFormsModule } from "@angular/forms";
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { HeaderComponent } from './components/header/header.component';
 import { RegisterComponent } from './components/register/register.component';
 import { SignInComponent } from './components/sign-in/sign-in.component';
@@ -24,6 +24,8 @@ import { AfterRegistrationComponent } from './components/after-registration/afte
 import { VerifyEmailComponent } from './components/verify-email/verify-email.component';
 import { QRCodeModule } from 'angularx-qrcode';
 import { SecondFactorComponent } from './components/second-factor/second-factor.component';
+import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
+import { TokenInterceptorService } from './services/token-interceptor.service';
 
 
 @NgModule({
@@ -54,9 +56,11 @@ import { SecondFactorComponent } from './components/second-factor/second-factor.
     MatFormFieldModule,
     MatSelectModule,
     MatSnackBarModule,
+    MatProgressSpinnerModule,
     QRCodeModule
   ],
   providers: [
+    { provide: HTTP_INTERCEPTORS, useClass: TokenInterceptorService, multi: true }
   ],
   bootstrap: [AppComponent]
 })

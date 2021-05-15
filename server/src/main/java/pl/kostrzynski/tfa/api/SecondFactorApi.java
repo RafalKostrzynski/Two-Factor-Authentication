@@ -100,6 +100,7 @@ public class SecondFactorApi {
             userService.storeToken(jwtToken, principal.getName());
             return new ResponseEntity<>(new AuthenticationResponse(jwtToken, 14), HttpStatus.ACCEPTED);
         }
+        if (!payload.isActive()) throw new ApiMethodException("Access forbidden", ApiErrorCodeEnum.FORBIDDEN);
         throw new ApiMethodException("Token expired", ApiErrorCodeEnum.FORBIDDEN);
     }
 }

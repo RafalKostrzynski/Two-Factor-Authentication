@@ -57,7 +57,7 @@ export class SignInComponent implements OnInit {
         data => {
           if (new Date(data.expirationTime).getTime() > new Date().getTime()) {
             this.tokenStorageService.saveToken(data.jwtTokenWeb, data.expirationTime);
-            this.router.navigate(["/second-factor"]);
+            this.router.navigate(["/second-factor"], { state: { data: data.qrCode } });
           }
         }, errorMessage => {
           if (errorMessage === "Access forbidden") this.errorMessage = "Username or password are incorrect, please try again"

@@ -40,7 +40,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.authorizeRequests()
+        http.cors().and().
+                authorizeRequests()
                 .antMatchers("/tfa/service/rest/v1/first-auth/**").permitAll()
                 .antMatchers("/tfa/service/rest/v1/for-user/pub-key/update",
                         "/tfa/service/rest/v1/for-user/pub-key/update/request").hasRole("MOBILE_AUTHENTICATED")

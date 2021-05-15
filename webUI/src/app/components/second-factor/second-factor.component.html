@@ -1,1 +1,18 @@
-<p>second-factor works!</p>
+<div>
+    <p>Please scan this QR-Code to accomplish your authentication</p>
+
+    <p>You have {{expirationTimeSeconds}} seconds to scan the picture, at failure you will be redirected back to the sign in page</p>
+    <mat-progress-spinner 
+    color="primary"
+    [value]="expirationTime">
+</mat-progress-spinner>
+    <div *ngIf="authenticateQR">
+        <qrcode [qrdata]="authenticateQR" [width]="256" [errorCorrectionLevel]="'M'" [elementType]="'svg'"></qrcode>
+    </div>
+</div>
+<mat-error *ngIf="errorMessage">
+    {{errorMessage}}</mat-error>
+
+<div>
+    You will be automatically redirected after you scan the QR-Code. This could take up to 5 seconds after scanning.
+</div>

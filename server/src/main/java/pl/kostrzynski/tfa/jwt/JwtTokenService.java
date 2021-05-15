@@ -66,6 +66,7 @@ public class JwtTokenService {
         AuthenticationState authenticationState =
                 AuthenticationState.valueOf(String.valueOf(getClaimsFromJwt(jwtToken).get("AuthenticationState")));
         if(authenticationState.equals(AuthenticationState.AUTHENTICATED)){
+            //TODO this should be hashed
             return user.getJwt().equals(jwtToken);
         }
         return true;
