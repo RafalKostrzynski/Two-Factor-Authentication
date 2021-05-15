@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders, HttpStatusCode } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { Observable} from 'rxjs';
+import { catchError} from 'rxjs/operators';
 import { AuthenticationResponse } from '../models/authentication-response';
 import { QrCode } from '../models/qr-code';
 import { User } from '../models/user';
@@ -34,11 +34,8 @@ export class HttpService {
       .pipe(catchError(this.processHTTPMsgService.handleError));
   }
 
-  verifyEmail(token: string): Observable<string> {
-    const httpOptions = {
-      headers: this._createHeadersWithoutJWT(),
-    };
-    return this.http.get<string>(baseURL + 'first-auth/verify-email/' + token, httpOptions)
+  verifyEmail(token: string): Observable<any> {
+    return this.http.get(baseURL + 'first-auth/verify-email/' + token, {responseType: 'text'})
       .pipe(catchError(this.processHTTPMsgService.handleError));
   }
 
@@ -86,6 +83,7 @@ export class HttpService {
     var token = this.tokenStorageService.getToken();
     if (token != "")
       return new HttpHeaders({
+        'Accept': 'application/json',
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ' + token
       })
@@ -94,6 +92,7 @@ export class HttpService {
 
   private _createHeadersWithoutJWT(): HttpHeaders {
     return new HttpHeaders({
+      'Accept': 'application/json',
       'Content-Type': 'application/json'
     })
   }

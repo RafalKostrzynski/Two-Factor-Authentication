@@ -19,7 +19,9 @@ export class ProcessHTTPMsgService {
     }
     else {
       var errorResponse = error.error as ErrorResponse;
-      errMsg = `${errorResponse.errors?.toString()}`;
+      if (errorResponse.errors?.toString() !== undefined)
+        errMsg = `${errorResponse.errors?.toString()}`;
+      else errMsg = "Something went wrong please try again later";
     }
     return throwError(errMsg);
   }

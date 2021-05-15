@@ -22,6 +22,7 @@ import { MatSnackBarModule } from "@angular/material/snack-bar";
 import { ForgotPasswordComponent } from './components/forgot-password/forgot-password.component';
 import { AfterRegistrationComponent } from './components/after-registration/after-registration.component';
 import { VerifyEmailComponent } from './components/verify-email/verify-email.component';
+import { QRCodeModule } from 'angularx-qrcode';
 
 
 @NgModule({
@@ -50,7 +51,8 @@ import { VerifyEmailComponent } from './components/verify-email/verify-email.com
     MatCardModule,
     MatFormFieldModule,
     MatSelectModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    QRCodeModule
   ],
   providers: [
   ],

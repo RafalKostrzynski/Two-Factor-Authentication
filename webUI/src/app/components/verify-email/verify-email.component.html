@@ -1,1 +1,26 @@
-<p>verify-email works!</p>
+<div>
+    <p>Please scan this QR-Code with our app to generate a new key</p>
+    <div *ngIf="generateKeyQR">
+        <qrcode [qrdata]="generateKeyQR" [width]="256" [errorCorrectionLevel]="'M'" [elementType]="'svg'"></qrcode>
+    </div>
+</div>
+<div>
+    <p>If you don't have our app, download the apk file by entering:
+        <a href="../../../assets/two-factor-authentication.apk">
+            TwoFactorAuthentication.apk
+        </a>
+</div>
+<div>
+    <p>
+        Have you already created a key? <br>
+        <a mat-raised-button color="primary" routerLink="/sign-in">
+            <mat-icon>vpn_key</mat-icon>Sign in now
+        </a>
+
+    </p>
+
+
+</div>
+<mat-error *ngIf="errorMessage">
+    {{errorMessage}}
+</mat-error>

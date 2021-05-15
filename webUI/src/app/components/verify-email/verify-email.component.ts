@@ -11,11 +11,17 @@ export class VerifyEmailComponent implements OnInit {
 
   constructor(private httpService: HttpService, private activatedRoute: ActivatedRoute) { }
 
+  errorMessage?: string;
   generateKeyQR?: string;
 
   ngOnInit(): void {
     var token: string = this.activatedRoute.snapshot.paramMap.get("token")!;
-    this.httpService.verifyEmail(token).subscribe((qrToken: string) => this.generateKeyQR = qrToken);
+    this.httpService.verifyEmail(token).subscribe(
+      response => {
+        console.log(response.toString());
+        this.generateKeyQR = response;
+      }, errorMessage => this.errorMessage = <any>errorMessage
+    );
   }
 
 }
