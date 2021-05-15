@@ -32,11 +32,17 @@ public class VerificationTokenService {
         }).orElseGet(() -> new VerificationToken(user, token));
 
         verificationTokenRepository.save(verificationToken);
+        String serverPort;
+        String endpointPrefix;
+        if (purpose.equals("add-public")) {
+            serverPort = String.valueOf(httpServletRequest.getServerPort());
+            endpointPrefix = "/tfa/service/rest/v1/first-auth/";
+        } else {
+            serverPort = "4200/";
+            endpointPrefix = "";
+        }
         return "https://" + httpServletRequest.getServerName() + ":" +
-                // this is because i serve on localhost
-                //httpServletRequest.getServerPort()
-                 "4200/"+
-                httpServletRequest.getContextPath()
+                serverPort + httpServletRequest.getContextPath() + endpointPrefix
                 + purpose + "/" + token;
     }
 
@@ -48,7 +54,7 @@ public class VerificationTokenService {
     }
 
     @Async
-    public void deleteToken(String token){
+    public void deleteToken(String token) {
         VerificationToken verificationToken = verificationTokenRepository.findByValue(token)
                 .orElseThrow(() -> new IllegalArgumentException("Couldn't find provided token"));
         verificationTokenRepository.delete(verificationToken);
