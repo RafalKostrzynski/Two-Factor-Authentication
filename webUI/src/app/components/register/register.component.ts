@@ -1,7 +1,5 @@
-import { HttpStatusCode } from '@angular/common/http';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { User } from 'src/app/models/user';
 import { HttpService } from 'src/app/services/http.service';
@@ -25,8 +23,7 @@ export class RegisterComponent implements OnInit {
   errorMessage?: string;
 
   constructor(private httpService: HttpService,
-    private router: Router,
-    private snackBar: MatSnackBar) { }
+    private router: Router) { }
 
   ngOnInit(): void {
   }
@@ -60,29 +57,12 @@ export class RegisterComponent implements OnInit {
 
   onSubmit() {
     var user: User = this.registerForm.value as User;
-    this.httpService.register(user).subscribe((responseCode: HttpStatusCode) => {
-      if (responseCode == 202) this.router.navigate(["/after-registration"]);
-      else this.snackBar.open("Something went wrong please try again!", "Close");
+    this.httpService.register(user).subscribe(() => {
+      this.router.navigate(["/after-registration"]);
     }, errorMessage => {
       this.errorMessage = <any>errorMessage
     })
   }
-
-  //TODO extract to after afterRegistrationComponent
-  resendMail() {
-    var form = this.registerForm.get('email');
-    if (form?.valid) {
-      this.httpService.verificationMail(form?.value).subscribe((responseCode: HttpStatusCode) => {
-        if (responseCode == 202) this.router.navigate(["/after-registration"]);
-        else this.snackBar.open("Something went wrong please validate data and try again!", "Close");
-      }, errorMessage => {
-        this.errorMessage = <any>errorMessage
-      });
-    } else {
-      this.errorMessage = "Please insert email address into the email field";
-    }
-  }
-
 }
 
 export const validatePasswords: ValidatorFn = (group: AbstractControl): ValidationErrors | null => {

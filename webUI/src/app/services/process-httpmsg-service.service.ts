@@ -19,7 +19,7 @@ export class ProcessHTTPMsgService {
     }
     else {
       var errorResponse = error.error as ErrorResponse;
-      errMsg = `${errorResponse.status} - ${errorResponse.status || ''} ${errorResponse.errors?.toString()}`;
+      errMsg = `${errorResponse.errors?.toString()}`;
     }
     return throwError(errMsg);
   }

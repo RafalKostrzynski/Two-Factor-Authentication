@@ -21,6 +21,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSnackBarModule } from "@angular/material/snack-bar";
 import { ForgotPasswordComponent } from './components/forgot-password/forgot-password.component';
 import { AfterRegistrationComponent } from './components/after-registration/after-registration.component';
+import { VerifyEmailComponent } from './components/verify-email/verify-email.component';
 
 
 @NgModule({
@@ -32,6 +33,7 @@ import { AfterRegistrationComponent } from './components/after-registration/afte
     HomeComponent,
     ForgotPasswordComponent,
     AfterRegistrationComponent,
+    VerifyEmailComponent,
   ],
   imports: [
     BrowserModule,

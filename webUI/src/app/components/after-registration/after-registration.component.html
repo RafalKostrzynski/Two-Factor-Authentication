@@ -1,1 +1,17 @@
-<p>after-registration works!</p>
+<div>
+    <p>We have send you an verification email. Please enter the link in the email.</p>
+    <p>Please check your spam folder as well</p>
+</div>
+<div>
+    <p>Have you not received any email message? Try again by entering your email here.</p>
+    <form novalidate [formGroup]="emailForm" #fform="ngForm" (ngSubmit)="resendMail()">
+        <input matInput type="text" placeholder="Enter your email address" formControlName="email">
+        Email not received? <button mat-button type="submit" [disabled]="emailForm.invalid">Resend email</button>
+        <mat-error *ngIf="!emailForm.get('email')?.valid && emailForm.get('email')?.touched">
+            {{getErrorMessage()}}
+        </mat-error>
+        <mat-error *ngIf="errorMessage">
+            {{errorMessage}}
+        </mat-error>
+    </form>
+</div>

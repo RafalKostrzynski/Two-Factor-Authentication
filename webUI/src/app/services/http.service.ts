@@ -28,15 +28,23 @@ export class HttpService {
 
   verificationMail(email: string): Observable<HttpStatusCode> {
     const httpOptions = {
-      headers: this._createHeadersWithoutJWT()
+      headers: this._createHeadersWithoutJWT(),
     };
     return this.http.patch<HttpStatusCode>(baseURL + 'first-auth/verification-mail?email=' + email, httpOptions)
       .pipe(catchError(this.processHTTPMsgService.handleError));
   }
 
+  verifyEmail(token: string): Observable<string> {
+    const httpOptions = {
+      headers: this._createHeadersWithoutJWT(),
+    };
+    return this.http.get<string>(baseURL + 'first-auth/verify-email/' + token, httpOptions)
+      .pipe(catchError(this.processHTTPMsgService.handleError));
+  }
+
   forgotPassword(email: string): Observable<HttpStatusCode> {
     const httpOptions = {
-      headers: this._createHeadersWithoutJWT()
+      headers: this._createHeadersWithoutJWT(),
     };
     return this.http.post<HttpStatusCode>(baseURL + 'first-auth/forgot-password?email=' + email, httpOptions)
       .pipe(catchError(this.processHTTPMsgService.handleError));
@@ -44,7 +52,7 @@ export class HttpService {
 
   register(user: User): Observable<HttpStatusCode> {
     const httpOptions = {
-      headers: this._createHeadersWithoutJWT()
+      headers: this._createHeadersWithoutJWT(),
     };
     return this.http.post<HttpStatusCode>(baseURL + 'first-auth/user', user, httpOptions)
       .pipe(catchError(this.processHTTPMsgService.handleError));
