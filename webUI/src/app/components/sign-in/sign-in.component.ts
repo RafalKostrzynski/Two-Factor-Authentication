@@ -19,11 +19,12 @@ export class SignInComponent implements OnInit {
     Validators.pattern("(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+()'=])(?=\\S+$).{9,60}")]),
   })
 
+  errorMessage: string = '';
   user!: User;
   hide = true;
-  constructor(private httpService: HttpService, 
+  constructor(private httpService: HttpService,
     private tokenStorageService: TokenStorageService,
-    private router: Router ) { }
+    private router: Router) { }
 
   ngOnInit(): void {
   }
@@ -51,13 +52,17 @@ export class SignInComponent implements OnInit {
 
   onSubmit() {
     var user: User = this.signInForm.value as User;
-    this.httpService.signIn(user).subscribe(
-      data => {        
-        if (new Date(data.expirationTime).getTime() > new Date().getTime()) {
-          this.tokenStorageService.saveToken(data.jwtTokenWeb, data.expirationTime);
-          this.router.navigate(["/second-factor"]);
-        }
-      })
+    if (this.signInForm.valid) {
+      this.httpService.signIn(user).subscribe(
+        data => {
+          if (new Date(data.expirationTime).getTime() > new Date().getTime()) {
+            this.tokenStorageService.saveToken(data.jwtTokenWeb, data.expirationTime);
+            this.router.navigate(["/second-factor"]);
+          }
+        }, errorMessage => {
+          if (errorMessage === "Access forbidden") this.errorMessage = "Username or password are incorrect, please try again"
+          else this.errorMessage = <any>errorMessage
+        })
+    } else this.errorMessage = "Please validate your input data";
   }
-
 }

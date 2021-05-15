@@ -27,6 +27,8 @@
                     <a mat-button routerLink="/forgot-password">Forgot password?</a>
                 </div>
             </form>
+            <mat-error *ngIf="errorMessage">
+                {{errorMessage}}</mat-error>
         </mat-card-content>
     </mat-card>
 
