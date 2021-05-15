@@ -23,6 +23,7 @@ import { ForgotPasswordComponent } from './components/forgot-password/forgot-pas
 import { AfterRegistrationComponent } from './components/after-registration/after-registration.component';
 import { VerifyEmailComponent } from './components/verify-email/verify-email.component';
 import { QRCodeModule } from 'angularx-qrcode';
+import { SecondFactorComponent } from './components/second-factor/second-factor.component';
 
 
 @NgModule({
@@ -35,6 +36,7 @@ import { QRCodeModule } from 'angularx-qrcode';
     ForgotPasswordComponent,
     AfterRegistrationComponent,
     VerifyEmailComponent,
+    SecondFactorComponent,
   ],
   imports: [
     BrowserModule,

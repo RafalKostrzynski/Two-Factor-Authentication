@@ -4,12 +4,14 @@ import { AfterRegistrationComponent } from './components/after-registration/afte
 import { ForgotPasswordComponent } from './components/forgot-password/forgot-password.component';
 import { HomeComponent } from './components/home/home.component';
 import { RegisterComponent } from './components/register/register.component';
+import { SecondFactorComponent } from './components/second-factor/second-factor.component';
 import { SignInComponent } from './components/sign-in/sign-in.component';
 import { VerifyEmailComponent } from './components/verify-email/verify-email.component';
 
 const routes: Routes = [
   { path: 'home', component: HomeComponent },
   { path: 'sign-in', component: SignInComponent },
+  { path: 'second-factor', component: SecondFactorComponent },
   { path: 'register', component: RegisterComponent },
   { path: 'forgot-password', component: ForgotPasswordComponent },
   { path: 'after-registration', component: AfterRegistrationComponent },
