@@ -7,17 +7,17 @@ export class TokenStorageService {
 
   constructor() { }
 
-  public signOut(): void {
+  signOut(): void {
     localStorage.removeItem("JWT_TOKEN");
     localStorage.removeItem("EXPIRATION_TIME");
   }
 
-  public saveToken(token: string, expirationTimeDate: Date) {
+  saveToken(token: string, expirationTimeDate: Date) {
     localStorage.setItem("EXPIRATION_TIME", expirationTimeDate.toString())
     localStorage.setItem("JWT_TOKEN", token);
   }
 
-  public getToken(): string {
+  getToken(): string {
     var token = localStorage.getItem("JWT_TOKEN");
     var expirationTimeString = localStorage.getItem("EXPIRATION_TIME");
     if (token != null && expirationTimeString != null) {

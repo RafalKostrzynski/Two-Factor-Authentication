@@ -1,1 +1,8 @@
-<p>settings-key works!</p>
+<div *ngIf="!isQRRequested">
+    <p>Click
+        <button mat-mini-fab color="primary" (click)="changeView()"> here</button>
+        if you want to change your mobile key
+    </p>
+</div>
+
+<div *ngIf="isQRRequested">hello</div>

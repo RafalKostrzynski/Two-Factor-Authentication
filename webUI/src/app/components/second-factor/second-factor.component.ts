@@ -66,7 +66,6 @@ export class SecondFactorComponent implements OnInit {
     this.httpService.authenticate().subscribe(
       data => {
         this.tokenStorageService.saveToken(data.jwtTokenWeb, data.expirationTime);
-        // this.requestFinished = true;
         this.router.navigate(["/home"]);
       }, errorMessage => {
         if (errorMessage === "Access forbidden") this.errorMessage = "";
