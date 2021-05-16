@@ -5,4 +5,18 @@
     </p>
 </div>
 
-<div *ngIf="isQRRequested">hello</div>
+<div *ngIf="isQRRequested">
+    <p>Please scan this QR-Code with our app to generate a new key</p>
+
+    <p>You have <b>{{expirationTimeSeconds}}</b> seconds to scan the picture, at failure you will have to generate a new
+        request</p>
+    <mat-progress-spinner color="primary" [value]="expirationTime">
+    </mat-progress-spinner>
+
+    <div *ngIf="generateKeyQR">
+        <qrcode [qrdata]="generateKeyQR" [width]="256" [errorCorrectionLevel]="'M'" [elementType]="'svg'"></qrcode>
+    </div>
+    <mat-error *ngIf="errorMessage">
+        {{errorMessage}}
+    </mat-error>
+</div>
