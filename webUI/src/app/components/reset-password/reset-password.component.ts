@@ -21,5 +21,4 @@ export class ResetPasswordComponent implements OnInit {
       errorMessage => this.errorMessage = <any>errorMessage
     );
   }
-
 }

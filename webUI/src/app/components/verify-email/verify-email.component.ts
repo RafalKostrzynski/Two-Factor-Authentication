@@ -22,5 +22,4 @@ export class VerifyEmailComponent implements OnInit {
       }, errorMessage => this.errorMessage = <any>errorMessage
     );
   }
-
 }

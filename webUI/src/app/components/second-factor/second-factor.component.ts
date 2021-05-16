@@ -26,8 +26,8 @@ export class SecondFactorComponent implements OnInit {
     var qrCodeObject: QrCode = history.state.data;
     this.authenticateQR = JSON.stringify(qrCodeObject);
     var expirationTimeFromQrCode = Math.floor((new Date(qrCodeObject.expirationTime).getTime() - new Date().getTime()) / 1000);
-    this.requestAuthentication(expirationTimeFromQrCode);
-    this.startCountDown(expirationTimeFromQrCode);
+     this.requestAuthentication(expirationTimeFromQrCode);
+     this.startCountDown(expirationTimeFromQrCode);
   }
 
   private async requestAuthentication(seconds: number) {

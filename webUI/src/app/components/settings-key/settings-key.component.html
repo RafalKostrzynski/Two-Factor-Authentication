@@ -1,22 +1,26 @@
-<div *ngIf="!isQRRequested">
-    <p>Click
-        <button mat-mini-fab color="primary" (click)="changeView()"> here</button>
-        if you want to change your mobile key
-    </p>
-</div>
-
-<div *ngIf="isQRRequested">
-    <p>Please scan this QR-Code with our app to generate a new key</p>
-
-    <p>You have <b>{{expirationTimeSeconds}}</b> seconds to scan the picture, at failure you will have to generate a new
-        request</p>
-    <mat-progress-spinner color="primary" [value]="expirationTime">
-    </mat-progress-spinner>
-
-    <div *ngIf="generateKeyQR">
-        <qrcode [qrdata]="generateKeyQR" [width]="256" [errorCorrectionLevel]="'M'" [elementType]="'svg'"></qrcode>
+<div class="container">
+    <div *ngIf="!isQRRequested" class="infos">
+        <p>Click
+            <button mat-mini-fab color="primary" (click)="changeView()"> here</button>
+            if you want to change your mobile key
+        </p>
     </div>
-    <mat-error *ngIf="errorMessage">
-        {{errorMessage}}
-    </mat-error>
+
+    <div *ngIf="isQRRequested" class="infos qr">
+        <p class="spacer font">Please scan this QR-Code with our app to generate a new key</p>
+        <div fxLayout="row" fxLayout.sm="column" fxLayout.xs="column" fxLayoutAlign="space-around center" class="spacer">
+            <mat-progress-spinner color="primary" [value]="expirationTime" fxLayoutAlign="center center">
+            </mat-progress-spinner>
+            <div *ngIf="generateKeyQR" fxLayoutAlign="center center">
+                <qrcode [qrdata]="generateKeyQR" [width]="256" [errorCorrectionLevel]="'M'" [elementType]="'svg'">
+                </qrcode>
+            </div>
+        </div>
+        <mat-error *ngIf="errorMessage" class="spacer">
+            {{errorMessage}}
+        </mat-error>
+        <p>You have <b>{{expirationTimeSeconds}}</b> seconds to scan the picture, at failure you will have to generate a
+            new
+            request</p>
+    </div>
 </div>

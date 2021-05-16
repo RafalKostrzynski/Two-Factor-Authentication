@@ -1,18 +1,26 @@
-<div>
-    <p>Please scan this QR-Code to accomplish your authentication</p>
-
-    <p>You have <b>{{expirationTimeSeconds}}</b> seconds to scan the picture, at failure you will be redirected back to the sign in page</p>
-    <mat-progress-spinner 
-    color="primary"
-    [value]="expirationTime">
-</mat-progress-spinner>
-    <div *ngIf="authenticateQR">
-        <qrcode [qrdata]="authenticateQR" [width]="256" [errorCorrectionLevel]="'M'" [elementType]="'svg'"></qrcode>
+<div class="container">
+    <h1 fxLayout="column" class="spacer-top">
+        <b>
+            <p>Please scan this QR-Code to accomplish your authentication</p>
+        </b>
+    </h1>
+    <div class="infos qr">
+        <p class="spacer-top">You have <b>{{expirationTimeSeconds}}</b> seconds to scan the picture, at failure you will be redirected back
+            to the sign in page</p>
+        <div fxLayout="row" fxLayout.sm="column" fxLayout.xs="column" fxLayoutAlign="space-around center"
+            class="spacer">
+            <mat-progress-spinner color="primary" [value]="expirationTime">
+            </mat-progress-spinner>
+            <div *ngIf="authenticateQR">
+                <qrcode [qrdata]="authenticateQR" [width]="256" [errorCorrectionLevel]="'M'" [elementType]="'svg'">
+                </qrcode>
+            </div>
+        </div>
     </div>
-</div>
-<mat-error *ngIf="errorMessage">
-    {{errorMessage}}</mat-error>
+    <mat-error *ngIf="errorMessage">
+        {{errorMessage}}</mat-error>
 
-<div>
-    You will be automatically redirected after you scan the QR-Code. This could take up to 5 seconds after scanning.
+    <div class="spacer-top font">
+        You will be automatically redirected after you scan the QR-Code. This could take up to 5 seconds after scanning.
+    </div>
 </div>

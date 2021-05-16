@@ -1,26 +1,35 @@
-<div>
-    <p>Please scan this QR-Code with our app to generate a new key</p>
-    <div *ngIf="generateKeyQR">
-        <qrcode [qrdata]="generateKeyQR" [width]="256" [errorCorrectionLevel]="'M'" [elementType]="'svg'"></qrcode>
-    </div>
-</div>
-<div>
-    <p>If you don't have our app, download the apk file by entering:
-        <a href="../../../assets/two-factor-authentication.apk">
-            TwoFactorAuthentication.apk
-        </a>
-</div>
-<div>
-    <p>
-        Have you already created a key? <br>
-        <a mat-raised-button color="primary" routerLink="/sign-in">
-            <mat-icon>vpn_key</mat-icon>Sign in now
-        </a>
+<div class="container">
+    <h1 fxLayout="column">
+        <b>
+            <p>Generate a new key</p>
+        </b>
+    </h1>
+    <div class="infos">
+        <p class="spacer spacer-top">Please scan this QR-Code with our app to generate a new key</p>
+        <div *ngIf="generateKeyQR" fxLayout="row" fxLayoutAlign="center center">
+            <qrcode [qrdata]="generateKeyQR" [width]="256" [errorCorrectionLevel]="'M'" [elementType]="'svg'"></qrcode>
+        </div>
 
+        <div fxLayout="column">
+            <div fxLayout="row" fxLayoutAlign="space-around center" class="spacer">
+                <p>
+                    Have you already created a key?
+                </p>
+                <a mat-raised-button color="primary" routerLink="/sign-in">
+                    <mat-icon class="icon">vpn_key</mat-icon>Sign in now
+                </a>
+            </div>
+            <div fxLayoutAlign="center center" class="font-md">
+                <p>If you don't have our app, download the apk file by entering:
+                    <a href="../../../assets/two-factor-authentication.apk">
+                        TwoFactorAuthentication.apk
+                    </a>
+            </div>
+        </div>
+        <mat-error *ngIf="errorMessage">
+            {{errorMessage}}
+        </mat-error>
+    </div>
+    <p class="font">QR-Code so you can easily download the apk direct into your app will be added in a later release...
     </p>
 </div>
-
-<p>QR-Code so you can easily download the apk direct into your app will be added in a later release...</p>
-<mat-error *ngIf="errorMessage">
-    {{errorMessage}}
-</mat-error>
