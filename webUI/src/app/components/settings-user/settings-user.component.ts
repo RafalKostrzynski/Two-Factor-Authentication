@@ -27,6 +27,9 @@ export class SettingsUserComponent implements OnInit {
   constructor(private httpService: HttpService, private snackbar: MatSnackBar) { }
 
   ngOnInit(): void {
+    this.httpService.getUser().subscribe(data =>
+      this.changeUserForm.setValue(
+        { username: data.username, email: data.email, password: '', repeatPassword: '' }))
   }
 
   getUsernameErrorMessage(): string {
@@ -60,10 +63,12 @@ export class SettingsUserComponent implements OnInit {
     var user: User = this.changeUserForm.value as User;
     this.errorMessage = '';
     this.httpService.updateUser(user).subscribe((data: User) => {
-      this.changeUserForm.setValue({ username: data.username, email: data.email, password: '******', repeatPassword: '******' });
+      this.changeUserForm.setValue({ username: data.username, email: data.email, password: '', repeatPassword: '' });
       this.snackbar.open("User changed successfully!", "Close");
     }, errorMessage => {
-      this.errorMessage = <any>errorMessage
+      this.errorMessage = errorMessage === "Wrong input, try again later" ?
+        "Email or username already taken" :
+        <any>errorMessage;
     })
   }
 

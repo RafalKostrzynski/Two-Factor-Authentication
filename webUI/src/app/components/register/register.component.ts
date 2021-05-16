@@ -45,7 +45,6 @@ export class RegisterComponent implements OnInit {
 
   getErrorMessage(controlName: string, minValue: string, maxValue: string): string {
     var control = this.registerForm.get(controlName);
-    if (control?.pristine) return '';
     controlName = controlName.charAt(0).toUpperCase() + controlName.slice(1);
     var errorMessage = '';
     if (control?.hasError("required")) errorMessage = `${controlName} is required.`;
@@ -61,7 +60,9 @@ export class RegisterComponent implements OnInit {
     this.httpService.register(user).subscribe(() => {
       this.router.navigate(["/after-registration"]);
     }, errorMessage => {
-      this.errorMessage = <any>errorMessage
+      this.errorMessage = errorMessage === "Wrong input, try again later" ?
+       "Email or username already taken" :
+        <any>errorMessage;
     })
   }
 }

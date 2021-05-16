@@ -10,7 +10,7 @@ import { TokenStorageService } from 'src/app/services/token-storage.service';
   templateUrl: './sign-in.component.html',
   styleUrls: ['./sign-in.component.scss']
 })
-export class SignInComponent implements OnInit {
+export class SignInComponent {
   @ViewChild('fform') signInFormDirective: any;
 
   signInForm = new FormGroup({
@@ -26,9 +26,6 @@ export class SignInComponent implements OnInit {
     private tokenStorageService: TokenStorageService,
     private router: Router) { }
 
-  ngOnInit(): void {
-  }
-
   getUsernameErrorMessage(): string {
     return this.getErrorMessage("username", "5", "30");
   }
@@ -39,7 +36,6 @@ export class SignInComponent implements OnInit {
 
   getErrorMessage(controlName: string, minValue: string, maxValue: string): string {
     var control = this.signInForm.get(controlName);
-    if (control?.pristine) return '';
     controlName = controlName.charAt(0).toUpperCase() + controlName.slice(1);
     var errorMessage = '';
     if (control?.hasError("required")) errorMessage = `${controlName} is required.`;
@@ -60,8 +56,9 @@ export class SignInComponent implements OnInit {
             this.router.navigate(["/second-factor"], { state: { data: data.qrCode } });
           }
         }, errorMessage => {
-          if (errorMessage === "Access forbidden") this.errorMessage = "Username or password are incorrect, please try again"
-          else this.errorMessage = <any>errorMessage
+          this.errorMessage = errorMessage === "Access forbidden" ?
+            "Username or password are incorrect, please try again" :
+            this.errorMessage = <any>errorMessage
         })
     } else this.errorMessage = "Please validate your input data";
   }
