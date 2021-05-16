@@ -48,7 +48,7 @@ public class UserService {
     @Async
     public void storeToken(String jwtToken, String username) {
         User user = getUserByUsername(username);
-        user.setJwt(jwtToken);
+        user.setJwt(passwordEncoder.encode(jwtToken));
         userRepository.save(user);
     }
 

@@ -4,6 +4,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import pl.kostrzynski.tfa.model.entity.User;
 import pl.kostrzynski.tfa.model.enums.AuthenticationState;
@@ -15,9 +16,11 @@ public class JwtTokenService {
 
     private final JwtConfig jwtConfig;
     private static final String AUTHENTICATION_STATE = "AuthenticationState";
+    private final PasswordEncoder passwordEncoder;
 
-    public JwtTokenService(JwtConfig jwtConfig) {
+    public JwtTokenService(JwtConfig jwtConfig, PasswordEncoder passwordEncoder) {
         this.jwtConfig = jwtConfig;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public String createToken(Authentication authentication, AuthenticationState authenticationState) {
@@ -62,12 +65,11 @@ public class JwtTokenService {
         return claims.getSubject();
     }
 
-    public boolean validateUsersSingleToken(String jwtToken, User user){
+    public boolean validateUsersSingleToken(String jwtToken, User user) {
         AuthenticationState authenticationState =
                 AuthenticationState.valueOf(String.valueOf(getClaimsFromJwt(jwtToken).get("AuthenticationState")));
-        if(authenticationState.equals(AuthenticationState.AUTHENTICATED)){
-            //TODO this should be hashed
-            return user.getJwt().equals(jwtToken);
+        if (authenticationState.equals(AuthenticationState.AUTHENTICATED)) {
+            return passwordEncoder.matches(jwtToken, user.getJwt());
         }
         return true;
     }
