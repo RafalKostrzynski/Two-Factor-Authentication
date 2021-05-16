@@ -17,9 +17,8 @@ export class ResetPasswordComponent implements OnInit {
   ngOnInit(): void {
     var token: string = this.activatedRoute.snapshot.paramMap.get("token")!;
     this.httpService.resetPassword(token).subscribe(
-      response => {
-        this.generateKeyQR = JSON.stringify(response);
-      }, errorMessage => this.errorMessage = <any>errorMessage
+      response => this.generateKeyQR = JSON.stringify(response), 
+      errorMessage => this.errorMessage = <any>errorMessage
     );
   }
 

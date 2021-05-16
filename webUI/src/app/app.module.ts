@@ -28,6 +28,11 @@ import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 import { TokenInterceptorService } from './services/token-interceptor.service';
 import { ResetPasswordComponent } from './components/reset-password/reset-password.component';
 import { HeaderAuthenticatedComponent } from './components/header-authenticated/header-authenticated.component';
+import { SettingsComponent } from './components/settings/settings.component';
+import { MatTabsModule } from "@angular/material/tabs";
+import { SettingsUserComponent } from './components/settings-user/settings-user.component';
+import { SettingsKeyComponent } from './components/settings-key/settings-key.component';
+
 
 
 @NgModule({
@@ -43,6 +48,9 @@ import { HeaderAuthenticatedComponent } from './components/header-authenticated/
     SecondFactorComponent,
     ResetPasswordComponent,
     HeaderAuthenticatedComponent,
+    SettingsComponent,
+    SettingsUserComponent,
+    SettingsKeyComponent,
   ],
   imports: [
     BrowserModule,
@@ -61,7 +69,8 @@ import { HeaderAuthenticatedComponent } from './components/header-authenticated/
     MatSelectModule,
     MatSnackBarModule,
     MatProgressSpinnerModule,
-    QRCodeModule
+    QRCodeModule,
+    MatTabsModule
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: TokenInterceptorService, multi: true }

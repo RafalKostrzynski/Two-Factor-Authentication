@@ -61,4 +61,9 @@ export class HttpService {
       .pipe(catchError(this.processHTTPMsgService.handleError));
   }
 
+  getUser() : Observable<User> {
+    return this.http.get<User>(baseURL + 'for-user/user')
+    .pipe(catchError(this.processHTTPMsgService.handleError));
+  }
+
 }

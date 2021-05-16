@@ -16,6 +16,7 @@ export class SecondFactorComponent implements OnInit {
   expirationTimeSeconds?: number;
   errorMessage: string = "";
   requestFinished: boolean = false;
+  interval: any;
 
   constructor(private httpService: HttpService,
     private tokenStorageService: TokenStorageService,
@@ -46,12 +47,12 @@ export class SecondFactorComponent implements OnInit {
 
   private startCountDown(seconds: number) {
     var decrementValue = 100 / 60;
-    const interval = setInterval(() => {
+    this.interval = setInterval(() => {
       this.expirationTime = seconds * decrementValue;
       this.expirationTimeSeconds = seconds;
       seconds--;
       if (seconds < 0) {
-        clearInterval(interval);
+        clearInterval(this.interval);
         if (!this.requestFinished) {
           try {
             this.createAuthenticationCall()
@@ -65,7 +66,7 @@ export class SecondFactorComponent implements OnInit {
     this.httpService.authenticate().subscribe(
       data => {
         this.tokenStorageService.saveToken(data.jwtTokenWeb, data.expirationTime);
-        this.requestFinished = true;
+        // this.requestFinished = true;
         this.router.navigate(["/home"]);
       }, errorMessage => {
         if (errorMessage === "Access forbidden") this.errorMessage = "";
@@ -74,4 +75,8 @@ export class SecondFactorComponent implements OnInit {
     return false;
   }
 
+  ngOnDestroy() {
+    this.requestFinished = true;
+    clearInterval(this.interval);
+  }
 }

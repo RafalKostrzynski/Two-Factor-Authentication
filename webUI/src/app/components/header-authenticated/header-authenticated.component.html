@@ -1,10 +1,14 @@
 <p>
-    <mat-toolbar color="primary">
-      <span>Two Factor Authentication</span>
-      <span class="spacer"></span>
-      <button mat-button (click)="signOut()" aria-label="Icon-button with logout">
-        <mat-icon>logout</mat-icon>
-        Sign out
-      </button>
-    </mat-toolbar>
-  </p>
+  <mat-toolbar color="primary">
+    <span>Two Factor Authentication</span>
+    <span class="spacer"></span>
+    <a mat-button routerLink="/settings" aria-label="Icon-button with settings">
+      <mat-icon>settings</mat-icon>
+      Settings
+    </a>
+    <button mat-button (click)="signOut()" aria-label="Icon-button with logout">
+      <mat-icon>logout</mat-icon>
+      Sign out
+    </button>
+  </mat-toolbar>
+</p>

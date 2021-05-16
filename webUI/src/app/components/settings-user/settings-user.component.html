@@ -1,0 +1,43 @@
+<div fxLayout="row" fxLayoutAlign="center center">
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>Change your data</mat-card-title>
+      </mat-card-header>
+  
+      <form fxLayout="column">
+  
+        <mat-card-content>
+          <form novalidate [formGroup]="changeUserForm" #fform="ngForm" (ngSubmit)="onSubmit()">
+            <mat-form-field fxLayout="row">
+              <input matInput placeholder="Username" type="text" formControlName="username">
+              <mat-error *ngIf="!changeUserForm.get('username')?.valid && 
+                  (changeUserForm.controls['username'].touched || changeUserForm.controls['username'].dirty)">
+                {{getUsernameErrorMessage()}}</mat-error>
+            </mat-form-field>
+            <mat-form-field fxLayout="row">
+              <input matInput placeholder="Email address" type="text" formControlName="email">
+              <mat-error *ngIf="!changeUserForm.get('email')?.valid">
+                {{getEmailErrorMessage()}}</mat-error>
+            </mat-form-field>
+            <mat-form-field fxLayout="row">
+              <input matInput placeholder="Password" [type]="hide ? 'password' : 'text'" formControlName="password">
+              <mat-icon matSuffix (click)="hide = !hide">{{hide ? 'visibility_off' : 'visibility'}}</mat-icon>
+              <mat-error *ngIf="!changeUserForm.get('password')?.valid">
+                {{getPasswordErrorMessage()}}</mat-error>
+            </mat-form-field>
+            <mat-form-field fxLayout="row">
+              <input matInput placeholder="Confirm password" [type]="hide ? 'password' : 'text'"
+                formControlName="repeatPassword" #repeat_password>
+              <mat-icon matSuffix (click)="hide = !hide">{{hide ? 'visibility_off' : 'visibility'}}</mat-icon>
+              <mat-error *ngIf="!changeUserForm.get('repeatPassword')?.valid">
+                Passwords are not identical</mat-error>
+            </mat-form-field>
+            <div fxLayout="row" fxLayoutGap="50px" fxLayoutAlign="space-around">
+              <button type="submit" mat-stroked-button color="accent" [disabled]="changeUserForm.invalid">Change data</button>
+            </div>
+            <mat-error *ngIf="errorMessage">{{errorMessage}}</mat-error>
+          </form>
+        </mat-card-content>
+      </form>
+    </mat-card>
+  </div>
