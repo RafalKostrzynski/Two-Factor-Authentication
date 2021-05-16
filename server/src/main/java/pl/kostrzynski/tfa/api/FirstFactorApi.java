@@ -72,8 +72,8 @@ public class FirstFactorApi {
     @GetMapping("reset-password/{token}")
     public ResponseEntity<QrCodeDetail> createDataForResetPassword(@PathVariable String token) {
         User user = verificationTokenService.getUserByVerificationToken(token);
-        if (!user.isEnabled()) throw new ApiMethodException("This user is not registered yet" +
-                "Please finish the registration process",
+        if (!user.isEnabled()) throw new ApiMethodException("This user is not registered yet." +
+                " Please finish the registration process",
                 ApiErrorCodeEnum.FORBIDDEN);
         String payload = payloadService.generatePayload();
         String jwtTokenMobile = jwtTokenService.createToken(user.getUsername(), AuthenticationState.MOBILE_RESET_PASSWORD);
