@@ -27,6 +27,7 @@ import { SecondFactorComponent } from './components/second-factor/second-factor.
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 import { TokenInterceptorService } from './services/token-interceptor.service';
 import { ResetPasswordComponent } from './components/reset-password/reset-password.component';
+import { HeaderAuthenticatedComponent } from './components/header-authenticated/header-authenticated.component';
 
 
 @NgModule({
@@ -41,6 +42,7 @@ import { ResetPasswordComponent } from './components/reset-password/reset-passwo
     VerifyEmailComponent,
     SecondFactorComponent,
     ResetPasswordComponent,
+    HeaderAuthenticatedComponent,
   ],
   imports: [
     BrowserModule,

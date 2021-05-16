@@ -1,2 +1,4 @@
-<app-header></app-header>
+<app-header *ngIf="authenticatedRoute"></app-header>
+<app-header-authenticated *ngIf="!authenticatedRoute"></app-header-authenticated>
+
 <router-outlet></router-outlet>

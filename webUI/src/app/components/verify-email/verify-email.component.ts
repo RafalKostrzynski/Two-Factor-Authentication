@@ -18,7 +18,6 @@ export class VerifyEmailComponent implements OnInit {
     var token: string = this.activatedRoute.snapshot.paramMap.get("token")!;
     this.httpService.verifyEmail(token).subscribe(
       response => {
-        console.log(response.toString());
         this.generateKeyQR = response;
       }, errorMessage => this.errorMessage = <any>errorMessage
     );

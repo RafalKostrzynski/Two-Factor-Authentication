@@ -18,7 +18,6 @@ export class ResetPasswordComponent implements OnInit {
     var token: string = this.activatedRoute.snapshot.paramMap.get("token")!;
     this.httpService.resetPassword(token).subscribe(
       response => {
-        console.log(response.toString());
         this.generateKeyQR = JSON.stringify(response);
       }, errorMessage => this.errorMessage = <any>errorMessage
     );
