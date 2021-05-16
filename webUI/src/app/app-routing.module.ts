@@ -4,6 +4,7 @@ import { AfterRegistrationComponent } from './components/after-registration/afte
 import { ForgotPasswordComponent } from './components/forgot-password/forgot-password.component';
 import { HomeComponent } from './components/home/home.component';
 import { RegisterComponent } from './components/register/register.component';
+import { ResetPasswordComponent } from './components/reset-password/reset-password.component';
 import { SecondFactorComponent } from './components/second-factor/second-factor.component';
 import { SignInComponent } from './components/sign-in/sign-in.component';
 import { VerifyEmailComponent } from './components/verify-email/verify-email.component';
@@ -16,6 +17,7 @@ const routes: Routes = [
   { path: 'forgot-password', component: ForgotPasswordComponent },
   { path: 'after-registration', component: AfterRegistrationComponent },
   { path: 'verify-email/:token', component: VerifyEmailComponent},
+  { path: 'reset-password/:token', component: ResetPasswordComponent},
   { path: '', redirectTo: '/sign-in', pathMatch: 'full' }
 ];
 

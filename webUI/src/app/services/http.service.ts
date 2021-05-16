@@ -26,6 +26,11 @@ export class HttpService {
       .pipe(catchError(this.processHTTPMsgService.handleError));
   }
 
+  resetPassword(token: string):Observable<QrCode>{
+    return this.http.get<QrCode>(baseURL + 'first-auth/reset-password/' + token)
+    .pipe(catchError(this.processHTTPMsgService.handleError));
+  }
+
   verifyEmail(token: string): Observable<any> {
     return this.http.get(baseURL + 'first-auth/verify-email/' + token, { responseType: 'text' })
       .pipe(catchError(this.processHTTPMsgService.handleError));

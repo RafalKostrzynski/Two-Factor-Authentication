@@ -65,7 +65,7 @@ public class UserService {
     public void sendPasswordResetMail(User user, HttpServletRequest httpServletRequest) throws MessagingException {
         String url = verificationTokenService.createUUIDLink(user, "reset-password", httpServletRequest);
         String textMessage = "Hello " + user.getUsername() + "!\n\n" +
-                "Someone with requested a password reset with this email address.\n" +
+                "Someone requested a password reset with this email address.\n" +
                 "Click on this link address to reset your current password.\n\n" + url
                 + "\n\nIf this request was not provided by you, ignore this message" +
                 "This token is available for 24 hours, after this it will expire\n\n" +

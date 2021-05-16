@@ -34,7 +34,6 @@
           </mat-form-field>
           <div fxLayout="row" fxLayoutGap="50px" fxLayoutAlign="space-around">
             <button type="submit" mat-stroked-button color="accent" [disabled]="registerForm.invalid">Register</button>
-            <a mat-button routerLink="/forgot-password">Forgot password?</a>
           </div>
           <mat-error *ngIf="errorMessage">{{errorMessage}}</mat-error>
         </form>

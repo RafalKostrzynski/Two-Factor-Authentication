@@ -26,6 +26,7 @@ import { QRCodeModule } from 'angularx-qrcode';
 import { SecondFactorComponent } from './components/second-factor/second-factor.component';
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 import { TokenInterceptorService } from './services/token-interceptor.service';
+import { ResetPasswordComponent } from './components/reset-password/reset-password.component';
 
 
 @NgModule({
@@ -39,6 +40,7 @@ import { TokenInterceptorService } from './services/token-interceptor.service';
     AfterRegistrationComponent,
     VerifyEmailComponent,
     SecondFactorComponent,
+    ResetPasswordComponent,
   ],
   imports: [
     BrowserModule,
