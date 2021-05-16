@@ -38,6 +38,25 @@ public class AfterAuthApi {
         this.jwtTokenService = jwtTokenService;
         this.userService = userService;
     }
+    // request from authenticated user to change key
+    @GetMapping("pub-key/new-key-gen")
+    public ResponseEntity<QrCodeDetail> createTokenForNewKey(Principal principal) {
+        String jwtTokenMobile = jwtTokenService.createToken((Authentication) principal, AuthenticationState.MOBILE_AUTHENTICATED);
+        return new ResponseEntity<>(new QrCodeDetail(QrPurpose.CHANGE_KEY, "NONE",
+                jwtTokenMobile, LocalDateTime.now().plusSeconds(60).toString()),
+                HttpStatus.ACCEPTED);
+    }
+
+    @GetMapping("pub-key/update/request")
+    public ResponseEntity<HttpStatus> verifyRequest() {
+        return new ResponseEntity<>(HttpStatus.ACCEPTED);
+    }
+
+    @GetMapping("user")
+    public ResponseEntity<UserDto> getUser(Principal principal){
+        return new ResponseEntity<>(
+                new UserDto(userService.getUserByUsername(principal.getName())), HttpStatus.ACCEPTED);
+    }
 
     @PutMapping("user")
     public ResponseEntity<UserDto> updateUser(Principal principal, @RequestBody @Valid User user) {
@@ -51,20 +70,6 @@ public class AfterAuthApi {
                                                       @RequestBody @Valid SecondAuthDto secondAuthDto) {
         SecondAuth dbSecondAuth = secondAuthService.getSecondAuthByUsername(principal.getName());
         secondAuthService.updateSecondAuth(dbSecondAuth, secondAuthDto);
-        return new ResponseEntity<>(HttpStatus.ACCEPTED);
-    }
-
-    // request from authenticated user to change key
-    @GetMapping("pub-key/new-key-gen")
-    public ResponseEntity<QrCodeDetail> createTokenForNewKey(Principal principal) {
-        String jwtTokenMobile = jwtTokenService.createToken((Authentication) principal, AuthenticationState.MOBILE_AUTHENTICATED);
-        return new ResponseEntity<>(new QrCodeDetail(QrPurpose.CHANGE_KEY, "NONE",
-                jwtTokenMobile, LocalDateTime.now().plusSeconds(60).toString()),
-                HttpStatus.ACCEPTED);
-    }
-
-    @GetMapping("pub-key/update/request")
-    public ResponseEntity<HttpStatus> verifyRequest() {
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 }
