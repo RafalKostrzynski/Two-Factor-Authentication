@@ -11,6 +11,7 @@ export class TokenInterceptorService implements HttpInterceptor{
   constructor(private tokenStorageService: TokenStorageService) { }
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    if(req.url.includes("/tfa/service/rest/v1/first-auth/")){return next.handle(req);}
     const userToken = this.tokenStorageService.getToken();
     const modifiedReq = req.clone({ 
       headers: req.headers.set('Authorization', `Bearer ${userToken}`),

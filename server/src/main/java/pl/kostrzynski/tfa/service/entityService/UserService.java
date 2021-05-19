@@ -1,7 +1,6 @@
 package pl.kostrzynski.tfa.service.entityService;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import pl.kostrzynski.tfa.exception.ApiErrorCodeEnum;
@@ -12,6 +11,8 @@ import pl.kostrzynski.tfa.service.MailSenderService;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class UserService {
@@ -45,7 +46,6 @@ public class UserService {
         sendVerificationEmail(user, httpServletRequest);
     }
 
-    @Async
     public void storeToken(String jwtToken, String username) {
         User user = getUserByUsername(username);
         user.setJwt(passwordEncoder.encode(jwtToken));
@@ -81,9 +81,18 @@ public class UserService {
     }
 
     private User changeUser(User dbUser, User updatedUser) {
-        dbUser.setUsername(updatedUser.getUsername());
-        dbUser.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
-        dbUser.setEmail(updatedUser.getEmail());
+        if (updatedUser.getUsername() != null &&
+                updatedUser.getUsername().length() > 4 &&
+                updatedUser.getUsername().length() < 31) {
+            dbUser.setUsername(updatedUser.getUsername());
+        }
+        if (updatedUser.getPassword() != null &&
+                matchesRegex("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+()'=])(?=\\S+$).{9,60}$",
+                        updatedUser.getPassword()))
+            dbUser.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
+        if (updatedUser.getEmail() != null &&
+                matchesRegex("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$", updatedUser.getEmail()))
+            dbUser.setEmail(updatedUser.getEmail());
         return userRepository.save(dbUser);
     }
 
@@ -103,5 +112,11 @@ public class UserService {
             return userRepository.save(e);
         }).orElseThrow(
                 () -> new ApiMethodException(String.format("Username %s not found", username), ApiErrorCodeEnum.NOT_FOUND));
+    }
+
+    public boolean matchesRegex(String regex, String testedString) {
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(testedString);
+        return matcher.matches();
     }
 }

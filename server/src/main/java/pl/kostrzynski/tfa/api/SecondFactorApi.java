@@ -5,17 +5,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import pl.kostrzynski.tfa.exception.ApiErrorCodeEnum;
 import pl.kostrzynski.tfa.exception.ApiMethodException;
 import pl.kostrzynski.tfa.jwt.JwtTokenService;
 import pl.kostrzynski.tfa.model.AuthenticationResponse;
-import pl.kostrzynski.tfa.model.to.SecondAuthDto;
 import pl.kostrzynski.tfa.model.entity.Payload;
 import pl.kostrzynski.tfa.model.entity.SecondAuth;
 import pl.kostrzynski.tfa.model.entity.SmartphoneDetails;
 import pl.kostrzynski.tfa.model.enums.AuthenticationState;
+import pl.kostrzynski.tfa.model.to.SecondAuthDto;
 import pl.kostrzynski.tfa.service.ECCHandler;
 import pl.kostrzynski.tfa.service.entityService.PayloadService;
 import pl.kostrzynski.tfa.service.entityService.SecondAuthService;
@@ -78,7 +77,8 @@ public class SecondFactorApi {
     @PostMapping("change-password")
     public ResponseEntity<HttpStatus> changePassword(Principal principal,
                                                      @RequestBody String signature, @RequestParam String password) {
-        if (password.length() < 9 || password.length() > 60)
+        if (!userService.matchesRegex("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+()'=])(?=\\S+$).{9,60}$",
+                password))
             throw new ApiMethodException("Password not valid", ApiErrorCodeEnum.NOT_ACCEPTABLE);
         SecondAuth secondAuth = secondAuthService.getSecondAuthByUsername(principal.getName());
         SmartphoneDetails smartphoneDetails = smartphoneDetailsService.getSmartphoneDetailsBySecondAuthId(secondAuth.getId());

@@ -59,7 +59,7 @@ public class AfterAuthApi {
     }
 
     @PutMapping("user")
-    public ResponseEntity<UserDto> updateUser(Principal principal, @RequestBody @Valid User user) {
+    public ResponseEntity<UserDto> updateUser(Principal principal, @RequestBody User user) {
         User updatedUser = userService.updateUser(principal.getName(), user);
         return new ResponseEntity<>(new UserDto(updatedUser), HttpStatus.ACCEPTED);
     }

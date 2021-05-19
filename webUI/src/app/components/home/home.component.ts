@@ -14,9 +14,9 @@ export class HomeComponent implements OnInit {
   constructor(private httpService: HttpService, private router:Router, private snackBar:MatSnackBar) { }
 
   user?: User;
-  
+
   ngOnInit(): void {
-    this.httpService.getUser().subscribe(data => this.user = data, 
+    this.httpService.getUser().subscribe(data => this.user = data,
       errorMessage => {
         (errorMessage as string).includes("Access forbidden")?
          this.router.navigate(['/sign-in']):
