@@ -15,9 +15,9 @@ export class SettingsUserComponent implements OnInit {
   @ViewChild('fform') registerFormDirective: any;
 
   changeUserForm = new FormGroup({
-    username: new FormControl('', [Validators.required, Validators.minLength(5), Validators.maxLength(30)]),
-    email: new FormControl('', [Validators.required, Validators.pattern("^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$")]),
-    password: new FormControl('', [Validators.required, Validators.minLength(9), Validators.maxLength(60),
+    username: new FormControl('', [Validators.minLength(5), Validators.maxLength(30)]),
+    email: new FormControl('', [Validators.pattern("^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,20}$")]),
+    password: new FormControl('', [Validators.minLength(9), Validators.maxLength(60),
     Validators.pattern("(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+()'=])(?=\\S+$).{9,60}")]),
     repeatPassword: new FormControl()
   }, { validators: validatePasswords })
@@ -51,8 +51,7 @@ export class SettingsUserComponent implements OnInit {
     if (control?.pristine) return '';
     controlName = controlName.charAt(0).toUpperCase() + controlName.slice(1);
     var errorMessage = '';
-    if (control?.hasError("required")) errorMessage = `${controlName} is required.`;
-    else if (control?.hasError('minlength')) errorMessage = `${controlName} must be at least ${minValue} characters long.`;
+    if (control?.hasError('minlength')) errorMessage = `${controlName} must be at least ${minValue} characters long.`;
     else if (control?.hasError('maxlength')) errorMessage = `${controlName} can´t be longer than ${maxValue} characters.`;
     else if (control?.hasError('pattern')) errorMessage = `${controlName} must contain at least 1 uppercase, 1 special character (@#$%^&+'()=), 1 digit and must not contain white spaces.`
 

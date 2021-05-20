@@ -26,7 +26,7 @@ public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-    @Email(message = "Please provide a valid Email address", regexp = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")
+    @Email(message = "Please provide a valid Email address", regexp = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,20}$")
     @Column(nullable = false, unique = true)
     private String email;
     @Size(min = 5, max = 30, message = "Please provide a valid username")

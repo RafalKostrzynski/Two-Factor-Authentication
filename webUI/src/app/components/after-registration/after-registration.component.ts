@@ -14,7 +14,7 @@ export class AfterRegistrationComponent {
 
   errorMessage: string = "";
   emailForm = new FormGroup({
-    email: new FormControl('', [Validators.required, Validators.pattern("^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$")])
+    email: new FormControl('', [Validators.required, Validators.pattern("^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,20}$")])
   });
 
   constructor(private httpService: HttpService, private snackBar: MatSnackBar) { }

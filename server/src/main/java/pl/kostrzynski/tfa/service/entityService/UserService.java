@@ -91,7 +91,7 @@ public class UserService {
                         updatedUser.getPassword()))
             dbUser.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
         if (updatedUser.getEmail() != null &&
-                matchesRegex("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$", updatedUser.getEmail()))
+                matchesRegex("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,20}$", updatedUser.getEmail()))
             dbUser.setEmail(updatedUser.getEmail());
         return userRepository.save(dbUser);
     }
