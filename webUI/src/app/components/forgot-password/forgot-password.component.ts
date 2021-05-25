@@ -20,7 +20,7 @@ export class ForgotPasswordComponent{
     var control = this.emailForm.get('email');
     if (control?.valid) {
       this.httpService.forgotPassword(control?.value).subscribe(() => {
-        this.snackBar.open("Email send successfully!", "Close");
+        this.snackBar.open("Email sent successfully!", "Close");
       }, errorMessage => {
         this.errorMessage = <any>errorMessage
       });
